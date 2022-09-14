@@ -7,8 +7,8 @@ import numpy as np
 
 data = np.zeros((6561328, 31))
 
-# Loads every dataset into a big data set
-for x in range(1):
+### Step 1 - Loads every dataset into a big data set ###
+for x in range(7):
     with open("./data/data" + str(x+1) + ".csv") as csvfile:
 
         print(csvfile.name)
@@ -22,24 +22,27 @@ for x in range(1):
             count = count + 1
             #print(row[0])
 
-# Removes any redundent rows that don't have 23 rows
+### Step 2 - Removes any redundent rows that don't have 23 rows ###
 previous = data[0][0]
-index = 0
 array_of_parameters = np.zeros((23, 31))
+index = 1
+temp_row = data[0]
 
-# Create a file called temp.csv, if temp.csv already exsist it override the previous file
-knee_data = open("temp.csv", "x")
+# Create a file called temp.csv, if temp.csv already exists it override the previous file
+temp_knee_data = open("temp_knee_data.csv", "w")
 
 for row in data:
+    array_of_parameters[index] = row
     if row[0] == previous:
-        array_of_parameters[index] = row
         index += 1
-        if index == 22:
-            print("Added knee data to file")
-            for i in array_of_parameters:
-                knee_data += array_of_parameters[i]
-            index = 0
+        if index == 23:
+            print("Added knee data to array")
+            array_of_parameters[0] = temp_row
+            np.savetxt(temp_knee_data, array_of_parameters, newline="\n", delimiter=",", fmt="%13f")
+            index = 1
     else:
-        index = 0
+        array_of_parameters = np.zeros((23, 31))
+        index = 1
+        temp_row = row
     # This row we are looking at, is stored in the previous row
     previous = row[0]
