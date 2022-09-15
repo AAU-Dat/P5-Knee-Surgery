@@ -32,11 +32,11 @@ index = 1
 temp_row = data[0]
 
 # Create a file called temp.csv, if temp.csv already exists it override the previous file
-temp_knee_data = open("temp_knee_data.csv", "w")
+temp_knee_data = open("temp_knee_data2.csv", "w")
 
 for row in data:
     array_of_parameters[index] = row
-    if row[0] == previous:
+    if row[0] == previous and row[0] != 0:  # how to determine 0-row?
         index += 1
         if index == 23:
             #print("Added knee data to array")
@@ -49,6 +49,8 @@ for row in data:
         temp_row = row
     # This row we are looking at, is stored in the previous row
     previous = row[0]
+
+
 
 ### Step 3: transpose data
 
