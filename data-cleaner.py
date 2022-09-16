@@ -6,18 +6,17 @@ import csv
 import numpy as np
 
 data = np.zeros((6561328, 31))
-
+count = 0
 ### Step 1 - Loads every dataset into a big data set ###
-for x in range(8):
+for x in range(0, 8):
     with open("./data/data" + str(x+1) + ".csv") as csvfile:
         print(csvfile.name)
         csvreader = csv.reader(csvfile)
-        count = 0
         for row in csvreader:
-            data[count] = row;
+            data[count] = row
             count = count + 1
-            #print(row[0])
 
+poo = 2
 ### step 1.5 - remove the last 11 metadata rows
 data = np.delete(data, slice(20, 31), 1)
 
@@ -28,7 +27,7 @@ index = 1
 temp_row = data[0]
 
 # Create a file called temp.csv, if temp.csv already exists it override the previous file
-temp_knee_data = open("temp_knee_data2.csv", "w")
+temp_knee_data = open("temp_knee_data_1_to_8.csv", "w")
 
 for row in data:
     array_of_parameters[index] = row
