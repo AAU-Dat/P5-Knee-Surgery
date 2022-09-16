@@ -10,22 +10,18 @@ data = np.zeros((6561328, 31))
 ### Step 1 - Loads every dataset into a big data set ###
 for x in range(8):
     with open("./data/data" + str(x+1) + ".csv") as csvfile:
-
         print(csvfile.name)
-
         csvreader = csv.reader(csvfile)
-
         count = 0
-
         for row in csvreader:
             data[count] = row;
             count = count + 1
             #print(row[0])
 
 ### step 1.5 - remove the last 11 metadata rows
-data = np.delete(data, slice(20, 31, 1), 1)
+data = np.delete(data, slice(20, 31), 1)
 
-### Step 2 - Removes any redundent rows that don't have 23 rows ###
+### Step 2 - Removes any redundant rows that don't have 23 rows ###
 previous = data[0][0]
 array_of_parameters = np.zeros((23, 20))
 index = 1
