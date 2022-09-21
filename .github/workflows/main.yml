@@ -1,0 +1,16 @@
+name: Bread
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 7 * * 3"
+
+jobs:
+  post-to-Discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Discord post action step
+        id: discord
+        uses: Biloen/bread-reminder@1.0
+        with:
+          discord-webhook: ${{ secrets.BREAD_WEBHOOK }}
