@@ -3,7 +3,7 @@ name: Bread
 on:
   workflow_dispatch:
   schedule:
-    - cron: "30 7 * * 3"
+    - cron: "30 7 * * 4"
 
 jobs:
   post-to-Discord:
