@@ -13,8 +13,6 @@ def load_data(stopfile):
             for row in csvreader:
                 data[count] = row
                 count = count + 1
-                if count > 100:
-                    break
     return data
 
 
@@ -24,15 +22,14 @@ def remove_metadata(data_with_metadata):
 
 
 def remove_incomplete_data(data):
-    #len(data)
     currently_checking_for = data[0, 0]
     succession_start = 0
     row_count_on_complete_dataset = 0
     complete_data = np.zeros((1541000, 20))
-    for x in range(0, 100):
+    for x in range(0, len(data)):
         if currently_checking_for == data[x, 0]:
             if x - succession_start == 22:
-                complete_data[row_count_on_complete_dataset:row_count_on_complete_dataset+23][0:20] = data[succession_start:x][0:20]
+                complete_data[row_count_on_complete_dataset:row_count_on_complete_dataset+23, 0:20] = data[succession_start:x+1, 0:20]
                 row_count_on_complete_dataset += 23
         else:
             currently_checking_for = data[x][0]
