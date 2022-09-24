@@ -56,17 +56,16 @@ def rerange_data(data):
 def remove_dublicates(data):
     data_without_dublicates = np.zeros((102963, 284))
     data_without_dublicates_row_count = 0
-    flag = True
 
     for x in range(0, len(data)):
         for y in range(0, data_without_dublicates_row_count):
-            if all(data[x, 0:284] == data_without_dublicates[y, 0:284]):
-                flag = False
-        if flag is True:
+            #this removes all lines that are totally equal but is very expensive in our case
+            # all(data[x, 0:284] == data_without_dublicates[y, 0:284]
+            if all(data[x, 0:8] == data_without_dublicates[y, 0:8]):
+                break
+        else:
             data_without_dublicates[data_without_dublicates_row_count, 0:284] = data[x, 0:284]
             data_without_dublicates_row_count += 1
-        else:
-            flag = True
 
     return data_without_dublicates
 
