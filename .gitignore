@@ -1,3 +1,4 @@
 [dD]ata
 *.csv
 .[pP]ython
+[pP]yvenv.cfg
