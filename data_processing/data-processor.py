@@ -1,6 +1,7 @@
 import numpy as np
 import csv
 import math
+import pandas as pd
 
 
 # Loads raw data from data files 1 to 8
@@ -19,12 +20,14 @@ def load_data(stopfile):
 
 
 # Remove the last columns containing metadata - 20 to 31
-def remove_metadata(data_with_metadata):
+def remove_metadata():
+    data_with_metadata = load_data(1)
     return np.delete(data_with_metadata, slice(20, 31), 1)
 
 
 #finds each case with 23 sets of messurements in a row
-def remove_incomplete_data(data):
+def remove_incomplete_data():
+    data = remove_metadata()
     #size of all complete data 2368149 to verify use 2368150 with debug and see if the last row returns zeroes
     currently_checking_for = data[0, 0]
     succession_start = 0
@@ -41,8 +44,8 @@ def remove_incomplete_data(data):
     return complete_data
 
 
-#this func doesn't work yet
-def rerange_data(data):
+def transpose_data():
+    data = remove_incomplete_data()
     #102963 is the amount of rows after we rearange the data
     reranged_data = np.zeros((102963, 284))
     for i in range(0, 2368149, 23):
@@ -53,6 +56,7 @@ def rerange_data(data):
 
 
 #think this works but extremely inefficient
+'''
 def remove_dublicates(data):
     data_without_dublicates = np.zeros((102963, 284))
     data_without_dublicates_row_count = 0
@@ -68,21 +72,36 @@ def remove_dublicates(data):
             data_without_dublicates_row_count += 1
 
     return data_without_dublicates
+'''
+def makes_header_in_file():
+    header = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
+    for i in range(1, 24):
+        header.extend(['trans_x_' + str(i), 'trans_y_' + str(i), 'trans_z_' + str(i), 'rot_z_' + str(i),
+                              'rot_x_' + str(i),'rot_y_' + str(i), 'F_x_' + str(i), 'F_y_' + str(i), 'F_z_' + str(i),
+                              'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
+    return header
+
+def drop_duplicates():
+    return df.drop_duplicates()
 
 
-
-
-
-#load all data
+# load all data
 raw_data = load_data(1)
-#remove meta data
+
+# remove meta data
 data_without_metadata = remove_metadata(raw_data)
-#find all cases with 23 instances
+
+# find all cases with 23 instances
 complete_data = remove_incomplete_data(data_without_metadata)
-#rearange data
-reranged_data = rerange_data(complete_data)
-#remove doublicates
-data_without_dublicates = remove_dublicates(reranged_data)
-#set header
+
+# transpose data
+transpose_data = transpose_data(complete_data)
+
+# set header
+df = pd.DataFrame(transpose_data(), makes_header_in_file())
+final_data = drop_duplicates()
+
+# write to file
+
 
 print("hej")
