@@ -1,8 +1,13 @@
-[dD]ata
+# Making sure no data is leaked onto the repo
+
+[Dd]ata
 *.csv
-.[pP]ython
-[pP]yvenv.cfg
+
+# Editor enviroments
+.[Pp]ython
+.[Ii]dea
+[Pp]yvenv.cfg
 [Vv]env
-.idea/P5-Knee-Surgery.iml
-.idea/misc.xml
-.DS_Store
+
+# mac osx file
+*.DS_Store
