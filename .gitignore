@@ -2,3 +2,4 @@
 *.csv
 .[pP]ython
 [pP]yvenv.cfg
+[Vv]env
