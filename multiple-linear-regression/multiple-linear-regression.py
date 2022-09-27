@@ -27,7 +27,7 @@ def gives_x_all_param_header():
 df = pd.read_csv('../data_processing/final_final_final.csv')
 
 x = df[gives_x_all_param_header()]
-y = df[['ACL_k']]
+y = df[['ACL_epsr']]
 
 # This prints out the x and y, it's just for checking that everything is correct
 # print(x)
@@ -70,11 +70,11 @@ plt.scatter(y_test, predictions_test, color=DotColor, s=MarkerSize)
 # plt.plot(y_test, predictions, color="blue", linewidth=3)
 
 # To save the graph for predictions_test
-plt.savefig('./figures/prediction_test.png')
+plt.savefig('./figures/prediction_test_ACL_espr.png')
 
 # prints out the graph for predictions_train
 plt.figure() # This makes a new figure
 plt.scatter(y_train, predictions_train, color=DotColor, s=MarkerSize)
 
 # To save the graph for predictions_train
-plt.savefig('./figures/prediction_train.png')
+plt.savefig('./figures/prediction_train_ACL_espr.png')
