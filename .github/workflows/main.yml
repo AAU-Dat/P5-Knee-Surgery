@@ -11,6 +11,6 @@ jobs:
     steps:
       - name: Discord post action step
         id: discord
-        uses: Biloen/bread-reminder@characters1.0
+        uses: Biloen/bread-reminder@3.0
         with:
           discord-webhook: ${{ secrets.BREAD_WEBHOOK }}
