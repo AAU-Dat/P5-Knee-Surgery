@@ -1,4 +1,5 @@
 import numpy as np
+import pandas
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
@@ -26,30 +27,34 @@ def gives_x_all_param_header():
 # importing data
 df = pd.read_csv('../data_processing/final_final_final.csv')
 
-x = df[gives_x_all_param_header()]
-y = df[['ACL_epsr']]
+def tests_model(param_result, df):
+    x = df[gives_x_all_param_header()]
+    y = df[param_result]
 
-# This prints out the x and y, it's just for checking that everything is correct
-# print(x)
-# print(y)
+    # This prints out the x and y, it's just for checking that everything is correct
+    # print(x)
+    # print(y)
 
-# Make a for loop that iterates thourgh x numbers of models of x_test and ----------------------------------------------
-# saves the best and worse r value and the average r value
-regr = linear_model.LinearRegression()
-regr.fit(x, y)
+    regr = linear_model.LinearRegression()
+    regr.fit(x, y)
 
-# creating train and test sets
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, test_size=0.2) # Remember to shuffle test
+    # creating train and test sets
+    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, test_size=0.2)  # Remember to shuffle test
 
-# creating a regression model
-model = LinearRegression()
+    # creating a regression model
+    model = LinearRegression()
 
-# fitting the model
-model.fit(x_train, y_train)
+    # fitting the model
+    model.fit(x_train, y_train)
 
-# making predictions
-predictions_test = model.predict(x_test)
-predictions_train = model.predict(x_train)
+    # making predictions
+    predictions_train = model.predict(x_train) #gem
+    predictions_test = model.predict(x_test) #gem
+
+    names = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
+    df = pandas.DataFrame(columns=['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr'])
+    for x in range(0, 8):
+
 
 # model evaluation fro predict_train
 print('Predict_train')
