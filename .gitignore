@@ -11,3 +11,9 @@
 
 # mac osx file
 *.DS_Store
+
+# Images
+*.png
+*.PNG
+*.jpg
+*.JPG
