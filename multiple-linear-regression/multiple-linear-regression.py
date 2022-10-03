@@ -22,6 +22,10 @@ def gives_x_all_param_header():
                        'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
     return x
 
+def title_x_y_header(xlable, ylable, title):
+    plt.xlabel(xlable)
+    plt.ylabel(ylable)
+    plt.title(title)
 
 # importing data
 df = pd.read_csv('../data_processing/final_final_final.csv')
@@ -30,8 +34,8 @@ x = df[gives_x_all_param_header()]
 y = df[['ACL_epsr']]
 
 # This prints out the x and y, it's just for checking that everything is correct
-# print(x)
-# print(y)
+print(x)
+print(y)
 
 # Make a for loop that iterates thourgh x numbers of models of x_test and ----------------------------------------------
 # saves the best and worse r value and the average r value
@@ -52,14 +56,14 @@ predictions_test = model.predict(x_test)
 predictions_train = model.predict(x_train)
 
 # model evaluation fro predict_train
-print('Predict_train')
+print('Predict_train for ACL_epsr')
 print('r2 value is: ', r2_score(y_train, predictions_train))
 print('Root Mean Squared Error (RMSE) : ', mean_squared_error(y_train, predictions_train, squared=False))
 print()
 # print('mean_absolute_error : ', mean_absolute_error(y_test, predictions))
 
 # model evaluation for predict_test
-print('Predict_test')
+print('Predict_test for ACL_epsr')
 print('r2 value is: ', r2_score(y_test, predictions_test))
 print('Root Mean Squared Error (RMSE) : ', mean_squared_error(y_test, predictions_test, squared=False))
 # print('mean_absolute_error : ', mean_absolute_error(y_test, predictions))
@@ -67,14 +71,12 @@ print('Root Mean Squared Error (RMSE) : ', mean_squared_error(y_test, prediction
 
 # prints out the graph for predictions_test
 plt.scatter(y_test, predictions_test, color=DotColor, s=MarkerSize)
-# plt.plot(y_test, predictions, color="blue", linewidth=3)
-
-# To save the graph for predictions_test
+title_x_y_header('Actual ACL_epsr value', 'Predicted ACL_epsr value', 'ACL_epsr test model')
 plt.savefig('./figures/prediction_test_ACL_espr.png')
 
 # prints out the graph for predictions_train
 plt.figure() # This makes a new figure
 plt.scatter(y_train, predictions_train, color=DotColor, s=MarkerSize)
-
-# To save the graph for predictions_train
+title_x_y_header('Actual ACL_epsr value', 'Predicted ACL_epsr value', 'ACL_epsr train model')
 plt.savefig('./figures/prediction_train_ACL_espr.png')
+
