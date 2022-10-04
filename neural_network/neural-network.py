@@ -1,4 +1,4 @@
-import numpy as np
+'''import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
@@ -97,3 +97,4 @@ def gradient_descent(x, y, alpha, iterations):
 
 
 w1, b1, w2, b2 = gradient_descent(X_train, Y_train, 0.10, 500)
+'''
