@@ -22,10 +22,12 @@ def gives_x_all_param_header():
                        'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
     return x
 
-def title_x_y_header(xlable, ylable, title):
+def graph_information(title, xlable, ylable, xleft, xright, ybottom, ytop):
+    plt.title(title)
     plt.xlabel(xlable)
     plt.ylabel(ylable)
-    plt.title(title)
+    plt.xlim(xleft, xright)
+    plt.ylim(ybottom, ytop)
 
 # importing data
 df = pd.read_csv('../data_processing/final_final_final.csv')
@@ -59,24 +61,24 @@ predictions_train = model.predict(x_train)
 print('Predict_train for ACL_epsr')
 print('r2 value is: ', r2_score(y_train, predictions_train))
 print('Root Mean Squared Error (RMSE) : ', mean_squared_error(y_train, predictions_train, squared=False))
+print('mean_absolute_error : ', mean_absolute_error(y_train, predictions_train))
 print()
-# print('mean_absolute_error : ', mean_absolute_error(y_test, predictions))
 
 # model evaluation for predict_test
 print('Predict_test for ACL_epsr')
 print('r2 value is: ', r2_score(y_test, predictions_test))
 print('Root Mean Squared Error (RMSE) : ', mean_squared_error(y_test, predictions_test, squared=False))
-# print('mean_absolute_error : ', mean_absolute_error(y_test, predictions))
+print('mean_absolute_error : ', mean_absolute_error(y_test, predictions_test))
 # ----------------------------------------------------------------------------------------------------------------------
 
 # prints out the graph for predictions_test
 plt.scatter(y_test, predictions_test, color=DotColor, s=MarkerSize)
-title_x_y_header('Actual ACL_epsr value', 'Predicted ACL_epsr value', 'ACL_epsr test model')
+graph_information('ACL_epsr test model', 'Actual ACL_epsr value', 'Predicted ACL_epsr value', -0.10, 0.30, -0.10, 0.30)
 plt.savefig('./figures/prediction_test_ACL_espr.png')
 
 # prints out the graph for predictions_train
 plt.figure() # This makes a new figure
 plt.scatter(y_train, predictions_train, color=DotColor, s=MarkerSize)
-title_x_y_header('Actual ACL_epsr value', 'Predicted ACL_epsr value', 'ACL_epsr train model')
+graph_information('ACL_epsr train model', 'Actual ACL_epsr value', 'Predicted ACL_epsr value', -0.10, 0.30, -0.10, 0.30)
 plt.savefig('./figures/prediction_train_ACL_espr.png')
 
