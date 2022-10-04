@@ -15,7 +15,6 @@ matplotlib.use('Agg')
 MarkerSize = 0.1
 DotColor = 'Blue'
 
-
 # This function make sure that y has all the 276 columns
 def gives_x_all_param_header():
     x = []
@@ -25,7 +24,6 @@ def gives_x_all_param_header():
                   'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
     return x
 
-
 def graph_information(title, xlable, ylable, xleft, xright, ybottom, ytop):
     plt.title(title)
     plt.xlabel(xlable)
@@ -33,16 +31,15 @@ def graph_information(title, xlable, ylable, xleft, xright, ybottom, ytop):
     plt.xlim(xleft, xright)
     plt.ylim(ybottom, ytop)
 
-
-def dynamic_train_test_model():
+def dynamic_train_test_model(header):
     x = df[gives_x_all_param_header()]
-    y = df['ACL_k']
+    y = df[header]
 
     regr = linear_model.LinearRegression()
     regr.fit(x, y)
 
     # creating train and test sets
-    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, test_size=0.2)  # Remember to shuffle test
+    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, test_size=0.2, shuffle=True)
 
     # creating a regression model
     model = LinearRegression()
@@ -64,46 +61,58 @@ def dynamic_train_test_model():
 
     return [r2_train, rmse_train, mae_train, r2_test, rmse_test, mae_test]
 
+def update_dict(dict, header, list_data):
+    l_train = dict[header + '_train']
+    l_test = dict[header + '_test']
+    l_train.append({'R2': list_data[0], 'RMSE': list_data[1], 'MAE': list_data[2]})
+    l_test.append({'R2': list_data[3], 'RMSE': list_data[4], 'MAE': list_data[5]})
+
+def get_stats(header, list):
+    return f'{header};{np.max(list)};{np.min(list)};{np.mean(list)}\n'
+
+def find_stats(dict, header):
+    r2_train = [x['R2'] for x in dict[header + '_train']]
+    rmse_train = [x['RMSE'] for x in dict[header + '_train']]
+    mae_train = [x['MAE'] for x in dict[header + '_train']]
+    r2_test = [x['R2'] for x in dict[header + '_test']]
+    rmse_test = [x['RMSE'] for x in dict[header + '_test']]
+    mae_test = [x['MAE'] for x in dict[header + '_test']]
+
+    res = []
+    res.append(get_stats(header + '_train_R2', r2_train))
+    res.append(get_stats(header + '_train_RMSE', rmse_train))
+    res.append(get_stats(header + '_train_MAE', mae_train))
+    res.append(get_stats(header + '_test_R2', r2_test))
+    res.append(get_stats(header + '_test_RMSE', rmse_test))
+    res.append(get_stats(header + '_test_MAE', mae_test))
+    return res
+
 
 # importing data
 df = pd.read_csv('../data_processing/final_final_final.csv')
-df_span_data = pd.DataFrame
 y_head = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
+results = dict()
+rounds = 5
+file = open('./results.csv', 'w')
+file.write('ID;Max;Min;Avg\n')
 
-for i in range(0, 1):
-    y = df[y_head[i]]
+for header in ['ACL_k']:
+    results[header + '_train'] = []
+    results[header + '_test'] = []
     # Remember to run the model once, so we can get graph to input into report
-    print(y)
-    for j in range(0, 3):
-        df_span_data
-        print(df_span_data)
-        # Here we need to iterate through multiple models to test the span of the min and max values of R2, RMSE, MAE
+    print(header)
 
-x = df[gives_x_all_param_header()]
-y = df['ACL_k']
+    for j in range(rounds):
+        print(f'[{j + 1} / {rounds}]', end='\r')
+        list_data = dynamic_train_test_model(header)
+        update_dict(results, header, list_data)
 
-# This prints out the x and y, it's just for checking that everything is correct
-print(x)
-print(y)
+    res = find_stats(results, header)
+    file.writelines(res)
 
-# Make a for loop that iterates thourgh x numbers of models of x_test and ----------------------------------------------
-# saves the best and worse r value and the average r value
-regr = linear_model.LinearRegression()
-regr.fit(x, y)
+file.close()
 
-# creating train and test sets
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, test_size=0.2)  # Remember to shuffle test
-
-# creating a regression model
-model = LinearRegression()
-
-# fitting the model
-model.fit(x_train, y_train)
-
-# making predictions
-predictions_test = model.predict(x_test)
-predictions_train = model.predict(x_train)
-
+"""
 # model evaluation fro predict_train
 print('Predict_train for ACL_epsr')
 print('r2 value is: ', r2_score(y_train, predictions_train))  # R2   value
@@ -128,6 +137,4 @@ plt.figure()  # This makes a new figure
 plt.scatter(y_train, predictions_train, color=DotColor, s=MarkerSize)
 graph_information('ACL_epsr train model', 'Actual ACL_epsr value', 'Predicted ACL_epsr value', -0.10, 0.30, -0.10, 0.30)
 plt.savefig('./figures/prediction_train_ACL_espr.png')
-
-
-data = {'ACL_k_train': [{'R2':[]}, {'RMSE':[]}, {'MAE':[]}]}
+"""
