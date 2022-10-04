@@ -1,30 +1,35 @@
-import numpy as np
+# Import required libraries
 import pandas as pd
-from matplotlib import pyplot as plt
+import numpy as np
+import matplotlib.pyplot as plt
 import sklearn
 from sklearn.neural_network import MLPClassifier
+from sklearn.neural_network import MLPRegressor
+
+# Import necessary modules
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+from math import sqrt
+from sklearn.metrics import r2_score
 
-raw_data = pd.read_csv("../data_processing/final_final_final.csv")
+# Step 2: Reading the Data and Performing Basic Data Checks
 
-target_column = ['ACL_k']
-predictors = list(set(list(raw_data.columns))-set(target_column))
+df = pd.read_csv('diabetes.csv')
+print(df.shape)
+df.describe().transpose()
 
-X = raw_data[predictors].values
-Y = raw_data[target_column].values
+# Step 3: Creating Arrays for the Features and the Response Variable
 
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.20, random_state=40)
+target_column = ['diabetes']
+predictors = list(set(list(df.columns))-set(target_column))
+df[predictors] = df[predictors]/df[predictors].max()
+df.describe().transpose()
+
+# Step 4: Creating the Training and Test Datasets
+
+X = df[predictors].values
+y = df[target_column].values
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=40)
 print(X_train.shape)
 print(X_test.shape)
-
-# TODO : Create the Logic for the Network
-
-mlp = MLPClassifier(hidden_layer_sizes=(8, 8, 8), activation='relu', solver='adam', max_iter=500)
-mlp.fit(X_train, Y_train)
-
-predict_train = mlp.predict(X_train)
-predict_test = mlp.predict(X_test)
-
-# TODO : Train the Neural Network
-
-# TODO : Show Results
