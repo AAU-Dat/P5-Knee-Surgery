@@ -15,6 +15,17 @@ matplotlib.use('Agg')
 MarkerSize = 0.1
 DotColor = 'Blue'
 
+# Constants to change x & y axises in the saved graphs
+#xleft_k     = -2500
+#xright_k    = 30000
+ybottom_k   = -2500
+ytop_k      = 30000
+
+#xleft_epsr  = -0.10
+#xright_epsr = 0.30
+ybottom_epsr= -0.10
+ytop_epsr   = 0.30
+
 # This function make sure that y has all the 276 columns
 def gives_x_all_param_header():
     x = []
@@ -24,13 +35,41 @@ def gives_x_all_param_header():
                   'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
     return x
 
-def graph_information(title, xlable, ylable): # , xleft, xright, ybottom, ytop
+def graph_information_k_value(title, xlable, ylable, ybottom, ytop):
     plt.title(title)
     plt.xlabel(xlable)
     plt.ylabel(ylable)
     #plt.xlim(xleft, xright)
-    #plt.ylim(ybottom, ytop)
+    plt.ylim(ybottom, ytop)
 
+def graph_information_epsr_value(title, xlable, ylable, ybottom, ytop):
+    plt.title(title)
+    plt.xlabel(xlable)
+    plt.ylabel(ylable)
+    #plt.xlim(xleft, xright)
+    plt.ylim(ybottom, ytop)
+
+def plt_graph_test(y_test, predictions_test, header_name):
+    plt.figure()  # This makes a new figure
+    plt.scatter(y_test, predictions_test, color=DotColor, s=MarkerSize)
+
+    if 'k' in header_name:
+        graph_information_k_value(f'{header_name} test model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value', ybottom_k, ytop_k)
+    else:
+        graph_information_epsr_value(f'{header_name} test model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value', ybottom_epsr, ytop_epsr)
+
+    plt.savefig('./figures/prediction_test_' f'{header_name}.png')
+
+def plt_graph_train(y_train, predictions_train, header_name):
+    plt.figure()  # This makes a new figure
+    plt.scatter(y_train, predictions_train, color=DotColor, s=MarkerSize)
+
+    if 'k' in header_name:
+        graph_information_k_value(f'{header_name} train model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value', ybottom_k, ytop_k)
+    else:
+        graph_information_epsr_value(f'{header_name} train model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value', ybottom_epsr, ytop_epsr)
+
+    plt.savefig('./figures/prediction_train_' f'{header_name}.png')
 
 def train_test_model(header):
     x = df[gives_x_all_param_header()]
@@ -111,18 +150,6 @@ def find_stats(dict, header):
     res.append(get_stats(header + '_test_MAE', mae_test))
     return res
 
-def plt_graph_test(y_test, predictions_test, header):
-    # prints out the graph for predictions_test
-    plt.scatter(y_test, predictions_test, color=DotColor, s=MarkerSize)
-    graph_information(f'{header} test model', 'Actual ' f'{header} value', 'Predicted ' f'{header} value') # , -0.10, 0.30, -0.10, 0.30
-    plt.savefig('./figures/prediction_test_' f'{header}.png')
-
-def plt_graph_train(y_train, predictions_train, header):
-    # prints out the graph for predictions_train
-    plt.figure()  # This makes a new figure
-    plt.scatter(y_train, predictions_train, color=DotColor, s=MarkerSize)
-    graph_information(f'{header} train model', 'Actual ' f'{header} value', 'Predicted ' f'{header} value') # , -0.10, 0.30, -0.10, 0.30
-    plt.savefig('./figures/prediction_train_' f'{header}.png')
 
 # importing data
 df = pd.read_csv('../data_processing/final_final_final.csv')
@@ -139,7 +166,7 @@ for header in y_head:
     print(header + ':')
 
     for j in range(rounds):
-        print("'\r" f'{j + 1} / {rounds}', end='')
+        print("'\r" f'{j + 1} / {rounds}\n', end='')
         list_data = dynamic_train_test_model(header)
         update_dict(results, header, list_data)
 
