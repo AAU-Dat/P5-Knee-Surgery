@@ -155,7 +155,7 @@ def find_stats(dict, header):
 df = pd.read_csv('../data_processing/final_final_final.csv')
 y_head = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
 results = dict()
-rounds = 20
+rounds = 50
 file = open('./multiple-linear-regression-figures-results.csv', 'w')
 file.write('ID;Max;Min;Avg\n')
 
@@ -163,10 +163,10 @@ for header in y_head:
     results[header + '_train'] = []
     results[header + '_test'] = []
     train_test_model(header)
-    print(header + ':')
+    print('\n' + header + ':')
 
     for j in range(rounds):
-        print("'\r" f'{j + 1} / {rounds}\n', end='')
+        print("\r" f'{j + 1} / {rounds}', end='')
         list_data = dynamic_train_test_model(header)
         update_dict(results, header, list_data)
 
