@@ -1,37 +1,85 @@
 import numpy as np
-import pandas
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import scipy as sp
+from scipy.constants._codata import val
 from sklearn import linear_model
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.model_selection import train_test_split
+
 matplotlib.use('Agg')
+
+# Constants to change style in graph
+MarkerSize = 0.1
+DotColor = 'Blue'
+
+# Constants to change x & y axises in the saved graphs
+#xleft_k     = -2500
+#xright_k    = 30000
+ybottom_k   = -2500
+ytop_k      = 30000
+
+#xleft_epsr  = -0.10
+#xright_epsr = 0.30
+ybottom_epsr= -0.10
+ytop_epsr   = 0.30
 
 # This function make sure that y has all the 276 columns
 def gives_x_all_param_header():
     x = []
     for i in range(1, 24):
         x.extend(['trans_x_' + str(i), 'trans_y_' + str(i), 'trans_z_' + str(i), 'rot_z_' + str(i),
-                       'rot_x_' + str(i), 'rot_y_' + str(i), 'F_x_' + str(i), 'F_y_' + str(i), 'F_z_' + str(i),
-                       'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
+                  'rot_x_' + str(i), 'rot_y_' + str(i), 'F_x_' + str(i), 'F_y_' + str(i), 'F_z_' + str(i),
+                  'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
     return x
 
-def tests_model(param_names, df_result, df, r2_train_column, r2_test_column, rmse_train_column, rmse_test_column):
-    x = df[gives_x_all_param_header()]
-    y = df[param_names]
+def graph_information_k_value(title, xlable, ylable, ybottom, ytop):
+    plt.title(title)
+    plt.xlabel(xlable)
+    plt.ylabel(ylable)
+    #plt.xlim(xleft, xright)
+    plt.ylim(ybottom, ytop)
 
-    # This prints out the x and y, it's just for checking that everything is correct
-    # print(x)
-    # print(y)
+def graph_information_epsr_value(title, xlable, ylable, ybottom, ytop):
+    plt.title(title)
+    plt.xlabel(xlable)
+    plt.ylabel(ylable)
+    #plt.xlim(xleft, xright)
+    plt.ylim(ybottom, ytop)
+
+def plt_graph_test(y_test, predictions_test, header_name):
+    plt.figure()  # This makes a new figure
+    plt.scatter(y_test, predictions_test, color=DotColor, s=MarkerSize)
+
+    if 'k' in header_name:
+        graph_information_k_value(f'{header_name} test model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value', ybottom_k, ytop_k)
+    else:
+        graph_information_epsr_value(f'{header_name} test model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value', ybottom_epsr, ytop_epsr)
+
+    plt.savefig('./multiple-linear-regression-figures/prediction_test_' f'{header_name}.png')
+
+def plt_graph_train(y_train, predictions_train, header_name):
+    plt.figure()  # This makes a new figure
+    plt.scatter(y_train, predictions_train, color=DotColor, s=MarkerSize)
+
+    if 'k' in header_name:
+        graph_information_k_value(f'{header_name} train model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value', ybottom_k, ytop_k)
+    else:
+        graph_information_epsr_value(f'{header_name} train model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value', ybottom_epsr, ytop_epsr)
+
+    plt.savefig('./multiple-linear-regression-figures/prediction_train_' f'{header_name}.png')
+
+def train_test_model(header):
+    x = df[gives_x_all_param_header()]
+    y = df[header]
 
     regr = linear_model.LinearRegression()
     regr.fit(x, y)
 
     # creating train and test sets
-    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, test_size=0.2)  # Remember to shuffle test
+    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, test_size=0.2, shuffle=True)
 
     # creating a regression model
     model = LinearRegression()
@@ -40,66 +88,89 @@ def tests_model(param_names, df_result, df, r2_train_column, r2_test_column, rms
     model.fit(x_train, y_train)
 
     # making predictions
-    predictions_train = model.predict(x_train)
     predictions_test = model.predict(x_test)
+    predictions_train = model.predict(x_train)
+
+    plt_graph_train(y_train, predictions_train, header)
+    plt_graph_test(y_test, predictions_test, header)
+
+def dynamic_train_test_model(header):
+    x = df[gives_x_all_param_header()]
+    y = df[header]
+
+    regr = linear_model.LinearRegression()
+    regr.fit(x, y)
+
+    # creating train and test sets
+    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, test_size=0.2, shuffle=True)
+
+    # creating a regression model
+    model = LinearRegression()
+
+    # fitting the model
+    model.fit(x_train, y_train)
+
+    # making predictions
+    predictions_test = model.predict(x_test)
+    predictions_train = model.predict(x_train)
 
     r2_train = r2_score(y_train, predictions_train)
-    r2_test = r2_score(y_test, predictions_test)
     rmse_train = mean_squared_error(y_train, predictions_train, squared=False)
+    mae_train = mean_absolute_error(y_train, predictions_train)
+
+    r2_test = r2_score(y_test, predictions_test)
     rmse_test = mean_squared_error(y_test, predictions_test, squared=False)
+    mae_test = mean_absolute_error(y_test, predictions_test)
 
-    df_result = df_result.append({r2_train_column: r2_train, r2_test_column: r2_test,
-                                  rmse_train_column: rmse_train, rmse_test_column: rmse_test}, ignore_index=True)
+    return [r2_train, rmse_train, mae_train, r2_test, rmse_test, mae_test]
 
-    return df_result
+def update_dict(dict, header, list_data):
+    l_train = dict[header + '_train']
+    l_test = dict[header + '_test']
+    l_train.append({'R2': list_data[0], 'RMSE': list_data[1], 'MAE': list_data[2]})
+    l_test.append({'R2': list_data[3], 'RMSE': list_data[4], 'MAE': list_data[5]})
 
-def output_to_terminal_predict_train(y_train, predictions_train):
-    # model evaluation fro predict_train
-    print('Predict_train')
-    print('r2 value is: ', r2_score(y_train, predictions_train))
-    print('Root Mean Squared Error (RMSE) : ', mean_squared_error(y_train, predictions_train, squared=False))
-    print()
+def get_stats(header, list):
+    return f'{header};{np.max(list)};{np.min(list)};{np.mean(list)}\n'
 
-def output_to_terminal_predict_test(y_test, predictions_test):
-    # model evaluation for predict_test
-    print('Predict_test')
-    print('r2 value is: ', r2_score(y_test, predictions_test))
-    print('Root Mean Squared Error (RMSE) : ', mean_squared_error(y_test, predictions_test, squared=False))
-# ----------------------------------------------------------------------------------------------------------------------
+def find_stats(dict, header):
+    r2_train = [x['R2'] for x in dict[header + '_train']]
+    rmse_train = [x['RMSE'] for x in dict[header + '_train']]
+    mae_train = [x['MAE'] for x in dict[header + '_train']]
+    r2_test = [x['R2'] for x in dict[header + '_test']]
+    rmse_test = [x['RMSE'] for x in dict[header + '_test']]
+    mae_test = [x['MAE'] for x in dict[header + '_test']]
 
-def save_graph_train(y_train, predictions_train):
-    plt.figure() # This makes a new figure
-    plt.scatter(y_train, predictions_train, color=DotColor, s=MarkerSize)
-    plt.savefig('./figures/prediction_train_ACL_epsr.png')
+    res = []
+    res.append(get_stats(header + '_train_R2', r2_train))
+    res.append(get_stats(header + '_train_RMSE', rmse_train))
+    res.append(get_stats(header + '_train_MAE', mae_train))
+    res.append(get_stats(header + '_test_R2', r2_test))
+    res.append(get_stats(header + '_test_RMSE', rmse_test))
+    res.append(get_stats(header + '_test_MAE', mae_test))
+    return res
 
-def save_graph_test(y_test, predictions_test):
-    plt.figure()  # This makes a new figure
-    plt.scatter(y_test, predictions_test, color=DotColor, s=MarkerSize)
-    plt.savefig('./figures/prediction_test_ACL_epsr.png')
-
-def generates_columns(name):
-    return [name + '_r2_train', name + '_r2_test', name + '_rmse_train', name + '_rmse_test']
-
-
-# Global variables
-param_names = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
-
-columns = []
-# Generates names to columns
-for x in range(0, 8):
-    columns.extend(generates_columns(param_names[x]))
-
-# Constants to change style in graph
-MarkerSize = 0.1
-DotColor = 'Blue'
 
 # importing data
 df = pd.read_csv('../data_processing/final_final_final.csv')
+y_head = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
+results = dict()
+rounds = 20
+file = open('./multiple-linear-regression-figures-results.csv', 'w')
+file.write('ID;Max;Min;Avg\n')
 
-df_r2_rmse = pd.DataFrame(columns=[columns])
+for header in y_head:
+    results[header + '_train'] = []
+    results[header + '_test'] = []
+    train_test_model(header)
+    print(header + ':')
 
-for i in range(0, 32, 4):
-    for j in range(0, 10):
-       df_r2_rmse = tests_model(param_names[int(i/4)], df_r2_rmse, df, columns[i], columns[i+1], columns[i+2], columns[i+3])
+    for j in range(rounds):
+        print("'\r" f'{j + 1} / {rounds}\n', end='')
+        list_data = dynamic_train_test_model(header)
+        update_dict(results, header, list_data)
 
-print(df_r2_rmse)
+    res = find_stats(results, header)
+    file.writelines(res)
+
+file.close()
