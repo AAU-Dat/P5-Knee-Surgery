@@ -58,7 +58,7 @@ def plt_graph_test(y_test, predictions_test, header_name):
     else:
         graph_information_epsr_value(f'{header_name} test model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value', ybottom_epsr, ytop_epsr)
 
-    plt.savefig('./figures/prediction_test_' f'{header_name}.png')
+    plt.savefig('./multiple-linear-regression-figures/prediction_test_' f'{header_name}.png')
 
 def plt_graph_train(y_train, predictions_train, header_name):
     plt.figure()  # This makes a new figure
@@ -69,7 +69,7 @@ def plt_graph_train(y_train, predictions_train, header_name):
     else:
         graph_information_epsr_value(f'{header_name} train model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value', ybottom_epsr, ytop_epsr)
 
-    plt.savefig('./figures/prediction_train_' f'{header_name}.png')
+    plt.savefig('./multiple-linear-regression-figures/prediction_train_' f'{header_name}.png')
 
 def train_test_model(header):
     x = df[gives_x_all_param_header()]
@@ -156,7 +156,7 @@ df = pd.read_csv('../data_processing/final_final_final.csv')
 y_head = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
 results = dict()
 rounds = 20
-file = open('./results.csv', 'w')
+file = open('./multiple-linear-regression-figures-results.csv', 'w')
 file.write('ID;Max;Min;Avg\n')
 
 for header in y_head:
