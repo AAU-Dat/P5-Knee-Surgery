@@ -24,12 +24,36 @@ def gives_x_all_param_header():
                   'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
     return x
 
-def graph_information(title, xlable, ylable, xleft, xright, ybottom, ytop):
+def graph_information(title, xlable, ylable): # , xleft, xright, ybottom, ytop
     plt.title(title)
     plt.xlabel(xlable)
     plt.ylabel(ylable)
-    plt.xlim(xleft, xright)
-    plt.ylim(ybottom, ytop)
+    #plt.xlim(xleft, xright)
+    #plt.ylim(ybottom, ytop)
+
+
+def train_test_model(header):
+    x = df[gives_x_all_param_header()]
+    y = df[header]
+
+    regr = linear_model.LinearRegression()
+    regr.fit(x, y)
+
+    # creating train and test sets
+    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, test_size=0.2, shuffle=True)
+
+    # creating a regression model
+    model = LinearRegression()
+
+    # fitting the model
+    model.fit(x_train, y_train)
+
+    # making predictions
+    predictions_test = model.predict(x_test)
+    predictions_train = model.predict(x_train)
+
+    plt_graph_train(y_train, predictions_train, header)
+    plt_graph_test(y_test, predictions_test, header)
 
 def dynamic_train_test_model(header):
     x = df[gives_x_all_param_header()]
@@ -87,23 +111,35 @@ def find_stats(dict, header):
     res.append(get_stats(header + '_test_MAE', mae_test))
     return res
 
+def plt_graph_test(y_test, predictions_test, header):
+    # prints out the graph for predictions_test
+    plt.scatter(y_test, predictions_test, color=DotColor, s=MarkerSize)
+    graph_information(f'{header} test model', 'Actual ' f'{header} value', 'Predicted ' f'{header} value') # , -0.10, 0.30, -0.10, 0.30
+    plt.savefig('./figures/prediction_test_' f'{header}.png')
+
+def plt_graph_train(y_train, predictions_train, header):
+    # prints out the graph for predictions_train
+    plt.figure()  # This makes a new figure
+    plt.scatter(y_train, predictions_train, color=DotColor, s=MarkerSize)
+    graph_information(f'{header} train model', 'Actual ' f'{header} value', 'Predicted ' f'{header} value') # , -0.10, 0.30, -0.10, 0.30
+    plt.savefig('./figures/prediction_train_' f'{header}.png')
 
 # importing data
 df = pd.read_csv('../data_processing/final_final_final.csv')
 y_head = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
 results = dict()
-rounds = 5
+rounds = 20
 file = open('./results.csv', 'w')
 file.write('ID;Max;Min;Avg\n')
 
-for header in ['ACL_k']:
+for header in y_head:
     results[header + '_train'] = []
     results[header + '_test'] = []
-    # Remember to run the model once, so we can get graph to input into report
-    print(header)
+    train_test_model(header)
+    print(header + ':')
 
     for j in range(rounds):
-        print(f'[{j + 1} / {rounds}]', end='\r')
+        print("'\r" f'{j + 1} / {rounds}', end='')
         list_data = dynamic_train_test_model(header)
         update_dict(results, header, list_data)
 
@@ -111,30 +147,3 @@ for header in ['ACL_k']:
     file.writelines(res)
 
 file.close()
-
-"""
-# model evaluation fro predict_train
-print('Predict_train for ACL_epsr')
-print('r2 value is: ', r2_score(y_train, predictions_train))  # R2   value
-print('Root Mean Squared Error (RMSE) : ', mean_squared_error(y_train, predictions_train, squared=False))  # RMSE value
-print('mean_absolute_error : ', mean_absolute_error(y_train, predictions_train))  # MAE  value
-print()
-
-# model evaluation for predict_test
-print('Predict_test for ACL_epsr')
-print('r2 value is: ', r2_score(y_test, predictions_test))
-print('Root Mean Squared Error (RMSE) : ', mean_squared_error(y_test, predictions_test, squared=False))
-print('mean_absolute_error : ', mean_absolute_error(y_test, predictions_test))
-# ----------------------------------------------------------------------------------------------------------------------
-
-# prints out the graph for predictions_test
-plt.scatter(y_test, predictions_test, color=DotColor, s=MarkerSize)
-graph_information('ACL_epsr test model', 'Actual ACL_epsr value', 'Predicted ACL_epsr value', -0.10, 0.30, -0.10, 0.30)
-plt.savefig('./figures/prediction_test_ACL_espr.png')
-
-# prints out the graph for predictions_train
-plt.figure()  # This makes a new figure
-plt.scatter(y_train, predictions_train, color=DotColor, s=MarkerSize)
-graph_information('ACL_epsr train model', 'Actual ACL_epsr value', 'Predicted ACL_epsr value', -0.10, 0.30, -0.10, 0.30)
-plt.savefig('./figures/prediction_train_ACL_espr.png')
-"""
