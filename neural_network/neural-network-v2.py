@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import sklearn
 from sklearn import metrics
 from sklearn.neural_network import MLPClassifier, MLPRegressor
+import keras_tuner as kt
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, classification_report, confusion_matrix, r2_score
@@ -36,16 +37,16 @@ print("Test set shape: ", X_test.shape)
 
 # Step 5: Building, Predicting, and Evaluating the Neural Network Model
 
-# Setting up the regressor
 mlp = MLPRegressor(hidden_layer_sizes=(40, 40), activation='relu', solver='adam', max_iter=650)
 mlp.fit(X_train, y_train.ravel())
 
-# Predicting the regressor
 expected_y = y_test
 predicted_y = mlp.predict(X_test)
 
-# Evaluating the regressor
-print(); print(metrics.r2_score(expected_y, predicted_y))
-print(metrics.mean_squared_log_error(expected_y, predicted_y))
+current_r2_score = metrics.r2_score(expected_y, predicted_y)
+current_msle = metrics.mean_squared_log_error(expected_y, predicted_y)
+
+print(); print("R2 Score: ", current_r2_score)
+print("MSLE Score: ", current_msle)
 
 print(); print("Completed")
