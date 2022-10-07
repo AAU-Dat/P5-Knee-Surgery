@@ -37,7 +37,7 @@ print("Test set shape: ", X_test.shape)
 # Step 5: Building, Predicting, and Evaluating the Neural Network Model
 
 # Setting up the regressor
-mlp = MLPRegressor(hidden_layer_sizes=(8, 8, 8), activation='relu', solver='adam', max_iter=800)
+mlp = MLPRegressor(hidden_layer_sizes=(40, 40), activation='relu', solver='adam', max_iter=650)
 mlp.fit(X_train, y_train.ravel())
 
 # Predicting the regressor
