@@ -12,6 +12,10 @@ from sklearn.model_selection import train_test_split
 
 matplotlib.use('Agg')
 
+# Constants to change train test split
+train_procent   = 0.80
+test_procent    = 0.20
+
 # Constants to change style in graph
 MarkerSize = 0.1
 DotColor = 'Blue'
@@ -85,7 +89,7 @@ def train_test_model(header):
     regr.fit(X_, y)
 
     # creating train and test sets
-    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.80, test_size=0.20, shuffle=True)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_procent, test_size=test_procent, shuffle=True)
 
     # creating a regression model
     model = LinearRegression()
@@ -111,7 +115,7 @@ def dynamic_train_test_model(header):
     regr.fit(X_, y)
 
     # creating train and test sets
-    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.80, test_size=0.20, shuffle=True)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_procent, test_size=test_procent, shuffle=True)
 
     # creating a regression model
     model = LinearRegression()
@@ -172,7 +176,7 @@ file.write('ID;Max;Min;Avg\n')
 for header in y_head:
     results[header + '_train'] = []
     results[header + '_test'] = []
-    train_test_model(header)
+    #train_test_model(header)
     print('\n' + header + ':')
 
     for j in range(rounds):
