@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np
+import sklearn.svm as sk
 import matplotlib.pyplot as plt
-import seaborn as sns
+
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 
 
 def gives_header_array():
@@ -20,4 +23,16 @@ header = gives_header_array()
 x = df[header[0]]
 y = df[header[9:285]]
 
-# https://towardsdatascience.com/unlocking-the-true-power-of-support-vector-regression-847fd123a4a0
+
+
+#StandardScaler()
+
+linear_svr_model = sk.LinearSVR()
+linear_svr_model.fit(x, y)
+
+plt.scatter(sc_X.inverse_transform(X), sc_y.inverse_transform(y), color='red')
+
+
+
+# https://www.youtube.com/watch?v=iSLJ6i-BpPg&ab_channel=CodeWarriors
+# https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVR.html#sklearn.svm.LinearSVR
