@@ -12,8 +12,8 @@ from sklearn.model_selection import train_test_split
 matplotlib.use('Agg')
 
 # Constants to change train test split
-train_procent   = 0.70
-test_procent    = 0.30
+train_procent   = 0.50
+test_procent    = 0.50
 
 # Constants to change style in graph
 MarkerSize = 0.1
