@@ -11,6 +11,7 @@ from keras.regularizers import L2
 
 LOG_DIR = f"{int(time.time())}"
 
+# Import Dataset and prepare for Training
 df = pd.read_csv('../data_processing/final_final_final.csv', index_col=0)
 df.describe().transpose()
 
@@ -33,53 +34,56 @@ def build_model(hp):
     hp: HyperParameters class instance
     """
 
-    # Hyperparameters
-    number_of_layers = hp.Int("n_layers", 2, 6)
-    learning_rate = hp.Choice("learning_rate", values=[1e-2, 1e-3, 1e-4])
-    units = [hp.Int(name='layer_1_units', min_value=16, max_value=256, step=16),
-             hp.Int(name='layer_2_units', min_value=16, max_value=256, step=16),
-             hp.Int(name='layer_3_units', min_value=16, max_value=256, step=16),
-             hp.Int(name='layer_4_units', min_value=16, max_value=256, step=16),
-             hp.Int(name='layer_5_units', min_value=16, max_value=256, step=16),
-             hp.Int(name='layer_6_units', min_value=16, max_value=256, step=16)]
-
     # Parameters
-    input_shape = X_train.shape[1:]
-    regularizer = L2(0.001)
+    _min_value = 2
+    _max_value = 6
+    _input_shape = X_train.shape[1:]
+    _regularizer = L2(0.001)
+    _loss = [metrics.mean_squared_error, metrics.mean_absolute_error]
+    _metrics = [metrics.RootMeanSquaredError(), metrics.MeanAbsoluteError()]
 
+    # Hyperparameters
+    hp_learning_rate = hp.Choice('learning_rate', values=[1e-2, 1e-3, 1e-4])
+    hp_number_of_layers = hp.Int('n_layers', min_value=_min_value, max_value=_max_value)
+    hp_units = []
+    for x in range(_max_value):
+        name = 'units_layer_' + str(x + 1)
+        hp_units.append(hp.Int(name=name, min_value=16, max_value=256, step=16))
+
+    # Create Sequential Model and setup Input Layer
     model = Sequential([
-        layers.Flatten(name='input_layer', input_shape=input_shape)
+        layers.Flatten(name='input_layer', input_shape=_input_shape)
     ])
 
     # Hidden Layers
-    for i in range(number_of_layers):
+    for i in range(hp_number_of_layers):
+        name = 'hidden_layer_' + str(i + 1)
         model.add(layers.Dense(
-            units=units[i],
-            name='hidden_layer_' + str(i + 1),
+            units=hp_units[i],
+            name=name,
             activation='relu',
-            kernel_regularizer=regularizer)
+            kernel_regularizer=_regularizer)
         )
         # TODO : reduce over fitting the model with -> model.add(layers.Dropout(0.05))
 
     # Output Layer
     model.add(layers.Dense(1, activation='softmax', name='output_layer'))
 
-    model.compile(optimizer=Adam(learning_rate=learning_rate),
-                  loss=[metrics.mean_squared_error,
-                        metrics.mean_absolute_error],
-                  metrics=[metrics.RootMeanSquaredError(),
-                           metrics.MeanAbsoluteError()],)
+    # Setup Compiler
+    model.compile(optimizer=Adam(learning_rate=hp_learning_rate),
+                  loss=_loss,
+                  metrics=_metrics)
     return model
 
 
 tuner = kt.RandomSearch(
     build_model,
-    objective=kt.Objective("val_root_mean_squared_error", direction='min'),
+    objective=kt.Objective('val_root_mean_squared_error', direction='min'),
     max_trials=10,
     executions_per_trial=2,
     directory=LOG_DIR,
     project_name='P5-Knee-Surgery',
-    seed=40
+    seed=40,
 )
 
 stop_early = keras.callbacks.EarlyStopping(monitor='val_loss', patience=3)
