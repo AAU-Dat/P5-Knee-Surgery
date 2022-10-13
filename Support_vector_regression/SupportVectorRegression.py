@@ -1,7 +1,9 @@
 import pandas as pd
+import numpy as np
 import sklearn.svm as sk
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 
 # Constants to change style in graph
@@ -30,13 +32,6 @@ def gives_header_array():
 
 
 def print_graph(target, prediction, target_index, on_what_data):
-    '''
-    things that change in each graph
-    title
-    data
-    model prediction
-    y aksen
-    '''
     # set data
     plt.figure()
     plt.scatter(target, prediction, color=DotColor, s=MarkerSize)
@@ -51,10 +46,11 @@ def print_graph(target, prediction, target_index, on_what_data):
     # plt.ylim(y_bottom, y_top)
 
     # saves/shows graph
-    plt.show()
-    # plt.savefig('./multiple-linear-regression-figures/prediction_test_' f'{header[target_index]}.png')
+    # plt.show()
+    plt.savefig(f'./Support_vector_regression_figures/prediction_{on_what_data}_{header[target_index]}.png')
 
-def make_SVR_graph(target_index):
+
+def make_SVR_graph(target_index, print=False):
     # find relevant data
     x = df[header[9:285]]
     y = df[header[target_index]]
@@ -71,16 +67,71 @@ def make_SVR_graph(target_index):
     predictions_test = linear_svr_model.predict(x_test)
 
     # plotting the graph
-    print_graph(y_train, predictions_train, target_index, 'train')
-    print_graph(y_test, predictions_test, target_index, 'test')
+    if(print):
+        print_graph(y_train, predictions_train, target_index, 'train')
+        print_graph(y_test, predictions_test, target_index, 'test')
+
+    #calculating correctness values
+    r2_train = r2_score(y_train, predictions_train)
+    rmse_train = mean_squared_error(y_train, predictions_train, squared=False)
+    mae_train = mean_absolute_error(y_train, predictions_train)
+
+    r2_test = r2_score(y_test, predictions_test)
+    rmse_test = mean_squared_error(y_test, predictions_test, squared=False)
+    mae_test = mean_absolute_error(y_test, predictions_test)
+
+    return [r2_train, rmse_train, mae_train, r2_test, rmse_test, mae_test]
+
+
+def update_dict(dict, header, list_data):
+    l_train = dict[header + '_train']
+    l_test = dict[header + '_test']
+    l_train.append({'R2': list_data[0], 'RMSE': list_data[1], 'MAE': list_data[2]})
+    l_test.append({'R2': list_data[3], 'RMSE': list_data[4], 'MAE': list_data[5]})
+
+def get_stats(header, list):
+    return f'{header};{np.max(list)};{np.min(list)};{np.mean(list)}\n'
+
+def find_stats(dict, header):
+    r2_train = [x['R2'] for x in dict[header + '_train']]
+    rmse_train = [x['RMSE'] for x in dict[header + '_train']]
+    mae_train = [x['MAE'] for x in dict[header + '_train']]
+    r2_test = [x['R2'] for x in dict[header + '_test']]
+    rmse_test = [x['RMSE'] for x in dict[header + '_test']]
+    mae_test = [x['MAE'] for x in dict[header + '_test']]
+
+    res = []
+    res.append(get_stats(header + '_train_R2', r2_train))
+    res.append(get_stats(header + '_train_RMSE', rmse_train))
+    res.append(get_stats(header + '_train_MAE', mae_train))
+    res.append(get_stats(header + '_test_R2', r2_test))
+    res.append(get_stats(header + '_test_RMSE', rmse_test))
+    res.append(get_stats(header + '_test_MAE', mae_test))
+    return res
 
 
 # importing data
 df = pd.read_csv('../data_processing/final_final_final.csv', index_col=0)
+results = dict()
+rounds = 20
+file = open('./Support_vector_regression_figures-results.csv', 'w')
+file.write('ID;Max;Min;Avg\n')
 header = gives_header_array()
 for x in range(0, 8):
-    make_SVR_graph(x)
+    results[header[x] + '_train'] = []
+    results[header[x] + '_test'] = []
+    make_SVR_graph(x, True)
+    print(header[x] + ':')
 
+    for j in range(rounds):
+        print("'\r" f'{j + 1} / {rounds}\n', end='')
+        list_data = make_SVR_graph(x)
+        update_dict(results, header[x], list_data)
+
+    res = find_stats(results, header[x])
+    file.writelines(res)
+
+file.close()
 
 
 # https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVR.html#sklearn.svm.LinearSVR
