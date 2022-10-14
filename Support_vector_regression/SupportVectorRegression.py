@@ -2,8 +2,12 @@ import pandas as pd
 import numpy as np
 import sklearn.svm as sk
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import normalize
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.pipeline import make_pipeline
+
 
 
 # Constants to change style in graph
@@ -13,8 +17,8 @@ DotColor = 'Blue'
 # Constants to change x & y axises in the saved graphs
 k_x_left     = -2500
 k_x_right    = 30000
-k_y_bottom   = -2500
-k_y_top      = 30000
+k_y_bottom   = 9500
+k_y_top      = 9700
 
 epsr_x_left   = -0.10
 epsr_x_right  = 0.30
@@ -23,18 +27,19 @@ epsr_y_top    = 0.30
 
 
 def gives_header_array():
-    x = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
+    header_array = ['0', 'ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
     for i in range(1, 24):
-        x.extend(['trans_x_' + str(i), 'trans_y_' + str(i), 'trans_z_' + str(i), 'rot_z_' + str(i),
+        header_array.extend(['trans_x_' + str(i), 'trans_y_' + str(i), 'trans_z_' + str(i), 'rot_z_' + str(i),
                   'rot_x_' + str(i), 'rot_y_' + str(i), 'F_x_' + str(i), 'F_y_' + str(i), 'F_z_' + str(i),
                   'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
-    return x
+    return header_array
 
 
-def print_graph(target, prediction, target_index, on_what_data):
+def print_a_graph(target, prediction, target_index, on_what_data, test_size):
     # set data
     plt.figure()
     plt.scatter(target, prediction, color=DotColor, s=MarkerSize)
+    # plt.plot([0, 10000], [0, 10000], color='red')
 
     # set names
     plt.title(f'{header[target_index]} {on_what_data} model')
@@ -43,35 +48,45 @@ def print_graph(target, prediction, target_index, on_what_data):
 
     # set axies
     # plt.xlim(x_left, x_right)
-    # plt.ylim(y_bottom, y_top)
+    # plt.ylim(k_y_bottom, k_y_top)
 
     # saves/shows graph
     # plt.show()
-    plt.savefig(f'./Support_vector_regression_figures/prediction_{on_what_data}_{header[target_index]}.png')
+    plt.savefig(f'./Support_vector_regression_figures/prediction_{on_what_data}_{header[target_index]}_{100-test_size*100}_{test_size*100}.png')
 
 
-def make_SVR_graph(target_index, print=False):
+def make_svr_graph(target_index, test_size, print_graph=False):
     # find relevant data
     x = df[header[9:285]]
     y = df[header[target_index]]
 
+    # normalizing the input data
+    # x = preprocessing.normalize(x)
+
+    # scaler = StandardScaler()
+    # scaler.fit(x)
+    # x = scaler.transform(x)
+
     # split data into train and test
-    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, test_size=0.2, shuffle=True)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=1-test_size, test_size=test_size, shuffle=True)
 
     # making the model and fitting the model to the data
-    linear_svr_model = sk.LinearSVR()
-    linear_svr_model.fit(x_train, y_train)
+    # linear_svr_model = sk.LinearSVR(max_iter=2000)
+    # linear_svr_model.fit(x_train, y_train)
+
+    linear_svr_model = make_pipeline(StandardScaler(), sk.LinearSVR(random_state=0, tol=1e-5))
+    linear_svr_model.fit(x, y)
 
     # predicting results with both test and train
     predictions_train = linear_svr_model.predict(x_train)
     predictions_test = linear_svr_model.predict(x_test)
 
     # plotting the graph
-    if(print):
-        print_graph(y_train, predictions_train, target_index, 'train')
-        print_graph(y_test, predictions_test, target_index, 'test')
+    if print_graph:
+        print_a_graph(y_train, predictions_train, target_index, 'train', test_size)
+        print_a_graph(y_test, predictions_test, target_index, 'test', test_size)
 
-    #calculating correctness values
+    # calculating correctness values
     r2_train = r2_score(y_train, predictions_train)
     rmse_train = mean_squared_error(y_train, predictions_train, squared=False)
     mae_train = mean_absolute_error(y_train, predictions_train)
@@ -88,6 +103,7 @@ def update_dict(dict, header, list_data):
     l_test = dict[header + '_test']
     l_train.append({'R2': list_data[0], 'RMSE': list_data[1], 'MAE': list_data[2]})
     l_test.append({'R2': list_data[3], 'RMSE': list_data[4], 'MAE': list_data[5]})
+
 
 def get_stats(header, list):
     return f'{header};{np.max(list)};{np.min(list)};{np.mean(list)}\n'
@@ -111,27 +127,32 @@ def find_stats(dict, header):
 
 
 # importing data
-df = pd.read_csv('../data_processing/final_final_final.csv', index_col=0)
+df = pd.read_csv('../data_processing/final_final_final.csv')
+header = gives_header_array()
+
 results = dict()
 rounds = 20
-file = open('./Support_vector_regression_figures-results.csv', 'w')
-file.write('ID;Max;Min;Avg\n')
-header = gives_header_array()
-for x in range(0, 8):
-    results[header[x] + '_train'] = []
-    results[header[x] + '_test'] = []
-    make_SVR_graph(x, True)
-    print(header[x] + ':')
 
-    for j in range(rounds):
-        print("'\r" f'{j + 1} / {rounds}\n', end='')
-        list_data = make_SVR_graph(x)
-        update_dict(results, header[x], list_data)
+for size_of_test in range(10, 20, 10):
+    file = open(f'./Support_vector_regression_figures-results_{100-size_of_test}_{size_of_test}.csv', 'w')
+    file.write('ID;Max;Min;Avg\n')
 
-    res = find_stats(results, header[x])
-    file.writelines(res)
+    for i in range(1, 9):
+        print('\n' + header[i] + ':')
+        results[header[i] + '_train'] = []
+        results[header[i] + '_test'] = []
+        make_svr_graph(i, size_of_test/100)
 
-file.close()
+        for j in range(rounds):
+            print("\r" f'{j + 1} / {rounds}', end='')
+            list_data = make_svr_graph(i, size_of_test/100)
+            update_dict(results, header[i], list_data)
+
+        res = find_stats(results, header[i])
+        file.writelines(res)
+    file.close()
+
+
 
 
 # https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVR.html#sklearn.svm.LinearSVR

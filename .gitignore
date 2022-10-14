@@ -2,6 +2,7 @@
 
 [Dd]ata
 *.csv
+*.png
 
 # Editor enviroments
 .[Pp]ython
