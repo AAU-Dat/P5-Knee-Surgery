@@ -3,7 +3,7 @@ import numpy as np
 import sklearn.svm as sk
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import normalize
+# from sklearn.preprocessing import normalize
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.pipeline import make_pipeline
@@ -51,7 +51,7 @@ def print_a_graph(target, prediction, target_index, on_what_data, test_size):
     # plt.ylim(k_y_bottom, k_y_top)
 
     # saves/shows graph
-    # plt.show()
+    plt.show()
     plt.savefig(f'./Support_vector_regression_figures/prediction_{on_what_data}_{header[target_index]}_{100-test_size*100}_{test_size*100}.png')
 
 
@@ -71,11 +71,12 @@ def make_svr_graph(target_index, test_size, print_graph=False):
     x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=1-test_size, test_size=test_size, shuffle=True)
 
     # making the model and fitting the model to the data
-    # linear_svr_model = sk.LinearSVR(max_iter=2000)
-    # linear_svr_model.fit(x_train, y_train)
+    linear_svr_model = sk.LinearSVR(max_iter=5000)
+    linear_svr_model.fit(x_train, y_train)
 
-    linear_svr_model = make_pipeline(StandardScaler(), sk.LinearSVR(random_state=0, tol=1e-5))
-    linear_svr_model.fit(x, y)
+    # linear_svr_model = make_pipeline(StandardScaler(), sk.LinearSVR(random_state=0, tol=1e-5))
+    # linear_svr_model.fit(x, y)
+
 
     # predicting results with both test and train
     predictions_train = linear_svr_model.predict(x_train)
@@ -141,7 +142,7 @@ for size_of_test in range(10, 20, 10):
         print('\n' + header[i] + ':')
         results[header[i] + '_train'] = []
         results[header[i] + '_test'] = []
-        make_svr_graph(i, size_of_test/100)
+        make_svr_graph(i, size_of_test/100, True)
 
         for j in range(rounds):
             print("\r" f'{j + 1} / {rounds}', end='')
