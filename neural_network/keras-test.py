@@ -9,6 +9,8 @@ from keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
 from keras.regularizers import L2
 from keras_tuner import RandomSearch
+from keras.losses import MeanSquaredLogarithmicError
+msle = MeanSquaredLogarithmicError()
 
 LOG_DIR = f"{int(time.time())}"
 
@@ -61,8 +63,8 @@ def build_model(hp):
     # Output Layer
     model.add(layers.Dense(1, activation='linear', name='output_layer'))
 
-    _loss = 'mean_absolute_error'
-    _metrics = ['mean_absolute_error']
+    _loss = msle
+    _metrics = [msle]
 
     hp_learning_rate = hp.Choice('learning_rate', values=[1e-2, 1e-3, 1e-4])
 
@@ -75,15 +77,15 @@ def build_model(hp):
 
 tuner = RandomSearch(
     build_model,
-    objective='val_mean_absolute_error',
-    max_trials=100,
+    objective='val_mean_squared_logarithmic_error',
+    max_trials=10,
     executions_per_trial=3,
     directory=LOG_DIR,
     project_name='P5-Knee-Surgery',
     seed=40,
 )
 
-stop_early = keras.callbacks.EarlyStopping(monitor='val_mean_absolute_error', patience=3)
+stop_early = keras.callbacks.EarlyStopping(monitor='val_mean_squared_logarithmic_error', patience=3)
 tuner.search(X_train, y_train, epochs=5, batch_size=64, validation_data=(X_test, y_test), callbacks=[stop_early])
 best_model = tuner.get_best_models()[0]
 
