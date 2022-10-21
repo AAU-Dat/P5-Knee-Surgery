@@ -61,9 +61,7 @@ def max_iter_test_func():
 
     file.close()
 
-# 1 - 1500
-# 300000
-# 200 - 50000+
+
 def c_test_func():
     file = open(f'./Support_vector_regression_test_results_C3.csv', 'w')
 
@@ -76,9 +74,17 @@ def c_test_func():
 
 
 
-df = pd.read_csv('../data_processing/final_final_final.csv')
+df = pd.read_csv('../../data_processing/final_final_final.csv')
 header = gives_header_array()
 
+test_size = 0.2
+x = 0.001
+max_inter = 6500000 * x
+
+# espr_c = 0.001
+# espr_max_iter = 2500000 * espr_c
+
 print('max_iter\tC\tr^2')
-for x in range(100000, 100050, 50):
-    print(f'{4000*x}\t{x}\t' + str(make_svr_graph(1, 0.2, 4000 * x, x)))
+for i in range(3, 10, 1):
+    divider = 10**i
+    print(f'{max_inter}\t{x}\t' + str(make_svr_graph(8, 0.2, max_inter, x)))

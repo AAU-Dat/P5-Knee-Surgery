@@ -9,13 +9,17 @@ from sklearn.pipeline import Pipeline
 
 
 
-# Constants to change style in graph
+# Change dots in graph
 MarkerSize = 0.1
 DotColor = 'Blue'
 
+# change line in graph
+to_k = [0, 20000]
+to_espr = [-0.25, 0.25]
+
 # Constants to change x & y axises in the saved graphs
 k_x_left     = -2500
-k_x_right    = 30000
+k_x_right    = 2100
 k_y_bottom   = 9500
 k_y_top      = 9700
 
@@ -23,6 +27,14 @@ epsr_x_left   = -0.10
 epsr_x_right  = 0.30
 epsr_y_bottom = -0.10
 epsr_y_top    = 0.30
+
+# settings for svm
+k_c = 250
+k_max_iter = 4000 * k_c
+
+espr_c = 0.001
+espr_max_iter = 6500000 * espr_c
+
 
 
 def gives_header_array():
@@ -38,7 +50,7 @@ def print_a_graph(target, prediction, target_index, on_what_data, test_size):
     # set data
     plt.figure()
     plt.scatter(target, prediction, color=DotColor, s=MarkerSize)
-    # plt.plot([0, 10000], [0, 10000], color='red')
+    plt.plot(to_k if is_k() else to_espr, to_k if is_k() else to_espr, color='red')
 
     # set names
     plt.title(f'{header[target_index]} {on_what_data} model')
@@ -51,10 +63,15 @@ def print_a_graph(target, prediction, target_index, on_what_data, test_size):
 
     # saves/shows graph
     # plt.show()
-    plt.savefig(f'./Support_vector_regression_figures/prediction_{on_what_data}_{header[target_index]}_{100-test_size*100}_{test_size*100}.png')
+    plt.savefig(f'./Support_vector_regression_figures/{100-test_size*100}_{test_size*100}/{header[target_index]}_{on_what_data}_{100-test_size*100}_{test_size*100}.png')
+    plt.close()
 
 
-def make_svr_graph(target_index, test_size, c, print_graph=False):
+def is_k ():
+    return i % 2 == 1
+
+
+def make_svr_graph(target_index, test_size, print_graph=False):
     # find relevant data
     x = df[header[9:285]]
     y = df[header[target_index]]
@@ -63,17 +80,11 @@ def make_svr_graph(target_index, test_size, c, print_graph=False):
     x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=1-test_size, test_size=test_size, shuffle=True)
 
     # making the model and fitting the model to the data
-    pipe = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR(max_iter=4000 * c, C=c))])
+    pipe = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR(max_iter=k_max_iter if is_k() else espr_max_iter, C=k_c if is_k() else espr_c))])
+
     pipe.fit(x_train, y_train)
 
-    # linear_svr_model = make_pipeline(StandardScaler(), sk.LinearSVR(random_state=0, tol=1e-5))
-    # linear_svr_model.fit(x, y)
-
-
     # predicting results with both test and train
-    # predictions_train = linear_svr_model.predict(x_train)
-    # predictions_test = linear_svr_model.predict(x_test)
-
     predictions_train = pipe.predict(x_train)
     predictions_test = pipe.predict(x_test)
 
@@ -129,26 +140,25 @@ header = gives_header_array()
 results = dict()
 rounds = 20
 
-for size_of_test in range(10, 20, 10):
+for size_of_test in range(10, 60, 10):
     file = open(f'./Support_vector_regression_figures-results_{100-size_of_test}_{size_of_test}.csv', 'w')
     file.write('ID;Max;Min;Avg\n')
+    print(f'\n{100-size_of_test}/{size_of_test} split:')
 
     for i in range(1, 9):
         print('\n' + header[i] + ':')
         results[header[i] + '_train'] = []
         results[header[i] + '_test'] = []
-        make_svr_graph(i, size_of_test/100, 500, True)
+        make_svr_graph(i, size_of_test/100, True)
 
         for j in range(rounds):
             print("\r" f'{j + 1} / {rounds}', end='')
-            list_data = make_svr_graph(i, size_of_test/100, 500)
+            list_data = make_svr_graph(i, size_of_test/100)
             update_dict(results, header[i], list_data)
 
         res = find_stats(results, header[i])
         file.writelines(res)
     file.close()
-
-
 
 
 # https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVR.html#sklearn.svm.LinearSVR
