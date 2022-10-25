@@ -17,7 +17,7 @@ ligament_headers = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr
 x = df[gives_x_all_param_header()]
 y = df[ligament_headers[0]]
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=90, test_size=10, shuffle=True)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, shuffle=True)
 regressor = RFR(n_estimators=10, random_state=0)
 regressor.fit(x_train, y_train)
 
