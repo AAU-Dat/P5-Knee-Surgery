@@ -1,6 +1,11 @@
+import scipy as sp
+import numpy as np
 from sklearn.ensemble import RandomForestRegressor as RFR
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 from sklearn.model_selection import train_test_split
+from time import time
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, RepeatedKFold
+from scipy.stats import randint
 import pandas as pd
 import numpy as np
 #import tensorflow as tf
@@ -35,7 +40,6 @@ def print_status(estimators, max_features, ligament):
 #def evaluate_best_config(estimators, max_features, ligament, r_2, mae, mse):
 
 
-
 def random_forest_all_parameters(estimators, ligaments):
     x = df[gives_x_all_param_header()]
 
@@ -55,8 +59,48 @@ def random_forest_all_parameters(estimators, ligaments):
                     print_status(max_features=0.45+(j*0.05), estimators=i, ligament=ligament_headers[l])
 
 
+# random_forest_all_parameters(1, 2)
 
-random_forest_all_parameters(1, 2)
+# Make parameters for random search.
+parameters_range = {"n_estimators": range(1, 201),
+                    "max_features": np.arange(0.5, 1.05, 0.05)}
 
+# Create regressor with standard settings.
+regressor = RFR()
 
+# Define how many hyperparameter-configurations random search tries.
+randomsearch_iterations = 1  # how many configurations are we trying out
+
+cross_validation = RepeatedKFold(n_splits=5, n_repeats=3, random_state=1)
+
+# Create random-search object with the attributes defined above.
+randomsearch = RandomizedSearchCV(regressor,
+                                  param_distributions=parameters_range,
+                                  n_iter=randomsearch_iterations,
+                                  scoring="neg_mean_absolute_error",
+                                  n_jobs=6,
+                                  cv=cross_validation)
+
+# Define x as all machine headers.
+x = df[gives_x_all_param_header()]
+
+# Define y as ACL_k.
+y = df[ligament_headers[1]]
+
+# Create 80-20 test-train split for machine data and ACL_k.
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=True)
+
+# Save the time for right before random-search starts
+start_time = time()
+
+# Start the random-search. Its parameters were defined above.
+randomsearch.fit(x, y)
+
+# Report back the results of random-search.
+print("Random-search took %.2f seconds for %d configurations of parameter settings." % ((time() - start_time),
+                                                                                        randomsearch_iterations))
+
+# can do best_score, best_params etc.
+print('Best Score: %s' % result.best_score_)
+print('Best Hyperparameters: %s' % result.best_params_)
 
