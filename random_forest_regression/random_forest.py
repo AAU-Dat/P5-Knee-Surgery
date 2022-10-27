@@ -1,3 +1,5 @@
+import random
+
 import scipy as sp
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor as RFR
@@ -43,7 +45,6 @@ def print_status(estimators, max_features, ligament):
 def save_to_list(r_2, mae, mse, estimators, max_features, ligament):
     return {"r_2": r_2, "mae": mae, "mse": mse, "estimators": estimators, "max_features": max_features, "ligament": ligament}
 
-# åh ja returnerer ikke noget haha!
 def write_best_scores_for_all_knees_to_file(list_of_result_dictionaries):
     #
     # iterate entries in dictionary
@@ -67,7 +68,6 @@ def write_best_scores_for_all_knees_to_file(list_of_result_dictionaries):
     file.close()
 
 
-
 def random_forest_all_parameters(estimators, ligaments):
     x = df[gives_x_all_param_header()]
     list_of_results = list(dict())
@@ -88,10 +88,33 @@ def random_forest_all_parameters(estimators, ligaments):
                 list_of_results.append(save_to_list(r_2=r2, mae=mae, mse=mse, estimators=i, max_features=0.45+(j*0.05), ligament=ligament_headers[l]))
                 print_status(max_features=0.45+(j*0.05), estimators=i, ligament=ligament_headers[l])
 
-    # List er tom? wtf 😒
     write_best_scores_for_all_knees_to_file(list_of_results)
 
-random_forest_all_parameters(1, 1)
+def random_forest_random_parameters(estimators_range, max_features_range, n_configurations, ligament_index):
+    x = df[gives_x_all_param_header()]
+    y = df[ligament_headers[ligament_index]]
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, shuffle=True)
+    list_of_results = list(dict())
+
+    for c in range(n_configurations):
+        estimators = random.randint(estimators_range[0], estimators_range[1])
+        max_features = random.uniform(max_features_range[0], max_features_range[1])
+        regressor = RFR(n_estimators=estimators, max_features=max_features)
+
+        regressor.fit(x_train, y_train)
+        y_pred = regressor.predict(x_test)
+        r2 = r2_score(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+
+        list_of_results.append(save_to_list(r_2=r2, mae=mae, mse=mse, estimators=estimators, max_features=max_features,
+                                            ligament=ligament_headers[ligament_index]))
+        write_results_to_file(r_2=r2, mae=mae, mse=mse, estimators=estimators, max_features=max_features,
+                              ligament=ligament_headers[ligament_index])
+    write_best_scores_for_all_knees_to_file(list_of_results)
+
+#random_forest_all_parameters(1, 1)
+random_forest_random_parameters(estimators_range=(1, 5), max_features_range=(0.9, 1), n_configurations=5, ligament_index=0)
 
 '''
 # Make parameters for random search.
