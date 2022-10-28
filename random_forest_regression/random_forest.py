@@ -7,6 +7,8 @@ from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 from sklearn.model_selection import train_test_split
 from time import time
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, RepeatedKFold, ShuffleSplit
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 from scipy.stats import randint
 import pandas as pd
 import numpy as np
@@ -99,10 +101,13 @@ def random_forest_random_parameters(estimators_range, max_features_range, n_conf
     for c in range(n_configurations):
         estimators = random.randint(estimators_range[0], estimators_range[1])
         max_features = random.uniform(max_features_range[0], max_features_range[1])
-        regressor = RFR(n_estimators=estimators, max_features=max_features)
+        pipe = Pipeline([('scaler', StandardScaler()), (
+        'RFR', RFR(n_estimators=estimators, max_features=max_features))])
+        #regressor = RFR(n_estimators=estimators, max_features=max_features)
 
-        regressor.fit(x_train, y_train)
-        y_pred = regressor.predict(x_test)
+        #regressor.fit(x_train, y_train)
+        pipe.fit(x_train, y_train)
+        y_pred = pipe.predict(x_test)
         r2 = r2_score(y_test, y_pred)
         mae = mean_absolute_error(y_test, y_pred)
         mse = mean_squared_error(y_test, y_pred)
@@ -114,7 +119,7 @@ def random_forest_random_parameters(estimators_range, max_features_range, n_conf
     write_best_scores_for_all_knees_to_file(list_of_results)
 
 #random_forest_all_parameters(1, 1)
-random_forest_random_parameters(estimators_range=(1, 5), max_features_range=(0.9, 1), n_configurations=5, ligament_index=0)
+random_forest_random_parameters(estimators_range=(1, 20), max_features_range=(0.5, 1), n_configurations=10, ligament_index=0)
 
 '''
 # Make parameters for random search.
