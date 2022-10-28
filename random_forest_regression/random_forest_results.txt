@@ -1,9 +1,55 @@
-r_2: 0.8745110855636771, MAE: 1388.126490418143, MSE: 3886143.448292221, maxfeatures: 0.9175466167856007, estimators: 4, ligament: ACL_k
-r_2: 0.7454900867876879, MAE: 1955.7477528669028, MSE: 7881668.561706541, maxfeatures: 0.9003137493237607, estimators: 1, ligament: ACL_k
-r_2: 0.8631008764673892, MAE: 1439.561676019764, MSE: 4239495.05327151, maxfeatures: 0.9457188350364053, estimators: 3, ligament: ACL_k
-r_2: 0.8293152940348577, MAE: 1597.171922968605, MSE: 5285767.709359731, maxfeatures: 0.9861701192016686, estimators: 2, ligament: ACL_k
-r_2: 0.8797137257279928, MAE: 1358.4892771752775, MSE: 3725027.973836214, maxfeatures: 0.9486997625237112, estimators: 4, ligament: ACL_k
-Highest r_2: {'r_2': 0.8797137257279928, 'mae': 1358.4892771752775, 'mse': 3725027.973836214, 'estimators': 4, 'max_features': 0.9486997625237112, 'ligament': 'ACL_k'}
-Highest MAE: {'r_2': 0.8797137257279928, 'mae': 1358.4892771752775, 'mse': 3725027.973836214, 'estimators': 4, 'max_features': 0.9486997625237112, 'ligament': 'ACL_k'}
-Highest MSE: {'r_2': 0.8797137257279928, 'mae': 1358.4892771752775, 'mse': 3725027.973836214, 'estimators': 4, 'max_features': 0.9486997625237112, 'ligament': 'ACL_k'}
+Highest r_2: {'r_2': 0.9792436309153504, 'mae': 522.4185133470421, 'mse': 633263.6980014057, 'estimators': 9, 'max_features': 0.6894880323432466, 'ligament': 'ACL_k'}
+Highest MAE: {'r_2': 0.9792436309153504, 'mae': 522.4185133470421, 'mse': 633263.6980014057, 'estimators': 9, 'max_features': 0.6894880323432466, 'ligament': 'ACL_k'}
+Highest MSE: {'r_2': 0.9792436309153504, 'mae': 522.4185133470421, 'mse': 633263.6980014057, 'estimators': 9, 'max_features': 0.6894880323432466, 'ligament': 'ACL_k'}
+
+Highest r_2: {'r_2': 0.8949939019535238, 'mae': 1241.1755749250563, 'mse': 3182990.2403121637, 'estimators': 9, 'max_features': 0.6894880323432466, 'ligament': 'ACL_k'}
+Highest MAE: {'r_2': 0.8949939019535238, 'mae': 1241.1755749250563, 'mse': 3182990.2403121637, 'estimators': 9, 'max_features': 0.6894880323432466, 'ligament': 'ACL_k'}
+Highest MSE: {'r_2': 0.8949939019535238, 'mae': 1241.1755749250563, 'mse': 3182990.2403121637, 'estimators': 9, 'max_features': 0.6894880323432466, 'ligament': 'ACL_k'}
+
+Highest r_2: {'r_2': 0.9840621574339599, 'mae': 469.4211964018473, 'mse': 485502.16570290935, 'estimators': 17, 'max_features': 0.9658248224405516, 'ligament': 'ACL_k'}
+Highest MAE: {'r_2': 0.9840621574339599, 'mae': 469.4211964018473, 'mse': 485502.16570290935, 'estimators': 17, 'max_features': 0.9658248224405516, 'ligament': 'ACL_k'}
+Highest MSE: {'r_2': 0.9840621574339599, 'mae': 469.4211964018473, 'mse': 485502.16570290935, 'estimators': 17, 'max_features': 0.9658248224405516, 'ligament': 'ACL_k'}
+
+Highest r_2: {'r_2': 0.9070598799216205, 'mae': 1187.7348273447362, 'mse': 2855434.9525507633, 'estimators': 17, 'max_features': 0.9658248224405516, 'ligament': 'ACL_k'}
+Highest MAE: {'r_2': 0.9070598799216205, 'mae': 1187.7348273447362, 'mse': 2855434.9525507633, 'estimators': 17, 'max_features': 0.9658248224405516, 'ligament': 'ACL_k'}
+Highest MSE: {'r_2': 0.9070598799216205, 'mae': 1187.7348273447362, 'mse': 2855434.9525507633, 'estimators': 17, 'max_features': 0.9658248224405516, 'ligament': 'ACL_k'}
+
+Highest r_2: {'r_2': 0.9875270627739512, 'mae': 425.569505162805, 'mse': 380144.8472033515, 'estimators': 50, 'max_features': 0.6627089919541659, 'ligament': 'ACL_k'}
+Highest MAE: {'r_2': 0.9875270627739512, 'mae': 425.569505162805, 'mse': 380144.8472033515, 'estimators': 50, 'max_features': 0.6627089919541659, 'ligament': 'ACL_k'}
+Highest MSE: {'r_2': 0.9875270627739512, 'mae': 425.569505162805, 'mse': 380144.8472033515, 'estimators': 50, 'max_features': 0.6627089919541659, 'ligament': 'ACL_k'}
+
+Highest r_2: {'r_2': 0.9133777702151588, 'mae': 1133.80813353745, 'mse': 2650816.9767422643, 'estimators': 50, 'max_features': 0.6627089919541659, 'ligament': 'ACL_k'}
+Highest MAE: {'r_2': 0.9133777702151588, 'mae': 1133.80813353745, 'mse': 2650816.9767422643, 'estimators': 50, 'max_features': 0.6627089919541659, 'ligament': 'ACL_k'}
+Highest MSE: {'r_2': 0.9133777702151588, 'mae': 1133.80813353745, 'mse': 2650816.9767422643, 'estimators': 50, 'max_features': 0.6627089919541659, 'ligament': 'ACL_k'}
+
+Mode: train
+Highest r_2: {'mode': 'train', 'r_2': 0.9706943698824858, 'mae': 592.1427789852278, 'mse': 891720.8285612381, 'estimators': 5, 'max_features': 0.734351219937135, 'ligament': 'ACL_k'}
+Highest MAE: {'mode': 'train', 'r_2': 0.9706943698824858, 'mae': 592.1427789852278, 'mse': 891720.8285612381, 'estimators': 5, 'max_features': 0.734351219937135, 'ligament': 'ACL_k'}
+Highest MSE: {'mode': 'train', 'r_2': 0.9706943698824858, 'mae': 592.1427789852278, 'mse': 891720.8285612381, 'estimators': 5, 'max_features': 0.734351219937135, 'ligament': 'ACL_k'}
+
+Mode: test
+Highest r_2: {'mode': 'test', 'r_2': 0.8891906476231829, 'mae': 1288.6091440596635, 'mse': 3438126.037799776, 'estimators': 5, 'max_features': 0.734351219937135, 'ligament': 'ACL_k'}
+Highest MAE: {'mode': 'test', 'r_2': 0.8891906476231829, 'mae': 1288.6091440596635, 'mse': 3438126.037799776, 'estimators': 5, 'max_features': 0.734351219937135, 'ligament': 'ACL_k'}
+Highest MSE: {'mode': 'test', 'r_2': 0.8891906476231829, 'mae': 1288.6091440596635, 'mse': 3438126.037799776, 'estimators': 5, 'max_features': 0.734351219937135, 'ligament': 'ACL_k'}
+
+Mode: train
+Highest r_2: {'mode': 'train', 'r_2': 0.9721755326608822, 'mae': 577.4910243159842, 'mse': 846056.4904459763, 'estimators': 5, 'max_features': 0.9023678283618557, 'ligament': 'ACL_k'}
+Highest MAE: {'mode': 'train', 'r_2': 0.9721755326608822, 'mae': 577.4910243159842, 'mse': 846056.4904459763, 'estimators': 5, 'max_features': 0.9023678283618557, 'ligament': 'ACL_k'}
+Highest MSE: {'mode': 'train', 'r_2': 0.9721755326608822, 'mae': 577.4910243159842, 'mse': 846056.4904459763, 'estimators': 5, 'max_features': 0.9023678283618557, 'ligament': 'ACL_k'}
+
+Mode: test
+Highest r_2: {'mode': 'test', 'r_2': 0.8820979130166217, 'mae': 1349.9733549719551, 'mse': 3682048.794836743, 'estimators': 5, 'max_features': 0.7223512754372601, 'ligament': 'ACL_k'}
+Highest MAE: {'mode': 'test', 'r_2': 0.8820979130166217, 'mae': 1349.9733549719551, 'mse': 3682048.794836743, 'estimators': 5, 'max_features': 0.7223512754372601, 'ligament': 'ACL_k'}
+Highest MSE: {'mode': 'test', 'r_2': 0.8820979130166217, 'mae': 1349.9733549719551, 'mse': 3682048.794836743, 'estimators': 5, 'max_features': 0.7223512754372601, 'ligament': 'ACL_k'}
+
+
+Mode: train, TestSize: 0.2, Configurations: 1
+Highest r_2: {'mode': 'train', 'r_2': 0.9422319294926996, 'mae': 701.9020581238995, 'mse': 1761205.2724039592, 'estimators': 2, 'max_features': 0.7342565522701703, 'ligament': 'ACL_k'}
+Highest MAE: {'mode': 'train', 'r_2': 0.9422319294926996, 'mae': 701.9020581238995, 'mse': 1761205.2724039592, 'estimators': 2, 'max_features': 0.7342565522701703, 'ligament': 'ACL_k'}
+Highest MSE: {'mode': 'train', 'r_2': 0.9422319294926996, 'mae': 701.9020581238995, 'mse': 1761205.2724039592, 'estimators': 2, 'max_features': 0.7342565522701703, 'ligament': 'ACL_k'}
+
+Mode: test, TestSize: 0.2, Configurations: 1
+Highest r_2: {'mode': 'test', 'r_2': 0.8138624134035285, 'mae': 1673.1643927798875, 'mse': 5677140.764181655, 'estimators': 2, 'max_features': 0.7342565522701703, 'ligament': 'ACL_k'}
+Highest MAE: {'mode': 'test', 'r_2': 0.8138624134035285, 'mae': 1673.1643927798875, 'mse': 5677140.764181655, 'estimators': 2, 'max_features': 0.7342565522701703, 'ligament': 'ACL_k'}
+Highest MSE: {'mode': 'test', 'r_2': 0.8138624134035285, 'mae': 1673.1643927798875, 'mse': 5677140.764181655, 'estimators': 2, 'max_features': 0.7342565522701703, 'ligament': 'ACL_k'}
 

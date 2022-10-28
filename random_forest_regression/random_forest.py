@@ -44,10 +44,10 @@ def print_status(estimators, max_features, ligament):
 #def evaluate_best_config(estimators, max_features, ligament, r_2, mae, mse):
 
 
-def save_to_list(r_2, mae, mse, estimators, max_features, ligament):
-    return {"r_2": r_2, "mae": mae, "mse": mse, "estimators": estimators, "max_features": max_features, "ligament": ligament}
+def save_to_list(r_2, mae, mse, estimators, max_features, ligament, mode):
+    return {"mode": mode, "r_2": r_2, "mae": mae, "mse": mse, "estimators": estimators, "max_features": max_features, "ligament": ligament}
 
-def write_best_scores_for_all_knees_to_file(list_of_result_dictionaries):
+def write_best_scores_for_all_knees_to_file(mode, test_size, list_of_result_dictionaries, configurations):
     #
     # iterate entries in dictionary
     # log the number of the entry with higher-than-before r2, or mae, or mse
@@ -66,7 +66,7 @@ def write_best_scores_for_all_knees_to_file(list_of_result_dictionaries):
             lowest_mse_record = e
 
     file = open("random_forest_results.txt", "a")
-    file.write(f'Highest r_2: {highest_r2_record}\nHighest MAE: {lowest_mae_record}\nHighest MSE: {lowest_mse_record}\n\n')
+    file.write(f'Mode: {mode}, TestSize: {test_size}, Configurations: {configurations}\nHighest r_2: {highest_r2_record}\nHighest MAE: {lowest_mae_record}\nHighest MSE: {lowest_mse_record}\n\n')
     file.close()
 
 
@@ -92,11 +92,12 @@ def random_forest_all_parameters(estimators, ligaments):
 
     write_best_scores_for_all_knees_to_file(list_of_results)
 
-def random_forest_random_parameters(estimators_range, max_features_range, n_configurations, ligament_index):
+def random_forest_random_parameters(estimators_range, max_features_range, n_configurations, ligament_index, test_size):
     x = df[gives_x_all_param_header()]
     y = df[ligament_headers[ligament_index]]
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, shuffle=True)
-    list_of_results = list(dict())
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=True)
+    list_of_results_train = list(dict())
+    list_of_results_test = list(dict())
 
     for c in range(n_configurations):
         estimators = random.randint(estimators_range[0], estimators_range[1])
@@ -107,19 +108,32 @@ def random_forest_random_parameters(estimators_range, max_features_range, n_conf
 
         #regressor.fit(x_train, y_train)
         pipe.fit(x_train, y_train)
-        y_pred = pipe.predict(x_test)
-        r2 = r2_score(y_test, y_pred)
-        mae = mean_absolute_error(y_test, y_pred)
-        mse = mean_squared_error(y_test, y_pred)
 
-        list_of_results.append(save_to_list(r_2=r2, mae=mae, mse=mse, estimators=estimators, max_features=max_features,
-                                            ligament=ligament_headers[ligament_index]))
-        write_results_to_file(r_2=r2, mae=mae, mse=mse, estimators=estimators, max_features=max_features,
-                              ligament=ligament_headers[ligament_index])
-    write_best_scores_for_all_knees_to_file(list_of_results)
+        y_predict_test = pipe.predict(x_test)
+        y_predict_train = pipe.predict(x_train)
+
+        r2_train = r2_score(y_train, y_predict_train)
+        mae_train = mean_absolute_error(y_train, y_predict_train)
+        mse_train = mean_squared_error(y_train, y_predict_train)
+
+        r2_test = r2_score(y_test, y_predict_test)
+        mae_test = mean_absolute_error(y_test, y_predict_test)
+        mse_test = mean_squared_error(y_test, y_predict_test)
+
+        list_of_results_train.append(save_to_list(mode="train", r_2=r2_train, mae=mae_train, mse=mse_train, estimators=estimators, max_features=max_features,
+            ligament=ligament_headers[ligament_index]))
+
+        list_of_results_test.append(save_to_list(mode="test", r_2=r2_test, mae=mae_test, mse=mse_test, estimators=estimators, max_features=max_features,
+            ligament=ligament_headers[ligament_index]))
+        #write_results_to_file(r_2=r2_test, mae=mae_test, mse=mse_test, estimators=estimators, max_features=max_features,
+                              #ligament=ligament_headers[ligament_index])
+
+    write_best_scores_for_all_knees_to_file("train", test_size, list_of_results_train, n_configurations)
+    write_best_scores_for_all_knees_to_file("test", test_size, list_of_results_test, n_configurations)
+
 
 #random_forest_all_parameters(1, 1)
-random_forest_random_parameters(estimators_range=(1, 20), max_features_range=(0.5, 1), n_configurations=10, ligament_index=0)
+random_forest_random_parameters(estimators_range=(1, 40), max_features_range=(0.5, 1), n_configurations=50, ligament_index=0, test_size=0.2)
 
 '''
 # Make parameters for random search.
