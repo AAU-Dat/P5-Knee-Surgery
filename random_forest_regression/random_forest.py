@@ -12,11 +12,11 @@ from sklearn.preprocessing import StandardScaler
 from scipy.stats import randint
 import pandas as pd
 import numpy as np
-#import tensorflow as tf
+import tensorflow as tf
 
 #Program skal bygges under keras for at vi kan bruge tensorflow. Se jamie branch.
 #import tensorflow as tf
-#print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
+print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
 
 df = pd.read_csv('../data_processing/final_final_final.csv')
 ligament_headers = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
