@@ -105,11 +105,13 @@ predicted_y = best_model.predict(X_test)
 
 current_r2_score = metrics.r2_score(expected_y, predicted_y)
 current_mse = metrics.mean_squared_error(expected_y, predicted_y)
+current_mae = metrics.mean_absolute_error(expected_y, predicted_y)
 current_msle = metrics.mean_squared_log_error(expected_y, predicted_y)
 current_rmse = math.sqrt(current_mse)
 
 print("The coefficient of determination (R^2): ", current_r2_score)
-print("Mean Squared Logarithmic Error: ", current_msle)
-print("Root Mean Squared Error: ", current_rmse)
+print("Mean Squared Logarithmic Error (MSLE): ", current_msle)
+print("Mean Absolute Error (MAE): ", current_mae)
+print("Root Mean Squared Error (RMSE): ", current_rmse)
 
 # </editor-fold>
