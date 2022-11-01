@@ -61,7 +61,7 @@ def write_best_scores_for_all_knees_to_file(mode, test_size, list_of_result_dict
         if e.get("mae") < lowest_mae:
             lowest_mae = e.get("mae")
             lowest_mae_record = e
-        if e.get("mse") < lowest_rmse:
+        if e.get("rmse") < lowest_rmse:
             lowest_rmse = e.get("rmse")
             lowest_rmse_record = e
 
@@ -92,12 +92,20 @@ def random_forest_all_parameters(estimators, ligaments):
 
     write_best_scores_for_all_knees_to_file(list_of_results)
 
+#
+def last_model_performed_best(list_of_model_results):
+    last_result = list_of_model_results[-1]
+    last_result_has_lowest_rmse = all(score < last_result for score in list_of_model_results)
+    return last_result_has_lowest_rmse
+
+
 def random_forest_random_parameters(estimators_range, max_features_range, n_configurations, ligament_index, test_size):
     x = df[gives_x_all_param_header()]
     y = df[ligament_headers[ligament_index]]
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=True)
     list_of_results_train = list(dict())
     list_of_results_test = list(dict())
+    list_of_rmse_test_scores = list()
 
     for c in range(n_configurations):
         estimators = random.randint(estimators_range[0], estimators_range[1])
@@ -128,8 +136,12 @@ def random_forest_random_parameters(estimators_range, max_features_range, n_conf
         #write_results_to_file(r_2=r2_test, mae=mae_test, rmse=rmse_test, estimators=estimators, max_features=max_features,
                               #ligament=ligament_headers[ligament_index])
 
+        list_of_rmse_test_scores.append(rmse_test)
+        if last_model_performed_best(list_of_rmse_test_scores): best_model = regressor
+
     write_best_scores_for_all_knees_to_file("train", test_size, list_of_results_train, n_configurations)
     write_best_scores_for_all_knees_to_file("test", test_size, list_of_results_test, n_configurations)
+
 
     #if better rmse, plot!
 
