@@ -104,7 +104,7 @@ def train_single_forest(ligament_index, estimators, max_features, test_size):
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=random.seed(69))
 
     time_before_train = time()
-    pipe = Pipeline([('scaler', StandardScaler()), ('RFR', RFR(n_estimators=estimators, max_features=max_features, verbose=3, n_jobs=7, max_depth=20))])
+    pipe = Pipeline([('scaler', StandardScaler()), ('RFR', RFR(n_estimators=estimators, max_features=max_features, verbose=3, n_jobs=7))])
     pipe.fit(x_train, y_train)
 
     y_predict_test = pipe.predict(x_test)
@@ -117,8 +117,9 @@ def train_single_forest(ligament_index, estimators, max_features, test_size):
     mae_test = mean_absolute_error(y_test, y_predict_test)
     rmse_test = mean_squared_error(y_test, y_predict_test, squared=False)
 
-    print(f'Time elapsed: {time_before_train-time()}')
-    print(f'rmse train: {rmse_train}\nrmse test: {rmse_test}')
+    print(f'Time elapsed: {time()-time_before_train}')
+    print(f'rmse_train;rmse_test;r2_train;r2_test;mae_train;mae_test')
+    print(f'{rmse_train};{rmse_test};{r2_train};{r2_test};{mae_train};{mae_test}')
 
 def random_forest_random_parameters(estimators_range, max_features_range, n_configurations, ligament_index, test_size):
     x = df[gives_x_all_param_header()]
