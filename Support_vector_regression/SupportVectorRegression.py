@@ -8,7 +8,6 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.pipeline import Pipeline
 
 
-
 # Change dots in graph
 MarkerSize = 0.1
 DotColor = 'Blue'
@@ -34,7 +33,6 @@ k_max_iter = 4000 * k_c
 
 espr_c = 0.001
 espr_max_iter = 6500000 * espr_c
-
 
 
 def gives_header_array():
@@ -114,6 +112,7 @@ def update_dict(dict, header, list_data):
 
 def get_stats(header, list):
     return f'{header};{np.max(list)};{np.min(list)};{np.mean(list)}\n'
+
 
 def find_stats(dict, header):
     r2_train = [x['R2'] for x in dict[header + '_train']]

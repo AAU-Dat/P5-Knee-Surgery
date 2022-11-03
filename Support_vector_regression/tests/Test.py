@@ -3,11 +3,9 @@ import numpy as np
 import sklearn.svm as sk
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-# from sklearn.preprocessing import normalize
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.pipeline import Pipeline
-from sklearn import preprocessing
 
 
 def gives_header_array():
@@ -24,26 +22,11 @@ def make_svr_graph(target_index, test_size, max_iter, c):
     x = df[header[9:285]] #285 is max
     y = df[header[target_index]]
 
-    # normalizing the input data
-    # x = preprocessing.normalize(x)
-
-    # scaler = StandardScaler()
-    # scaler.fit(x)
-    # x = scaler.transform(x)
-
     # split data into train and test
     x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=1-test_size, test_size=test_size, shuffle=True)
 
-    # making the model and fitting the model to the data
-    # linear_svr_model = sk.LinearSVR(max_iter=max_iter, C=c)
-    # linear_svr_model.fit(x_train, y_train)
-
-    pipe = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR(max_iter=max_iter, C=c))])
+    pipe = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR(max_iter=100, C=c))])
     pipe.fit(x_train, y_train)
-
-    # predicting results with both test and train
-    # predictions_train = linear_svr_model.predict(x_train)
-    # predictions_test = linear_svr_model.predict(x_test)
 
     predictions_train = pipe.predict(x_train)
     predictions_test = pipe.predict(x_test)
@@ -51,40 +34,37 @@ def make_svr_graph(target_index, test_size, max_iter, c):
     return r2_score(y_test, predictions_test)
 
 
-def max_iter_test_func():
-    file = open(f'./Support_vector_regression_test_results_max.csv', 'w')
+def test(using_k, start, end, steps, header_start):
+    for x in range(header_start, 9, 2):
+        print(header[x])
+        res = []
+        res.append('c\tr2')
+        for i in range(start, end, steps):
+            print("\r" f'{i} / {end}', end='')
+            if using_k:
+                res.append(str(i) + '\t' + str(make_svr_graph(x, test_size, i*5000, i)) + '\n')
+            else:
+                res.append(str(i/100) + '\t' + str(make_svr_graph(x, test_size, 500, i/100)) + '\n')
 
-    file.writelines('C\tr^2')
-    for x in range(1, 5, 1):
-        file.writelines(f'\n{str(x)} \t' + str(make_svr_graph(1, 0.2, 10000, x)))
-        print(x)
-
-    file.close()
-
-
-def c_test_func():
-    file = open(f'./Support_vector_regression_test_results_C3.csv', 'w')
-
-    file.writelines('C\tr^2')
-    for x in range(1, 5, 1):
-        file.writelines(f'\n{str(x)} \t' + str(make_svr_graph(1, 0.2, 10000, x)))
-        print(x)
-
-    file.close()
-
+        file = open(f'{header[x]}.csv', 'w')
+        file.writelines(res)
+        file.close()
 
 
 df = pd.read_csv('../../data_processing/final_final_final.csv')
 header = gives_header_array()
-
 test_size = 0.2
-x = 0.001
-max_inter = 6500000 * x
 
-# espr_c = 0.001
-# espr_max_iter = 2500000 * espr_c
+start_k = 50
+end_k = 1050
+steps_k = 50
 
-print('max_iter\tC\tr^2')
-for i in range(3, 10, 1):
-    divider = 10**i
-    print(f'{max_inter}\t{x}\t' + str(make_svr_graph(8, 0.2, max_inter, x)))
+start_espr = 5
+end_espr = 100
+steps_espr = 5
+
+k = 1
+espr = 2
+
+test(True, start_k, end_k, steps_k, k)
+test(False, start_espr, end_espr, steps_espr, espr)
