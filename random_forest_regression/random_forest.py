@@ -16,7 +16,7 @@ import tensorflow as tf
 
 #Program skal bygges under keras for at vi kan bruge tensorflow. Se jamie branch.
 #import tensorflow as tf
-print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
+#print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
 
 df = pd.read_csv('../data_processing/final_final_final.csv')
 ligament_headers = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
@@ -98,11 +98,32 @@ def last_model_performed_best(list_of_model_results):
     last_result_has_lowest_rmse = all(score < last_result for score in list_of_model_results)
     return last_result_has_lowest_rmse
 
+def train_single_forest(ligament_index, estimators, max_features, test_size):
+    x = df[gives_x_all_param_header()]
+    y = df[ligament_headers[ligament_index]]
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=random.seed(69))
+
+    time_before_train = time()
+    pipe = Pipeline([('scaler', StandardScaler()), ('RFR', RFR(n_estimators=estimators, max_features=max_features, verbose=3, n_jobs=7, max_depth=20))])
+    pipe.fit(x_train, y_train)
+
+    y_predict_test = pipe.predict(x_test)
+    y_predict_train = pipe.predict(x_train)
+
+    r2_train = r2_score(y_train, y_predict_train)
+    mae_train = mean_absolute_error(y_train, y_predict_train)
+    rmse_train = mean_squared_error(y_train, y_predict_train, squared=False)
+    r2_test = r2_score(y_test, y_predict_test)
+    mae_test = mean_absolute_error(y_test, y_predict_test)
+    rmse_test = mean_squared_error(y_test, y_predict_test, squared=False)
+
+    print(f'Time elapsed: {time_before_train-time()}')
+    print(f'rmse train: {rmse_train}\nrmse test: {rmse_test}')
 
 def random_forest_random_parameters(estimators_range, max_features_range, n_configurations, ligament_index, test_size):
     x = df[gives_x_all_param_header()]
     y = df[ligament_headers[ligament_index]]
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=True)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=random.seed(69))
     list_of_results_train = list(dict())
     list_of_results_test = list(dict())
     list_of_rmse_test_scores = list()
@@ -146,8 +167,13 @@ def random_forest_random_parameters(estimators_range, max_features_range, n_conf
     #if better rmse, plot!
 
 #random_forest_all_parameters(1, 1)
-random_forest_random_parameters(estimators_range=(1, 40), max_features_range=(0.5, 1), n_configurations=50, ligament_index=0, test_size=0.2)
+#random_forest_random_parameters(estimators_range=(1, 40), max_features_range=(0.5, 1), n_configurations=50, ligament_index=0, test_size=0.2)
 
+
+train_single_forest(estimators=100, max_features=1.0, ligament_index=0, test_size=0.2)
+
+
+'''
 # Make parameters for random search.
 parameters_range = {"n_estimators": range(1, 2),
                     "max_features": np.arange(0.5, 1.05, 0.05)}
@@ -196,5 +222,5 @@ print("Random-search took %.2f seconds for %d configurations of parameter settin
 print('Best estimator across all params:\n', randomsearch.best_estimator_)
 print('Best Score: %s' % result.best_score_)
 print('Best Hyperparameters: %s' % result.best_params_)
-
+'''
 
