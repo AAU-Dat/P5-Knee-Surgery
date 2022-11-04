@@ -25,10 +25,10 @@ def make_svr_graph(target_index, test_size, max_iter, c):
     # split data into train and test
     x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=1-test_size, test_size=test_size, shuffle=True)
 
-    pipe = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR(max_iter=100, C=c))])
+    pipe = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR(max_iter=max_iter, C=c))])
     pipe.fit(x_train, y_train)
 
-    predictions_train = pipe.predict(x_train)
+    # predictions_train = pipe.predict(x_train)
     predictions_test = pipe.predict(x_test)
 
     return r2_score(y_test, predictions_test)
@@ -60,7 +60,7 @@ end_k = 1050
 steps_k = 50
 
 start_espr = 5
-end_espr = 100
+end_espr = 105
 steps_espr = 5
 
 k = 1
