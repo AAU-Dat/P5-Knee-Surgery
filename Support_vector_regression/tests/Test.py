@@ -36,7 +36,7 @@ def make_svr_graph(target_index, test_size, max_iter, c):
 
 def test(using_k, start, end, steps, header_start):
     for x in range(header_start, 9, 2):
-        print(header[x])
+        print('\n' + header[x])
         res = []
         res.append('c\tr2')
         for i in range(start, end, steps):
@@ -44,7 +44,7 @@ def test(using_k, start, end, steps, header_start):
             if using_k:
                 res.append(str(i) + '\t' + str(make_svr_graph(x, test_size, i*5000, i)) + '\n')
             else:
-                res.append(str(i/100) + '\t' + str(make_svr_graph(x, test_size, 500, i/100)) + '\n')
+                res.append(str(i/1000) + '\t' + str(make_svr_graph(x, test_size, 35000*i/5, i/1000)) + '\n')
 
         file = open(f'{header[x]}.csv', 'w')
         file.writelines(res)
@@ -60,11 +60,11 @@ end_k = 1050
 steps_k = 50
 
 start_espr = 5
-end_espr = 105
+end_espr = 45
 steps_espr = 5
 
 k = 1
 espr = 2
 
-test(True, start_k, end_k, steps_k, k)
+# test(True, start_k, end_k, steps_k, k)
 test(False, start_espr, end_espr, steps_espr, espr)

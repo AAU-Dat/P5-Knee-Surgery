@@ -3,7 +3,7 @@
 [Dd]ata
 *.csv
 *.png
-
+*.rar
 # Editor enviroments
 .[Pp]ython
 .[Ii]dea

@@ -69,7 +69,7 @@ def is_k ():
     return i % 2 == 1
 
 
-def make_svr_graph(target_index, test_size, print_graph=False):
+def make_svr_graph(target_index, test_size, c, max_iter, print_graph=False):
     # find relevant data
     x = df[header[9:285]]
     y = df[header[target_index]]
@@ -78,7 +78,7 @@ def make_svr_graph(target_index, test_size, print_graph=False):
     x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=1-test_size, test_size=test_size, shuffle=True)
 
     # making the model and fitting the model to the data
-    pipe = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR(max_iter=k_max_iter if is_k() else espr_max_iter, C=k_c if is_k() else espr_c))])
+    pipe = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR(max_iter=max_iter, C=c))])
 
     pipe.fit(x_train, y_train)
 
@@ -135,12 +135,13 @@ def find_stats(dict, header):
 # importing data
 df = pd.read_csv('../data_processing/final_final_final.csv')
 header = gives_header_array()
+svr_settings = pd.read_csv('svr_settings.csv')
 
 results = dict()
 rounds = 20
 
-for size_of_test in range(10, 60, 10):
-    file = open(f'./Support_vector_regression_figures-results_{100-size_of_test}_{size_of_test}.csv', 'w')
+for size_of_test in range(20, 30, 10):
+    file = open(f'./Support_vector_regression_results_{100-size_of_test}_{size_of_test}.csv', 'w')
     file.write('ID;Max;Min;Avg\n')
     print(f'\n{100-size_of_test}/{size_of_test} split:')
 
@@ -148,11 +149,11 @@ for size_of_test in range(10, 60, 10):
         print('\n' + header[i] + ':')
         results[header[i] + '_train'] = []
         results[header[i] + '_test'] = []
-        make_svr_graph(i, size_of_test/100, True)
+        make_svr_graph(i, size_of_test/100, svr_settings[header[i]][0], svr_settings[header[i]][1], True)
 
         for j in range(rounds):
             print("\r" f'{j + 1} / {rounds}', end='')
-            list_data = make_svr_graph(i, size_of_test/100)
+            list_data = make_svr_graph(i, size_of_test/100, svr_settings[header[i]][0], svr_settings[header[i]][1])
             update_dict(results, header[i], list_data)
 
         res = find_stats(results, header[i])
