@@ -8,7 +8,7 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
 from keras.regularizers import L2
-from keras_tuner import BayesianOptimization
+from keras_tuner import Hyperband
 from keras.losses import MeanSquaredLogarithmicError
 from datetime import datetime
 
@@ -29,7 +29,7 @@ df[predictors] = df[predictors] / df[predictors].max()
 X = df[predictors].values
 y = df[target_column].values
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=40)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=69)
 
 # </editor-fold>
 
@@ -73,9 +73,9 @@ def build_model(hp):
 # <editor-fold desc="Optimising the model">
 
 
-tuner = BayesianOptimization(
-    build_model, objective='val_mean_squared_logarithmic_error', max_trials=10, hyperparameters=HP,
-    num_initial_points=50, directory=LOG_DIR, project_name='P5-Knee-Surgery', seed=40
+tuner = Hyperband(
+    build_model, objective='val_mean_squared_logarithmic_error', max_epochs=100, hyperparameters=HP,
+    factor=3, hyperband_iterations=1, directory=LOG_DIR, project_name='P5-Knee-Surgery', seed=69
 )
 
 # </editor-fold>
