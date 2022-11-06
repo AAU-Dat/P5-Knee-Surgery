@@ -1,3 +1,4 @@
+import csv
 import random
 
 import scipy as sp
@@ -21,6 +22,12 @@ import tensorflow as tf
 df = pd.read_csv('../data_processing/final_final_final.csv')
 ligament_headers = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
 rfr_criterion = ["squared_error", "poisson"]
+
+default_parameters = {"n_estimators": 100, "max_depth": None, "min_sample_split": 2, "max_features": 1.0}
+n_estimators_default = default_parameters["n_estimators"]
+max_depth_default = default_parameters["max_depth"]
+min_sample_split_default = default_parameters["min_sample_split"]
+max_features_default = default_parameters["max_features"]
 
 def gives_x_all_param_header():
     x = []
@@ -98,13 +105,81 @@ def last_model_performed_best(list_of_model_results):
     last_result_has_lowest_rmse = all(score < last_result for score in list_of_model_results)
     return last_result_has_lowest_rmse
 
-def train_single_forest(ligament_index, estimators, max_features, test_size):
+def train_test_return_results(n_trees, max_depth, min_sample_split, max_features, ligament_index):
+    x = df[gives_x_all_param_header()]
+    y = df[ligament_headers[ligament_index]]
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=random.seed(69))
+
+    pipe = Pipeline([('scaler', StandardScaler()), (
+    'RFR', RFR(n_estimators=n_trees, max_features=max_features, max_depth=max_depth, min_samples_split=min_sample_split, verbose=3, n_jobs=7))])
+    pipe.fit(x_train, y_train)
+
+    y_predict_test = pipe.predict(x_test)
+    y_predict_train = pipe.predict(x_train)
+
+    r2_train = r2_score(y_train, y_predict_train)
+    mae_train = mean_absolute_error(y_train, y_predict_train)
+    rmse_train = mean_squared_error(y_train, y_predict_train, squared=False)
+    r2_test = r2_score(y_test, y_predict_test)
+    mae_test = mean_absolute_error(y_test, y_predict_test)
+    rmse_test = mean_squared_error(y_test, y_predict_test, squared=False)
+
+    return [r2_train, r2_test, mae_test, mae_train, rmse_test, rmse_train]
+
+def file_exists(file_path):
+    print(f"File at {file_path} exists!\n")
+
+def write_to_file(content, file_path):
+    file = open(file_path, "a")
+    file.write(f"{content}\n")
+    file.close()
+
+def write_list_to_csv(list, file_path):
+    with open(file_path, 'a', newline="") as fd:
+        writer = csv.writer(fd, delimiter=";", quoting=csv.QUOTE_NONE, escapechar="")
+        writer.writerow(list)
+def investigate_hyperparameters(n_trees_range, max_depth_range, min_sample_split_range, max_features_range, ligament_index_range):
+    # train all configurations of one parameter.
+    # do it for all parameters
+    # do it for all ligaments (or at least 2 for now)
+    path_of_results = "./hyperparameter_poking.csv"
+    file_exists(path_of_results)
+    write_to_file("ID;r2_train;r2_test;mae_test;mre_test;rmse_train;rmse_test;n_estimators;max_depth;min_sample_split;max_features", "./hyperparameter_poking.csv")
+
+    for ligament in range(*ligament_index_range):
+        for num_trees in range(*n_trees_range):
+            results = [ligament_headers[ligament]]
+            results.extend(train_test_return_results(n_trees=num_trees, max_depth=None, min_sample_split=2, max_features=1.0, ligament_index=ligament))
+            results.extend([num_trees, "MAX", 2, 1.0])
+            write_list_to_csv(results, path_of_results)
+            #write_to_file(f"{num_trees};MAX;2;1.0", path_of_results)
+        for depth in range(*max_depth_range):
+            results = [ligament_headers[ligament]]
+            results.extend(train_test_return_results(n_trees=100, max_depth=depth, min_sample_split=2, max_features=1.0, ligament_index=ligament))
+            results.extend([100, depth, 2, 1.0])
+            write_list_to_csv(results, path_of_results)
+            #write_to_file(f"100;{depth};2;1.0", path_of_results)
+        for min_sample_split in np.arange(*min_sample_split_range):
+            results = [ligament_headers[ligament]]
+            results.extend(train_test_return_results(n_trees=100, max_depth=None, min_sample_split=min_sample_split, max_features=1.0, ligament_index=ligament))
+            results.extend([100, "MAX", min_sample_split, 1.0])
+            write_list_to_csv(results, path_of_results)
+            #write_to_file(f"100;MAX;{min_sample_split};1.0", path_of_results)
+        for max_features in np.arange(*max_features_range):
+            results = [ligament_headers[ligament]]
+            results.extend(train_test_return_results(n_trees=100, max_depth=None, min_sample_split=2, max_features=max_features, ligament_index=ligament))
+            results.extend([100, "MAX", 2, max_features])
+            write_list_to_csv(results, path_of_results)
+            #write_to_file(f"100;MAX;2;{min_sample_split}", path_of_results)
+
+
+def train_single_forest(ligament_index, estimators, max_features, test_size, max_depth):
     x = df[gives_x_all_param_header()]
     y = df[ligament_headers[ligament_index]]
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=random.seed(69))
 
     time_before_train = time()
-    pipe = Pipeline([('scaler', StandardScaler()), ('RFR', RFR(n_estimators=estimators, max_features=max_features, verbose=3, n_jobs=7))])
+    pipe = Pipeline([('scaler', StandardScaler()), ('RFR', RFR(n_estimators=estimators, max_features=max_features, max_depth=max_depth, verbose=3, n_jobs=7))])
     pipe.fit(x_train, y_train)
 
     y_predict_test = pipe.predict(x_test)
@@ -171,7 +246,8 @@ def random_forest_random_parameters(estimators_range, max_features_range, n_conf
 #random_forest_random_parameters(estimators_range=(1, 40), max_features_range=(0.5, 1), n_configurations=50, ligament_index=0, test_size=0.2)
 
 
-train_single_forest(estimators=100, max_features=1.0, ligament_index=0, test_size=0.2)
+#train_single_forest(estimators=1000, max_features=1.0, ligament_index=0, test_size=0.2, max_depth=None)
+investigate_hyperparameters(n_trees_range=(100, 201, 10), max_depth_range=(1, 51, 5), min_sample_split_range=(2, 11, 1), max_features_range=(0.2, 1.2, 0.2), ligament_index_range=(0, 8))
 
 
 '''
