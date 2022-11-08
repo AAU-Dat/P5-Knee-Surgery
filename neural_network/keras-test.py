@@ -74,7 +74,7 @@ def build_model(hp):
 
 
 tuner = Hyperband(
-    build_model, objective='val_mean_squared_logarithmic_error', max_epochs=100, hyperparameters=HP,
+    build_model, objective='val_mean_squared_logarithmic_error', max_epochs=20, hyperparameters=HP,
     factor=3, hyperband_iterations=1, directory=LOG_DIR, project_name='P5-Knee-Surgery', seed=69
 )
 
@@ -83,7 +83,9 @@ tuner = Hyperband(
 # <editor-fold desc="Finding the best model">
 
 stop_early = keras.callbacks.EarlyStopping(monitor='val_mean_squared_logarithmic_error', patience=3)
-tuner.search(X_train, y_train, epochs=10, batch_size=64, validation_data=(X_test, y_test), callbacks=[stop_early])
+tuner.search(X_train, y_train, epochs=50, batch_size=64,
+             validation_data=(X_test, y_test), callbacks=[stop_early],
+             shuffle=True, use_multiprocessing=True, workers=8)
 
 best_model = tuner.get_best_models()[0]
 best_model.build()
