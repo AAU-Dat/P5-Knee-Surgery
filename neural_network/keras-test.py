@@ -83,27 +83,37 @@ tuner = Hyperband(
 # <editor-fold desc="Finding the best model">
 
 stop_early = keras.callbacks.EarlyStopping(monitor='val_mean_squared_logarithmic_error', patience=3)
+
+# Search for the best model and hyperparameters
 tuner.search(X_train, y_train, epochs=50, batch_size=64,
              validation_data=(X_test, y_test), callbacks=[stop_early],
              shuffle=True, use_multiprocessing=True, workers=8)
 
-best_model = tuner.get_best_models()[0]
-best_model.build()
-
-print(best_model.summary())
+# Get the best model and hyperparameters from the tuner
+best_HP = tuner.get_best_hyperparameters()[0]
 
 # </editor-fold>
 
 # <editor-fold desc="Training the model">
 
-best_model.fit(X_train, y_train.ravel(), epochs=10, batch_size=64)
+# Build model with the best hyperparameters and train it on the train data for 50 epochs
+model = tuner.hypermodel.build(best_HP)
+history = model.fit(X_train, y_train.ravel(), epochs=50, validation_split=0.2, batch_size=64)
+
+val_msle_per_epoch = history.history['val_mean_squared_logarithmic_error']
+best_epoch = val_msle_per_epoch.index(min(val_msle_per_epoch)) + 1
+
+hypermodel = tuner.hypermodel.build(best_HP)
+
+# Retrain the model with the best epoch
+hypermodel.fit(X_train, y_train.ravel(), epochs=best_epoch, validation_split=0.2, batch_size=64)
 
 # </editor-fold>
 
 # <editor-fold desc="Evaluating the model">
 
 expected_y = y_test
-predicted_y = best_model.predict(X_test)
+predicted_y = hypermodel.predict(X_test)
 
 current_r2_score = metrics.r2_score(expected_y, predicted_y)
 current_mse = metrics.mean_squared_error(expected_y, predicted_y)
