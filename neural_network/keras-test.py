@@ -14,6 +14,7 @@ from datetime import datetime
 
 msle = MeanSquaredLogarithmicError()
 now = datetime.now()
+seed = 69
 
 LOG_DIR = 'Test ran on ' + now.strftime("%d-%b-%Y at %H:%M")
 
@@ -29,7 +30,7 @@ df[predictors] = df[predictors] / df[predictors].max()
 X = df[predictors].values
 y = df[target_column].values
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=69, shuffle=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=seed)
 
 # </editor-fold>
 
@@ -75,7 +76,7 @@ def build_model(hp):
 
 tuner = Hyperband(
     build_model, objective='val_mean_squared_logarithmic_error', max_epochs=20, hyperparameters=HP,
-    factor=3, hyperband_iterations=1, directory=LOG_DIR, project_name='P5-Knee-Surgery', seed=69
+    factor=3, hyperband_iterations=1, directory=LOG_DIR, project_name='P5-Knee-Surgery', seed=seed
 )
 
 # </editor-fold>
