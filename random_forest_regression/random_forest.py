@@ -13,7 +13,9 @@ from sklearn.preprocessing import StandardScaler
 from scipy.stats import randint
 import pandas as pd
 import numpy as np
-import tensorflow as tf
+#import tensorflow as tf
+from fast_ml.utilities import display_all
+from fast_ml.feature_selection import get_constant_features
 
 #Program skal bygges under keras for at vi kan bruge tensorflow. Se jamie branch.
 #import tensorflow as tf
@@ -29,12 +31,22 @@ max_depth_default = default_parameters["max_depth"]
 min_sample_split_default = default_parameters["min_sample_split"]
 max_features_default = default_parameters["max_features"]
 
+constant_features = get_constant_features(df)
+pee =2
+
 def gives_x_all_param_header():
     x = []
     for i in range(1, 24):
         x.extend(['trans_x_' + str(i), 'trans_y_' + str(i), 'trans_z_' + str(i), 'rot_z_' + str(i),
                   'rot_x_' + str(i), 'rot_y_' + str(i), 'F_x_' + str(i), 'F_y_' + str(i), 'F_z_' + str(i),
                   'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
+    return x
+
+def gives_x_all_param_header_noconstants():
+    x = []
+    for i in range(1, 24):
+        x.extend(['trans_x_' + str(i), 'trans_y_' + str(i), 'trans_z_' + str(i), 'rot_z_' + str(i),
+                  'rot_x_' + str(i), 'rot_y_' + str(i)])
     return x
 
 def write_results_to_file(r_2, mae, rmse, estimators, max_features, ligament):
@@ -144,7 +156,7 @@ def investigate_hyperparameters(n_trees_range, max_depth_range, min_sample_split
     # do it for all ligaments (or at least 2 for now)
     path_of_results = "./hyperparameter_poking.csv"
     file_exists(path_of_results)
-    write_to_file("ID;r2_train;r2_test;mae_test;mre_test;rmse_train;rmse_test;n_estimators;max_depth;min_sample_split;max_features", "./hyperparameter_poking.csv")
+    write_to_file("ID;r2_train;r2_test;mae_test;mae_train;rmse_train;rmse_test;n_estimators;max_depth;min_sample_split;max_features", "./hyperparameter_poking.csv")
 
     for ligament in range(*ligament_index_range):
         for num_trees in range(*n_trees_range):
@@ -174,7 +186,8 @@ def investigate_hyperparameters(n_trees_range, max_depth_range, min_sample_split
 
 
 def train_single_forest(ligament_index, estimators, max_features, test_size, max_depth):
-    x = df[gives_x_all_param_header()]
+    x = df[gives_x_all_param_header_noconstants()]
+    #x = df[gives_x_all_param_header()]
     y = df[ligament_headers[ligament_index]]
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=random.seed(69))
 
@@ -246,8 +259,8 @@ def random_forest_random_parameters(estimators_range, max_features_range, n_conf
 #random_forest_random_parameters(estimators_range=(1, 40), max_features_range=(0.5, 1), n_configurations=50, ligament_index=0, test_size=0.2)
 
 
-#train_single_forest(estimators=1000, max_features=1.0, ligament_index=0, test_size=0.2, max_depth=None)
-investigate_hyperparameters(n_trees_range=(100, 201, 10), max_depth_range=(1, 51, 5), min_sample_split_range=(2, 11, 1), max_features_range=(0.2, 1.2, 0.2), ligament_index_range=(0, 8))
+train_single_forest(estimators=100, max_features=1.0, ligament_index=0, test_size=0.2, max_depth=None)
+#investigate_hyperparameters(n_trees_range=(100, 201, 10), max_depth_range=(1, 51, 5), min_sample_split_range=(2, 11, 1), max_features_range=(0.2, 1.2, 0.2), ligament_index_range=(0, 8))
 
 
 '''
