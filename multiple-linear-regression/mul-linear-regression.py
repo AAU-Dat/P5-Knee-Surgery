@@ -89,7 +89,7 @@ def train_test_model(header):
     pipe.fit(x, y)
 
     # creating train and test sets
-    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_procent, test_size=test_procent, shuffle=ran_seed)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_procent, test_size=test_procent, random_state=ran_seed)
 
     # creating a regression model
     # model = LinearRegression()
@@ -110,7 +110,7 @@ def dynamic_train_test_model(header):
     y = df[header]
 
     # creating train and test sets
-    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_procent, test_size=test_procent, shuffle=ran_seed)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_procent, test_size=test_procent, random_state=ran_seed)
 
     # creating a regression model
     #model = LinearRegression()
