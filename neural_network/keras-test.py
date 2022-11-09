@@ -29,7 +29,7 @@ df[predictors] = df[predictors] / df[predictors].max()
 X = df[predictors].values
 y = df[target_column].values
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=69)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=69, shuffle=True)
 
 # </editor-fold>
 
