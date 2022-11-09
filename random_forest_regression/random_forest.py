@@ -1,6 +1,5 @@
 import csv
 import random
-
 import scipy as sp
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor as RFR
@@ -186,13 +185,13 @@ def investigate_hyperparameters(n_trees_range, max_depth_range, min_sample_split
 
 
 def train_single_forest(ligament_index, estimators, max_features, test_size, max_depth):
-    x = df[gives_x_all_param_header_noconstants()]
-    #x = df[gives_x_all_param_header()]
+    #x = df[gives_x_all_param_header_noconstants()]
+    x = df[gives_x_all_param_header()]
     y = df[ligament_headers[ligament_index]]
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=random.seed(69))
 
     time_before_train = time()
-    pipe = Pipeline([('scaler', StandardScaler()), ('RFR', RFR(n_estimators=estimators, max_features=max_features, max_depth=max_depth, verbose=3, n_jobs=7))])
+    pipe = Pipeline([('scaler', StandardScaler()), ('RFR', RFR(n_estimators=estimators, max_features=max_features, max_depth=max_depth, verbose=3, n_jobs=7, criterion="absolute_error"))])
     pipe.fit(x_train, y_train)
 
     y_predict_test = pipe.predict(x_test)
