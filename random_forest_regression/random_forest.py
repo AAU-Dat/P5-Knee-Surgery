@@ -39,13 +39,6 @@ def gives_x_all_param_header():
                   'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
     return x
 
-def gives_x_all_param_header_noconstants():
-    x = []
-    for i in range(1, 24):
-        x.extend(['trans_x_' + str(i), 'trans_y_' + str(i), 'trans_z_' + str(i), 'rot_z_' + str(i),
-                  'rot_x_' + str(i), 'rot_y_' + str(i)])
-    return x
-
 def write_results_to_file(r_2, mae, rmse, estimators, max_features, ligament):
     file = open("random_forest_results.txt", "a")
     file.write(f'r_2: {r_2}, MAE: {mae}, RMSE: {rmse}, maxfeatures: {max_features}, estimators: {estimators}, ligament: {ligament}\n')
@@ -203,7 +196,6 @@ def investigate_sub_100_trees(n_trees_range, ligament_index_range):
 
 
 def train_single_forest(ligament_index, estimators, max_features, test_size, max_depth):
-    #x = df[gives_x_all_param_header_noconstants()]
     x = df[gives_x_all_param_header()]
     y = df[ligament_headers[ligament_index]]
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=random.seed(69))
@@ -269,7 +261,7 @@ def random_forest_random_parameters(estimators_range, max_features_range, n_conf
     write_best_scores_for_all_knees_to_file("train", test_size, list_of_results_train, n_configurations)
     write_best_scores_for_all_knees_to_file("test", test_size, list_of_results_test, n_configurations)
     # PLOT HERE
-    
+
 
     #if better rmse, plot!
 
