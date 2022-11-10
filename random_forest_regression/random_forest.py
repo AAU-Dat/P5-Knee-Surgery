@@ -30,8 +30,6 @@ max_depth_default = default_parameters["max_depth"]
 min_sample_split_default = default_parameters["min_sample_split"]
 max_features_default = default_parameters["max_features"]
 
-constant_features = get_constant_features(df)
-pee =2
 
 def gives_x_all_param_header():
     x = []
@@ -116,13 +114,13 @@ def last_model_performed_best(list_of_model_results):
     last_result_has_lowest_rmse = all(score < last_result for score in list_of_model_results)
     return last_result_has_lowest_rmse
 
-def train_test_return_results(n_trees, max_depth, min_sample_split, max_features, ligament_index):
+def train_test_return_results(n_trees=100, max_depth=None, min_sample_split=2, max_features=1.0, min_samples_leaf=1, ligament_index=0):
     x = df[gives_x_all_param_header()]
     y = df[ligament_headers[ligament_index]]
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=random.seed(69))
 
     pipe = Pipeline([('scaler', StandardScaler()), (
-    'RFR', RFR(n_estimators=n_trees, max_features=max_features, max_depth=max_depth, min_samples_split=min_sample_split, verbose=3, n_jobs=7))])
+    'RFR', RFR(n_estimators=n_trees, max_features=max_features, max_depth=max_depth, min_samples_split=min_sample_split, min_samples_leaf=min_samples_leaf, verbose=3, n_jobs=7))])
     pipe.fit(x_train, y_train)
 
     y_predict_test = pipe.predict(x_test)
@@ -135,7 +133,7 @@ def train_test_return_results(n_trees, max_depth, min_sample_split, max_features
     mae_test = mean_absolute_error(y_test, y_predict_test)
     rmse_test = mean_squared_error(y_test, y_predict_test, squared=False)
 
-    return [r2_train, r2_test, mae_test, mae_train, rmse_test, rmse_train]
+    return [r2_train, r2_test, mae_train, mae_test, rmse_train, rmse_test]
 
 def file_exists(file_path):
     print(f"File at {file_path} exists!\n")
@@ -156,7 +154,6 @@ def investigate_hyperparameters(n_trees_range, max_depth_range, min_sample_split
     path_of_results = "./hyperparameter_poking.csv"
     file_exists(path_of_results)
     write_to_file("ID;r2_train;r2_test;mae_test;mae_train;rmse_train;rmse_test;n_estimators;max_depth;min_sample_split;max_features", "./hyperparameter_poking.csv")
-
     for ligament in range(*ligament_index_range):
         for num_trees in range(*n_trees_range):
             results = [ligament_headers[ligament]]
@@ -182,6 +179,27 @@ def investigate_hyperparameters(n_trees_range, max_depth_range, min_sample_split
             results.extend([100, "MAX", 2, max_features])
             write_list_to_csv(results, path_of_results)
             #write_to_file(f"100;MAX;2;{min_sample_split}", path_of_results)
+
+def investigate_sub_100_trees(n_trees_range, ligament_index_range):
+    path_of_results = "./hyperparameter_poking2.csv"
+    file_exists(path_of_results)
+    write_to_file("ID;r2_train;r2_test;mae_test;mae_train;rmse_train;rmse_test;n_estimators;max_depth;min_sample_split;max_features;min_samples_leaf", "./hyperparameter_poking2.csv")
+    for ligament in range(*ligament_index_range):
+        for small_num_trees in range(1, 6):
+            results = [ligament_headers[ligament]]
+            results.extend(train_test_return_results(n_trees=small_num_trees, max_depth=None, min_sample_split=2, max_features=1.0,ligament_index=ligament))
+            results.extend([small_num_trees, "MAX", 2, 1.0, 1])
+            write_list_to_csv(results, path_of_results)
+        for num_trees in range(*n_trees_range):
+            results = [ligament_headers[ligament]]
+            results.extend(train_test_return_results(n_trees=num_trees, max_depth=None, min_sample_split=2, max_features=1.0, ligament_index=ligament))
+            results.extend([num_trees, "MAX", 2, 1.0, 1])
+            write_list_to_csv(results, path_of_results)
+       # for min_samples in range(*min_samples_leaf_range):
+        #    results = [ligament_headers[ligament]]
+         #   results.extend(train_test_return_results(n_trees=100, max_depth=None, min_sample_split=2, max_features=1.0, ligament_index=ligament, min_samples_leaf=min_samples))
+          #  results.extend([100, "MAX", 2, 1.0, min_samples])
+           # write_list_to_csv(results, path_of_results)
 
 
 def train_single_forest(ligament_index, estimators, max_features, test_size, max_depth):
@@ -251,6 +269,7 @@ def random_forest_random_parameters(estimators_range, max_features_range, n_conf
     write_best_scores_for_all_knees_to_file("train", test_size, list_of_results_train, n_configurations)
     write_best_scores_for_all_knees_to_file("test", test_size, list_of_results_test, n_configurations)
     # PLOT HERE
+    
 
     #if better rmse, plot!
 
@@ -258,9 +277,9 @@ def random_forest_random_parameters(estimators_range, max_features_range, n_conf
 #random_forest_random_parameters(estimators_range=(1, 40), max_features_range=(0.5, 1), n_configurations=50, ligament_index=0, test_size=0.2)
 
 
-train_single_forest(estimators=100, max_features=1.0, ligament_index=0, test_size=0.2, max_depth=None)
+#train_single_forest(estimators=100, max_features=1.0, ligament_index=0, test_size=0.2, max_depth=None)
 #investigate_hyperparameters(n_trees_range=(100, 201, 10), max_depth_range=(1, 51, 5), min_sample_split_range=(2, 11, 1), max_features_range=(0.2, 1.2, 0.2), ligament_index_range=(0, 8))
-
+#investigate_sub_100_trees(n_trees_range=(10, 100, 10), ligament_index_range=(1, 8, 1))
 
 '''
 # Make parameters for random search.
