@@ -9,16 +9,14 @@ from keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
 from keras.regularizers import L2
 from keras_tuner import Hyperband
-from keras.losses import MeanSquaredLogarithmicError
 from datetime import datetime
 
-msle = MeanSquaredLogarithmicError()
 now = datetime.now()
 seed = 69
 
 LOG_DIR = 'Test ran on ' + now.strftime("%d-%b-%Y at %H:%M")
 
-# <editor-fold desc="Preparing the Data Set">
+# <editor-fold desc="Data Set Preparation">
 
 df = pd.read_csv('../data_processing/final_final_final.csv', index_col=0)
 
@@ -34,19 +32,22 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random
 
 # </editor-fold>
 
-# <editor-fold desc="Configure the search space">
+# <editor-fold desc="Configuring the search space">
 
 HP = kt.HyperParameters()
 
 HP.Int('n_layers', min_value=2, max_value=8)
 HP.Choice('learning_rate', values=[1e-2, 1e-3, 1e-4])
+HP.Boolean('dropout')
+HP.Fixed('loss', value='mean_squared_error')
+HP.Fixed('metrics', value='mean_absolute_error')
 for i in range(8):
     HP.Int(name='units_layer_' + str(i + 1), min_value=32, max_value=512, step=32)
     HP.Float(name='dropout_' + str(i + 1), min_value=0.0, max_value=0.5, default=0.25, step=0.05)
 
 # </editor-fold>
 
-# <editor-fold desc="Building the model for hyperparameters tuning">
+# <editor-fold desc="Building the model architecture">
 
 
 def build_model(hp):
@@ -60,32 +61,29 @@ def build_model(hp):
         model.add(layers.Dense(units=hp.get('units_layer_' + number), name='hidden_layer_' + number,
                                activation='relu', kernel_regularizer=L2(0.001)))
 
-        model.add(layers.Dropout(rate=hp.get('dropout_' + number)))
+        if hp.get('dropout'):
+            model.add(layers.Dropout(rate=hp.get('dropout_' + number)))
 
     # Output Layer
     model.add(layers.Dense(1, activation='linear', kernel_initializer='normal', name='output_layer'))
 
     # Setup Compiler
-    model.compile(optimizer=Adam(learning_rate=hp.get('learning_rate')), loss=msle, metrics=[msle])
+    model.compile(optimizer=Adam(learning_rate=hp.get('learning_rate')), loss=hp.get('loss'), metrics=[hp.get('metrics')])
     return model
 
 # </editor-fold>
 
-# <editor-fold desc="Optimising the model">
+# <editor-fold desc="Searching for the best hyperparameters">
 
 
 tuner = Hyperband(
-    build_model, objective='val_mean_squared_logarithmic_error', max_epochs=20, hyperparameters=HP,
+    build_model, objective='val_mean_absolute_error', max_epochs=20, hyperparameters=HP,
     factor=3, hyperband_iterations=1, directory=LOG_DIR, project_name='P5-Knee-Surgery', seed=seed
 )
 
-# </editor-fold>
+stop_early = keras.callbacks.EarlyStopping(monitor='val_mean_absolute_error', patience=3)
 
-# <editor-fold desc="Finding the best model">
-
-stop_early = keras.callbacks.EarlyStopping(monitor='val_mean_squared_logarithmic_error', patience=3)
-
-# Search for the best model and hyperparameters
+# Search for the best model and its hyperparameters
 tuner.search(X_train, y_train, epochs=50, batch_size=64,
              validation_data=(X_test, y_test), callbacks=[stop_early],
              shuffle=True, use_multiprocessing=True, workers=8)
@@ -98,16 +96,19 @@ best_HP = tuner.get_best_hyperparameters()[0]
 # <editor-fold desc="Training the model">
 
 # Build model with the best hyperparameters and train it on the train data for 50 epochs
-model = tuner.hypermodel.build(best_HP)
-history = model.fit(X_train, y_train.ravel(), epochs=50, validation_split=0.2, batch_size=64)
+best_model = tuner.hypermodel.build(best_HP)
+history = best_model.fit(X_train, y_train.ravel(), epochs=50, validation_split=0.2, batch_size=64)
 
-val_msle_per_epoch = history.history['val_mean_squared_logarithmic_error']
-best_epoch = val_msle_per_epoch.index(min(val_msle_per_epoch)) + 1
+val_mae_per_epoch = history.history['val_mean_absolute_error']
+best_epoch = val_mae_per_epoch.index(min(val_mae_per_epoch)) + 1
 
 hypermodel = tuner.hypermodel.build(best_HP)
 
-# Retrain the model with the best epoch
+# Retrain the model with the best found epoch
 hypermodel.fit(X_train, y_train.ravel(), epochs=best_epoch, validation_split=0.2, batch_size=64)
+
+# Save the model to the log directory for future reference
+hypermodel.save(LOG_DIR)
 
 # </editor-fold>
 
@@ -119,11 +120,9 @@ predicted_y = hypermodel.predict(X_test)
 current_r2_score = metrics.r2_score(expected_y, predicted_y)
 current_mse = metrics.mean_squared_error(expected_y, predicted_y)
 current_mae = metrics.mean_absolute_error(expected_y, predicted_y)
-current_msle = metrics.mean_squared_log_error(expected_y, predicted_y)
 current_rmse = math.sqrt(current_mse)
 
 print("The coefficient of determination (R^2): ", current_r2_score)
-print("Mean Squared Logarithmic Error (MSLE): ", current_msle)
 print("Mean Absolute Error (MAE): ", current_mae)
 print("Root Mean Squared Error (RMSE): ", current_rmse)
 
