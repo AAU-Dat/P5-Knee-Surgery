@@ -39,8 +39,7 @@ def gives_x_all_param_header():
                   'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
     return x
 
-def print_status(estimators, max_features, ligament):
-    print(f'Finished max_features= {max_features}, estimators= {estimators} ligament={ligament}')
+
 
 #
 # retain best entries for best values:
