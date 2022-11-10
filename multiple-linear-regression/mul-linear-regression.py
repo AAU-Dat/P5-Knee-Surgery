@@ -14,8 +14,8 @@ from sklearn.model_selection import train_test_split
 
 matplotlib.use('Agg')
 
+# Constant to change the random seed for the train_test_split
 ran_seed = random.seed(69)
-
 
 # Constants to change train test split
 train_procent   = 0.80
@@ -26,13 +26,13 @@ MarkerSize = 0.1
 DotColor = 'Blue'
 
 # Constants to change x & y axises in the saved graphs
-#xleft_k     = -2500
-#xright_k    = 30000
+xleft_k     = -2500
+xright_k    = 30000
 ybottom_k   = -2500
 ytop_k      = 30000
 
-#xleft_epsr  = -0.10
-#xright_epsr = 0.30
+xleft_epsr  = -0.10
+xright_epsr = 0.30
 ybottom_epsr= -0.10
 ytop_epsr   = 0.30
 
@@ -51,6 +51,7 @@ def graph_information_k_value(title, xlable, ylable, ybottom, ytop):
     plt.ylabel(ylable)
     #plt.xlim(xleft, xright)
     plt.ylim(ybottom, ytop)
+    plt.plot([xleft_k, xright_k], [ybottom_k, ytop_k], color='red')
 
 def graph_information_epsr_value(title, xlable, ylable, ybottom, ytop):
     plt.title(title)
@@ -58,6 +59,7 @@ def graph_information_epsr_value(title, xlable, ylable, ybottom, ytop):
     plt.ylabel(ylable)
     #plt.xlim(xleft, xright)
     plt.ylim(ybottom, ytop)
+    plt.plot([xleft_epsr, xright_epsr], [ybottom_epsr, ytop_epsr], color='red')
 
 def plt_graph_test(y_test, predictions_test, header_name):
     plt.figure()  # This makes a new figure
