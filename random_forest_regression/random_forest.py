@@ -78,29 +78,6 @@ def write_best_scores_for_all_knees_to_file(mode, test_size, list_of_result_dict
     file.write(f'Mode: {mode}, TestSize: {test_size}, Configurations: {configurations}\nHighest r_2: {highest_r2_record}\nHighest MAE: {lowest_mae_record}\nHighest RMSE: {lowest_rmse_record}\n\n')
     file.close()
 
-
-def random_forest_all_parameters(estimators, ligaments):
-    x = df[gives_x_all_param_header()]
-    list_of_results = list(dict())
-
-    for l in range(ligaments):
-        y = df[ligament_headers[l]]
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, shuffle=True)
-        for i in range(1, estimators+1):
-            for j in range(1, 12):
-                regressor = RFR(n_estimators=i, max_features=0.45+(j*0.05))
-                regressor.fit(x_train, y_train)
-                y_pred = regressor.predict(x_test)
-                r2 = r2_score(y_test, y_pred)
-                mae = mean_absolute_error(y_test, y_pred)
-                rmse = mean_squared_error(y_test, y_pred, squared=False)
-
-                #write_results_to_file(r_2=r2, mae=mae, rmse=rmse, estimators=i, max_features=0.45+(j*0.05), ligament=ligament_headers[l])
-                list_of_results.append(save_to_list(r_2=r2, mae=mae, rmse=rmse, estimators=i, max_features=0.45+(j*0.05), ligament=ligament_headers[l]))
-                print_status(max_features=0.45+(j*0.05), estimators=i, ligament=ligament_headers[l])
-
-    write_best_scores_for_all_knees_to_file(list_of_results)
-
 #
 def last_model_performed_best(list_of_model_results):
     last_result = list_of_model_results[-1]
