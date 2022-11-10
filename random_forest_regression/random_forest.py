@@ -39,11 +39,6 @@ def gives_x_all_param_header():
                   'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
     return x
 
-def write_results_to_file(r_2, mae, rmse, estimators, max_features, ligament):
-    file = open("random_forest_results.txt", "a")
-    file.write(f'r_2: {r_2}, MAE: {mae}, RMSE: {rmse}, maxfeatures: {max_features}, estimators: {estimators}, ligament: {ligament}\n')
-    file.close()
-
 def print_status(estimators, max_features, ligament):
     print(f'Finished max_features= {max_features}, estimators= {estimators} ligament={ligament}')
 
@@ -229,8 +224,6 @@ def random_forest_random_parameters(estimators_range, max_features_range, n_conf
 
         list_of_results_test.append(save_to_list(mode="test", r_2=r2_test, mae=mae_test, rmse=rmse_test, estimators=estimators, max_features=max_features,
             ligament=ligament_headers[ligament_index]))
-        #write_results_to_file(r_2=r2_test, mae=mae_test, rmse=rmse_test, estimators=estimators, max_features=max_features,
-                              #ligament=ligament_headers[ligament_index])
 
         list_of_rmse_test_scores.append(rmse_test)
         if last_model_performed_best(list_of_rmse_test_scores): best_model = regressor
