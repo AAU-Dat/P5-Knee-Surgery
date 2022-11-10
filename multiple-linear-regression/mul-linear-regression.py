@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import scipy as sp
-import random
+from numpy.random import RandomState, SeedSequence
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from scipy.constants._codata import val
@@ -15,7 +15,7 @@ from sklearn.model_selection import train_test_split
 matplotlib.use('Agg')
 
 # Constant to change the random seed for the train_test_split
-ran_seed = random.seed(69)
+ran_seed = RandomState(69)
 
 # Constants to change train test split
 train_procent   = 0.80
