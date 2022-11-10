@@ -151,7 +151,7 @@ def investigate_sub_100_trees(n_trees_range, ligament_index_range):
     for ligament in range(*ligament_index_range):
         for small_num_trees in range(1, 6):
             results = [ligament_headers[ligament]]
-            results.extend(train_test_return_results(n_trees=small_num_trees, max_depth=None, min_sample_split=2, max_features=1.0,ligament_index=ligament))
+            results.extend(train_test_return_results(n_trees=small_num_trees, max_depth=None, min_sample_split=2, max_features=1.0, ligament_index=ligament))
             results.extend([small_num_trees, "MAX", 2, 1.0, 1])
             write_list_to_csv(results, path_of_results)
         for num_trees in range(*n_trees_range):
@@ -240,7 +240,7 @@ def random_forest_random_parameters(estimators_range, max_features_range, n_conf
 
 #train_single_forest(estimators=100, max_features=1.0, ligament_index=0, test_size=0.2, max_depth=None)
 #investigate_hyperparameters(n_trees_range=(100, 201, 10), max_depth_range=(1, 51, 5), min_sample_split_range=(2, 11, 1), max_features_range=(0.2, 1.2, 0.2), ligament_index_range=(0, 8))
-#investigate_sub_100_trees(n_trees_range=(10, 100, 10), ligament_index_range=(1, 8, 1))
+investigate_sub_100_trees(n_trees_range=(10, 100, 10), ligament_index_range=(0, 8, 1))
 
 '''
 # Make parameters for random search.
