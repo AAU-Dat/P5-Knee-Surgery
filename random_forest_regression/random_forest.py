@@ -1,6 +1,5 @@
 import csv
 import random
-
 import scipy as sp
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor as RFR
@@ -25,14 +24,14 @@ df = pd.read_csv('../data_processing/final_final_final.csv')
 ligament_headers = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
 rfr_criterion = ["squared_error", "poisson"]
 
+random_generator = np.random.RandomState(69)
+
 default_parameters = {"n_estimators": 100, "max_depth": None, "min_sample_split": 2, "max_features": 1.0}
 n_estimators_default = default_parameters["n_estimators"]
 max_depth_default = default_parameters["max_depth"]
 min_sample_split_default = default_parameters["min_sample_split"]
 max_features_default = default_parameters["max_features"]
 
-constant_features = get_constant_features(df)
-pee =2
 
 def gives_x_all_param_header():
     x = []
@@ -42,20 +41,7 @@ def gives_x_all_param_header():
                   'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
     return x
 
-def gives_x_all_param_header_noconstants():
-    x = []
-    for i in range(1, 24):
-        x.extend(['trans_x_' + str(i), 'trans_y_' + str(i), 'trans_z_' + str(i), 'rot_z_' + str(i),
-                  'rot_x_' + str(i), 'rot_y_' + str(i)])
-    return x
 
-def write_results_to_file(r_2, mae, rmse, estimators, max_features, ligament):
-    file = open("random_forest_results.txt", "a")
-    file.write(f'r_2: {r_2}, MAE: {mae}, RMSE: {rmse}, maxfeatures: {max_features}, estimators: {estimators}, ligament: {ligament}\n')
-    file.close()
-
-def print_status(estimators, max_features, ligament):
-    print(f'Finished max_features= {max_features}, estimators= {estimators} ligament={ligament}')
 
 #
 # retain best entries for best values:
@@ -88,42 +74,19 @@ def write_best_scores_for_all_knees_to_file(mode, test_size, list_of_result_dict
     file.write(f'Mode: {mode}, TestSize: {test_size}, Configurations: {configurations}\nHighest r_2: {highest_r2_record}\nHighest MAE: {lowest_mae_record}\nHighest RMSE: {lowest_rmse_record}\n\n')
     file.close()
 
-
-def random_forest_all_parameters(estimators, ligaments):
-    x = df[gives_x_all_param_header()]
-    list_of_results = list(dict())
-
-    for l in range(ligaments):
-        y = df[ligament_headers[l]]
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, shuffle=True)
-        for i in range(1, estimators+1):
-            for j in range(1, 12):
-                regressor = RFR(n_estimators=i, max_features=0.45+(j*0.05))
-                regressor.fit(x_train, y_train)
-                y_pred = regressor.predict(x_test)
-                r2 = r2_score(y_test, y_pred)
-                mae = mean_absolute_error(y_test, y_pred)
-                rmse = mean_squared_error(y_test, y_pred, squared=False)
-
-                #write_results_to_file(r_2=r2, mae=mae, rmse=rmse, estimators=i, max_features=0.45+(j*0.05), ligament=ligament_headers[l])
-                list_of_results.append(save_to_list(r_2=r2, mae=mae, rmse=rmse, estimators=i, max_features=0.45+(j*0.05), ligament=ligament_headers[l]))
-                print_status(max_features=0.45+(j*0.05), estimators=i, ligament=ligament_headers[l])
-
-    write_best_scores_for_all_knees_to_file(list_of_results)
-
 #
 def last_model_performed_best(list_of_model_results):
     last_result = list_of_model_results[-1]
     last_result_has_lowest_rmse = all(score < last_result for score in list_of_model_results)
     return last_result_has_lowest_rmse
 
-def train_test_return_results(n_trees, max_depth, min_sample_split, max_features, ligament_index):
+def train_test_return_results(n_trees=100, max_depth=None, min_sample_split=2, max_features=1.0, min_samples_leaf=1, ligament_index=0):
     x = df[gives_x_all_param_header()]
     y = df[ligament_headers[ligament_index]]
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=random.seed(69))
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=random_generator)
 
     pipe = Pipeline([('scaler', StandardScaler()), (
-    'RFR', RFR(n_estimators=n_trees, max_features=max_features, max_depth=max_depth, min_samples_split=min_sample_split, verbose=3, n_jobs=7))])
+    'RFR', RFR(n_estimators=n_trees, max_features=max_features, max_depth=max_depth, min_samples_split=min_sample_split, min_samples_leaf=min_samples_leaf, verbose=3, n_jobs=7))])
     pipe.fit(x_train, y_train)
 
     y_predict_test = pipe.predict(x_test)
@@ -136,7 +99,7 @@ def train_test_return_results(n_trees, max_depth, min_sample_split, max_features
     mae_test = mean_absolute_error(y_test, y_predict_test)
     rmse_test = mean_squared_error(y_test, y_predict_test, squared=False)
 
-    return [r2_train, r2_test, mae_test, mae_train, rmse_test, rmse_train]
+    return [r2_train, r2_test, mae_train, mae_test, rmse_train, rmse_test]
 
 def file_exists(file_path):
     print(f"File at {file_path} exists!\n")
@@ -157,8 +120,12 @@ def investigate_hyperparameters(n_trees_range, max_depth_range, min_sample_split
     path_of_results = "./hyperparameter_poking.csv"
     file_exists(path_of_results)
     write_to_file("ID;r2_train;r2_test;mae_test;mae_train;rmse_train;rmse_test;n_estimators;max_depth;min_sample_split;max_features", "./hyperparameter_poking.csv")
-
     for ligament in range(*ligament_index_range):
+        for few_trees in range(1, 6):
+            results = [ligament_headers[ligament]]
+            results.extend(train_test_return_results(n_trees=few_trees, max_depth=None, min_sample_split=2, max_features=1.0, ligament_index=ligament))
+            results.extend([few_trees, "MAX", 2, 1.0])
+            write_list_to_csv(results, path_of_results)
         for num_trees in range(*n_trees_range):
             results = [ligament_headers[ligament]]
             results.extend(train_test_return_results(n_trees=num_trees, max_depth=None, min_sample_split=2, max_features=1.0, ligament_index=ligament))
@@ -184,15 +151,35 @@ def investigate_hyperparameters(n_trees_range, max_depth_range, min_sample_split
             write_list_to_csv(results, path_of_results)
             #write_to_file(f"100;MAX;2;{min_sample_split}", path_of_results)
 
+def investigate_sub_100_trees(n_trees_range, ligament_index_range):
+    path_of_results = "./hyperparameter_poking2.csv"
+    file_exists(path_of_results)
+    write_to_file("ID;r2_train;r2_test;mae_test;mae_train;rmse_train;rmse_test;n_estimators;max_depth;min_sample_split;max_features;min_samples_leaf", "./hyperparameter_poking2.csv")
+    for ligament in range(*ligament_index_range):
+        for small_num_trees in range(1, 6):
+            results = [ligament_headers[ligament]]
+            results.extend(train_test_return_results(n_trees=small_num_trees, max_depth=None, min_sample_split=2, max_features=1.0, ligament_index=ligament))
+            results.extend([small_num_trees, "MAX", 2, 1.0, 1])
+            write_list_to_csv(results, path_of_results)
+        for num_trees in range(*n_trees_range):
+            results = [ligament_headers[ligament]]
+            results.extend(train_test_return_results(n_trees=num_trees, max_depth=None, min_sample_split=2, max_features=1.0, ligament_index=ligament))
+            results.extend([num_trees, "MAX", 2, 1.0, 1])
+            write_list_to_csv(results, path_of_results)
+       # for min_samples in range(*min_samples_leaf_range):
+        #    results = [ligament_headers[ligament]]
+         #   results.extend(train_test_return_results(n_trees=100, max_depth=None, min_sample_split=2, max_features=1.0, ligament_index=ligament, min_samples_leaf=min_samples))
+          #  results.extend([100, "MAX", 2, 1.0, min_samples])
+           # write_list_to_csv(results, path_of_results)
+
 
 def train_single_forest(ligament_index, estimators, max_features, test_size, max_depth):
-    x = df[gives_x_all_param_header_noconstants()]
-    #x = df[gives_x_all_param_header()]
+    x = df[gives_x_all_param_header()]
     y = df[ligament_headers[ligament_index]]
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=random.seed(69))
 
     time_before_train = time()
-    pipe = Pipeline([('scaler', StandardScaler()), ('RFR', RFR(n_estimators=estimators, max_features=max_features, max_depth=max_depth, verbose=3, n_jobs=7))])
+    pipe = Pipeline([('scaler', StandardScaler()), ('RFR', RFR(n_estimators=estimators, max_features=max_features, max_depth=max_depth, verbose=3, n_jobs=7, criterion="absolute_error"))])
     pipe.fit(x_train, y_train)
 
     y_predict_test = pipe.predict(x_test)
@@ -243,8 +230,6 @@ def random_forest_random_parameters(estimators_range, max_features_range, n_conf
 
         list_of_results_test.append(save_to_list(mode="test", r_2=r2_test, mae=mae_test, rmse=rmse_test, estimators=estimators, max_features=max_features,
             ligament=ligament_headers[ligament_index]))
-        #write_results_to_file(r_2=r2_test, mae=mae_test, rmse=rmse_test, estimators=estimators, max_features=max_features,
-                              #ligament=ligament_headers[ligament_index])
 
         list_of_rmse_test_scores.append(rmse_test)
         if last_model_performed_best(list_of_rmse_test_scores): best_model = regressor
@@ -253,15 +238,16 @@ def random_forest_random_parameters(estimators_range, max_features_range, n_conf
     write_best_scores_for_all_knees_to_file("test", test_size, list_of_results_test, n_configurations)
     # PLOT HERE
 
+
     #if better rmse, plot!
 
 #random_forest_all_parameters(1, 1)
 #random_forest_random_parameters(estimators_range=(1, 40), max_features_range=(0.5, 1), n_configurations=50, ligament_index=0, test_size=0.2)
 
 
-train_single_forest(estimators=100, max_features=1.0, ligament_index=0, test_size=0.2, max_depth=None)
-#investigate_hyperparameters(n_trees_range=(100, 201, 10), max_depth_range=(1, 51, 5), min_sample_split_range=(2, 11, 1), max_features_range=(0.2, 1.2, 0.2), ligament_index_range=(0, 8))
-
+#train_single_forest(estimators=100, max_features=1.0, ligament_index=0, test_size=0.2, max_depth=None)
+investigate_hyperparameters(n_trees_range=(10, 201, 10), max_depth_range=(1, 51, 5), min_sample_split_range=(2, 11, 1), max_features_range=(0.2, 1.2, 0.2), ligament_index_range=(0, 8))
+#investigate_sub_100_trees(n_trees_range=(10, 100, 10), ligament_index_range=(0, 8, 1))
 
 '''
 # Make parameters for random search.
