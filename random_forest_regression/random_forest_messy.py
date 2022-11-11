@@ -33,6 +33,7 @@ max_features_default = default_parameters["max_features"]
 
 #constant_features = get_constant_features(df)
 #pee =2
+rand = np.random.RandomState(69)
 
 def gives_x_all_param_header():
     x = []
@@ -63,8 +64,8 @@ def print_status(estimators, max_features, ligament):
 #def evaluate_best_config(estimators, max_features, ligament, r_2, mae, rmse):
 
 
-def save_to_list(r_2, mae, rmse, estimators, max_features, ligament, mode):
-    return {"mode": mode, "r_2": r_2, "mae": mae, "rmse": rmse, "estimators": estimators, "max_features": max_features, "ligament": ligament}
+def save_to_list(r_2, mae, rmse, estimators, max_features, min_sample_split, max_depth, ligament, mode):
+    return {"mode": mode, "r_2": r_2, "mae": mae, "rmse": rmse, "estimators": estimators, "max_features": max_features, "min_sample_split": min_sample_split, "max_depth": max_depth, "ligament": ligament}
 
 def write_best_scores_for_all_knees_to_file(mode, test_size, list_of_result_dictionaries, configurations):
     #
@@ -95,7 +96,7 @@ def random_forest_all_parameters(estimators, ligaments):
 
     for l in range(ligaments):
         y = df[ligament_headers[l]]
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, shuffle=True)
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, shuffle=rand)
         for i in range(1, estimators+1):
             for j in range(1, 12):
                 regressor = RFR(n_estimators=i, max_features=0.45+(j*0.05))
@@ -120,7 +121,7 @@ def last_model_performed_best(list_of_model_results):
 def train_test_return_results(n_trees, max_depth, min_sample_split, max_features, ligament_index):
     x = df[gives_x_all_param_header()]
     y = df[ligament_headers[ligament_index]]
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=random.seed(69))
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=rand)
 
     pipe = Pipeline([('scaler', StandardScaler()), (
     'RFR', RFR(n_estimators=n_trees, max_features=max_features, max_depth=max_depth, min_samples_split=min_sample_split, verbose=3, n_jobs=7))])
@@ -189,7 +190,7 @@ def train_single_forest(ligament_index, estimators, max_features, test_size, max
     x = df[gives_x_all_param_header_noconstants()]
     #x = df[gives_x_all_param_header()]
     y = df[ligament_headers[ligament_index]]
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=random.seed(69))
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=rand)
 
     time_before_train = time()
     pipe = Pipeline([('scaler', StandardScaler()), ('RFR', RFR(n_estimators=estimators, max_features=max_features, max_depth=max_depth, verbose=3, n_jobs=7))])
@@ -209,58 +210,61 @@ def train_single_forest(ligament_index, estimators, max_features, test_size, max
     print(f'rmse_train;rmse_test;r2_train;r2_test;mae_train;mae_test')
     print(f'{rmse_train};{rmse_test};{r2_train};{r2_test};{mae_train};{mae_test}')
 
-def random_forest_random_parameters(estimators_range, max_features_range, n_configurations, ligament_index, test_size):
-    x = df[gives_x_all_param_header()]
-    y = df[ligament_headers[ligament_index]]
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=random.seed(69))
-    list_of_results_train = list(dict())
-    list_of_results_test = list(dict())
-    list_of_rmse_test_scores = list()
+def random_forest_random_parameters(estimators_range, max_features_range, max_depth_range, min_samples_split_range, n_configurations, ligament_index_range, test_size):
+    for ligament_index in range(*ligament_index_range):
+        x = df[gives_x_all_param_header()]
+        y = df[ligament_headers[ligament_index]]
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=rand)
+        list_of_results_train = list(dict())
+        list_of_results_test = list(dict())
+        for c in range(n_configurations):
+            estimators = random.randint(estimators_range[0], estimators_range[1])
+            max_features = random.uniform(max_features_range[0], max_features_range[1])
+            depth = random.randint(max_depth_range[0], max_depth_range[1])
+            min_samples_split = random.uniform(min_samples_split_range[0], min_samples_split_range[1])
 
-    for c in range(n_configurations):
-        estimators = random.randint(estimators_range[0], estimators_range[1])
-        max_features = random.uniform(max_features_range[0], max_features_range[1])
-        #pipe = Pipeline([('scaler', StandardScaler()), (
-        #'RFR', RFR(n_estimators=estimators, max_features=max_features))])
-        regressor = RFR(n_estimators=estimators, max_features=max_features)
+            regressor = Pipeline([('scaler', StandardScaler()), ('RFR', RFR(n_estimators=estimators, max_features=max_features, max_depth=depth, min_samples_split=min_samples_split, verbose=3, n_jobs=7))])
+            #regressor = RFR(n_estimators=estimators, max_features=max_features)
 
-        #regressor.fit(x_train, y_train)
-        regressor.fit(x_train, y_train)
+            regressor.fit(x_train, y_train)
 
-        y_predict_test = regressor.predict(x_test)
-        y_predict_train = regressor.predict(x_train)
+            y_predict_test = regressor.predict(x_test)
+            y_predict_train = regressor.predict(x_train)
 
-        r2_train = r2_score(y_train, y_predict_train)
-        mae_train = mean_absolute_error(y_train, y_predict_train)
-        rmse_train = mean_squared_error(y_train, y_predict_train, squared=False)
+            r2_train = r2_score(y_train, y_predict_train)
+            mae_train = mean_absolute_error(y_train, y_predict_train)
+            rmse_train = mean_squared_error(y_train, y_predict_train, squared=False)
 
-        r2_test = r2_score(y_test, y_predict_test)
-        mae_test = mean_absolute_error(y_test, y_predict_test)
-        rmse_test = mean_squared_error(y_test, y_predict_test, squared=False)
+            r2_test = r2_score(y_test, y_predict_test)
+            mae_test = mean_absolute_error(y_test, y_predict_test)
+            rmse_test = mean_squared_error(y_test, y_predict_test, squared=False)
 
-        list_of_results_train.append(save_to_list(mode="train", r_2=r2_train, mae=mae_train, rmse=rmse_train, estimators=estimators, max_features=max_features,
-            ligament=ligament_headers[ligament_index]))
+            list_of_results_train.append(save_to_list(mode="train", r_2=r2_train, mae=mae_train, rmse=rmse_train, estimators=estimators, max_features=max_features, max_depth=depth, min_sample_split=min_samples_split,
+                ligament=ligament_headers[ligament_index]))
 
-        list_of_results_test.append(save_to_list(mode="test", r_2=r2_test, mae=mae_test, rmse=rmse_test, estimators=estimators, max_features=max_features,
-            ligament=ligament_headers[ligament_index]))
+            list_of_results_test.append(save_to_list(mode="test", r_2=r2_test, mae=mae_test, rmse=rmse_test, estimators=estimators, max_features=max_features, max_depth=depth, min_sample_split=min_samples_split,
+                ligament=ligament_headers[ligament_index]))
+        write_best_scores_for_all_knees_to_file("train", test_size, list_of_results_train, n_configurations)
+        write_best_scores_for_all_knees_to_file("test", test_size, list_of_results_test, n_configurations)
         #write_results_to_file(r_2=r2_test, mae=mae_test, rmse=rmse_test, estimators=estimators, max_features=max_features,
                               #ligament=ligament_headers[ligament_index])
 
-        list_of_rmse_test_scores.append(rmse_test)
-        if last_model_performed_best(list_of_rmse_test_scores): best_model = regressor
+        #list_of_rmse_test_scores.append(rmse_test)
+        #if last_model_performed_best(list_of_rmse_test_scores): best_model = regressor
 
-    write_best_scores_for_all_knees_to_file("train", test_size, list_of_results_train, n_configurations)
-    write_best_scores_for_all_knees_to_file("test", test_size, list_of_results_test, n_configurations)
+    # vi skal kunne skrive de 2 andre hyperparametre (done), og vi skal kunne iterere igennem ligaments i et hug.
+    # se også om ligaments bliver skrevet odentligt.
     # PLOT HERE
 
     #if better rmse, plot!
 
 #random_forest_all_parameters(1, 1)
-#random_forest_random_parameters(estimators_range=(1, 40), max_features_range=(0.5, 1), n_configurations=50, ligament_index=0, test_size=0.2)
+random_forest_random_parameters(estimators_range=(1, 10), max_features_range=(0.5, 1), n_configurations=3, max_depth_range=(1,4), min_samples_split_range=(0.2, 1), ligament_index_range=(0,8), test_size=0.2)
 
 
-train_single_forest(estimators=100, max_features=1.0, ligament_index=0, test_size=0.2, max_depth=None)
+#train_single_forest(estimators=100, max_features=1.0, ligament_index=0, test_size=0.2, max_depth=None)
 #investigate_hyperparameters(n_trees_range=(100, 201, 10), max_depth_range=(1, 51, 5), min_sample_split_range=(2, 11, 1), max_features_range=(0.2, 1.2, 0.2), ligament_index_range=(0, 8))
+
 
 
 '''
