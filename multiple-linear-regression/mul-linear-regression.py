@@ -3,6 +3,9 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import scipy as sp
+import random
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
 from scipy.constants._codata import val
 from sklearn import linear_model
 from sklearn.linear_model import LinearRegression
@@ -11,9 +14,12 @@ from sklearn.model_selection import train_test_split
 
 matplotlib.use('Agg')
 
+ran_seed = random.seed(69)
+
+
 # Constants to change train test split
-train_procent   = 0.50
-test_procent    = 0.50
+train_procent   = 0.80
+test_procent    = 0.20
 
 # Constants to change style in graph
 MarkerSize = 0.1
@@ -79,14 +85,15 @@ def train_test_model(header):
     x = df[gives_x_all_param_header()]
     y = df[header]
 
-    regr = linear_model.LinearRegression()
-    regr.fit(x, y)
+    pipe = Pipeline([('scaler', StandardScaler()), ('mul_linear_reg', linear_model.LinearRegression())])
+    pipe.fit(x, y)
 
     # creating train and test sets
-    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_procent, test_size=test_procent, shuffle=True)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_procent, test_size=test_procent, shuffle=ran_seed)
 
     # creating a regression model
-    model = LinearRegression()
+    # model = LinearRegression()
+    model = Pipeline([('scaler', StandardScaler()), ('mul_linear_reg', linear_model.LinearRegression())])
 
     # fitting the model
     model.fit(x_train, y_train)
@@ -102,14 +109,12 @@ def dynamic_train_test_model(header):
     x = df[gives_x_all_param_header()]
     y = df[header]
 
-    regr = linear_model.LinearRegression()
-    regr.fit(x, y)
-
     # creating train and test sets
-    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_procent, test_size=test_procent, shuffle=True)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_procent, test_size=test_procent, shuffle=ran_seed)
 
     # creating a regression model
-    model = LinearRegression()
+    #model = LinearRegression()
+    model = Pipeline([('scaler', StandardScaler()), ('mul_linear_reg', linear_model.LinearRegression())])
 
     # fitting the model
     model.fit(x_train, y_train)
@@ -156,7 +161,7 @@ def find_stats(dict, header):
 
 
 # importing data
-df = pd.read_csv('../data_processing/final_final_final.csv')
+df = pd.read_csv('../data_processing/raw_data/final_final_final.csv')
 y_head = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
 results = dict()
 rounds = 50
@@ -166,7 +171,7 @@ file.write('ID;Max;Min;Avg\n')
 for header in y_head:
     results[header + '_train'] = []
     results[header + '_test'] = []
-    #train_test_model(header)
+    train_test_model(header)
     print('\n' + header + ':')
 
     for j in range(rounds):
