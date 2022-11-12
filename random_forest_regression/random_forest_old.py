@@ -41,14 +41,6 @@ def gives_x_all_param_header():
                   'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
     return x
 
-
-
-#
-# retain best entries for best values:
-#
-#def evaluate_best_config(estimators, max_features, ligament, r_2, mae, rmse):
-
-
 def save_to_list(r_2, mae, rmse, estimators, max_features, ligament, mode):
     return {"mode": mode, "r_2": r_2, "mae": mae, "rmse": rmse, "estimators": estimators, "max_features": max_features, "ligament": ligament}
 
@@ -249,54 +241,5 @@ def random_forest_random_parameters(estimators_range, max_features_range, n_conf
 investigate_hyperparameters(n_trees_range=(10, 201, 10), max_depth_range=(1, 51, 5), min_sample_split_range=(2, 11, 1), max_features_range=(0.2, 1.2, 0.2), ligament_index_range=(0, 8))
 #investigate_sub_100_trees(n_trees_range=(10, 100, 10), ligament_index_range=(0, 8, 1))
 
-'''
-# Make parameters for random search.
-parameters_range = {"n_estimators": range(1, 2),
-                    "max_features": np.arange(0.5, 1.05, 0.05)}
 
-scoring = {"negative MAE": "neg_mean_absolute_error",
-           "r_2": "r2",
-           "negative RMSE": "neg_mean_squared_error"}
-
-# Create regressor with standard settings.
-regressor = RFR()
-
-# Define how many hyperparameter-configurations random search tries.
-randomsearch_iterations = 1  # how many configurations are we trying out
-
-#cross_validation = RepeatedKFold(n_splits=5, n_repeats=1, random_state=1)
-
-# Create random-search object with the attributes defined above.
-randomsearch = RandomizedSearchCV(regressor,
-                                  param_distributions=parameters_range,
-                                  n_iter=randomsearch_iterations,
-                                  scoring=scoring,
-                                  n_jobs=1,
-                                  refit="negative RMSE",
-                                  cv=ShuffleSplit(test_size=0.20, n_splits=1, random_state=0))
-
-# Define x as all machine headers.
-x = df[gives_x_all_param_header()]
-
-# Define y as ACL_k.
-y = df[ligament_headers[0]]
-
-# Create 80-20 test-train split for machine data and ACL_k.
-#x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=True)
-
-# Save the time for right before random-search starts
-start_time = time()
-
-# Start the random-search. Its parameters were defined above.
-result = randomsearch.fit(x, y)
-
-# Report back the results of random-search.
-print("Random-search took %.2f seconds for %d configurations of parameter settings." % ((time() - start_time),
-                                                                                        randomsearch_iterations))
-
-# can do best_score, best_params etc.
-print('Best estimator across all params:\n', randomsearch.best_estimator_)
-print('Best Score: %s' % result.best_score_)
-print('Best Hyperparameters: %s' % result.best_params_)
-'''
 
