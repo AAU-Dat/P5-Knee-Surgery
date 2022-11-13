@@ -14,8 +14,8 @@ from scipy.stats import randint
 import pandas as pd
 import numpy as np
 #import tensorflow as tf
-from fast_ml.utilities import display_all
-from fast_ml.feature_selection import get_constant_features
+#from fast_ml.utilities import display_all
+#from fast_ml.feature_selection import get_constant_features
 
 #Program skal bygges under keras for at vi kan bruge tensorflow. Se jamie branch.
 #import tensorflow as tf
@@ -63,7 +63,9 @@ def print_status(estimators, max_features, ligament):
 def save_to_list(r_2, mae, rmse, estimators, max_features, min_sample_split, max_depth, ligament, mode):
     return {"mode": mode, "r_2": r_2, "mae": mae, "rmse": rmse, "estimators": estimators, "max_features": max_features, "min_sample_split": min_sample_split, "max_depth": max_depth, "ligament": ligament}
 
-
+# Should be changed to match index on best trained model and bring corresponding test data to file.
+# Currently can select different configured models for test and train in random_params.
+# This is not intended and should be fixed.
 def write_best_scores_for_all_knees_to_file(mode, test_size, list_of_result_dictionaries, configurations):
     #
     # iterate entries in dictionary
@@ -221,7 +223,7 @@ def random_forest_random_parameters(estimators_range, max_features_range, max_de
             estimators = random.randint(estimators_range[0], estimators_range[1])
             max_features = random.uniform(max_features_range[0], max_features_range[1])
             depth = random.randint(max_depth_range[0], max_depth_range[1])
-            min_samples_split = random.uniform(min_samples_split_range[0], min_samples_split_range[1])
+            min_samples_split = random.randint(min_samples_split_range[0], min_samples_split_range[1])
 
             regressor = Pipeline([('scaler', StandardScaler()), ('RFR', RFR(n_estimators=estimators, max_features=max_features, max_depth=depth, min_samples_split=min_samples_split, verbose=3, n_jobs=7))])
             #regressor = RFR(n_estimators=estimators, max_features=max_features)
@@ -250,6 +252,6 @@ def random_forest_random_parameters(estimators_range, max_features_range, max_de
                               #ligament=ligament_headers[ligament_index])
 
 
-random_forest_random_parameters(estimators_range=(1, 10), max_features_range=(0.5, 1), n_configurations=3, max_depth_range=(1,4), min_samples_split_range=(0.2, 1), ligament_index_range=(0,8), test_size=0.2)
+random_forest_random_parameters(estimators_range=(1, 100), max_features_range=(0.1, 1), n_configurations=60, max_depth_range=(1, 100), min_samples_split_range=(2, 4), ligament_index_range=(0,8), test_size=0.2)
 
 
