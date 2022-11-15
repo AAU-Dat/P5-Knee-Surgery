@@ -18,7 +18,6 @@ import numpy as np
 #from fast_ml.feature_selection import get_constant_features
 
 #Program skal bygges under keras for at vi kan bruge tensorflow. Se jamie branch.
-#import tensorflow as tf
 #print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
 
 df = pd.read_csv('../data_processing/final_final_final.csv')
