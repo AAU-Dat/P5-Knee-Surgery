@@ -89,8 +89,8 @@ def train_test_model(header, make_graph=False, calculate=False):
     # fitting the model
     poly_reg_model = Pipeline([
         ('scaler', StandardScaler()),
-        ('pca', PCA(n_components=6)),
-        ('pca_poly_reg', PolynomialFeatures(degree=5, include_bias=False)),
+        ('pca', PCA(n_components=69)),
+        ('pca_poly_reg', PolynomialFeatures(degree=2, include_bias=False)),
         ('lin_reg', LinearRegression())
     ])
 
