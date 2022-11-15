@@ -82,7 +82,6 @@ def train_test_model(header):
     X_ = poly.fit_transform(x)
 
     regr = linear_model.LinearRegression()
-
     regr.fit(X_, y)
 
     # creating train and test sets
