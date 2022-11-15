@@ -23,11 +23,11 @@ ACL_k, ACL_epsr, PCL_k, PCL_epsr = 'ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr'
 MCL_k, MCL_epsr, LCL_k, LCL_epsr = 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr'
 df = pd.read_csv('../data_processing/final_final_final.csv', index_col=0)
 result_columns = [ACL_k, ACL_epsr, PCL_k, PCL_epsr, MCL_k, MCL_epsr, LCL_k, LCL_epsr]
-input_shape = (276,)                            # input is a row of entries (284 - [8 result columns])
+input_shape = (276,)                            # input is a row of entries (284 [total cols] - 8 [result cols] = 276)
 seed = 69                                       # to get reproducible data splits and hyperparameters
-train_ratio = 0.80                              # percentage of the data set allocated to train and tune
-validation_ratio = 0.10                         # percentage of the data set allocated to validation
-test_ratio = 0.10                               # percentage of the data set allocated to evaluation
+train_ratio = 0.8                               # percentage of the data set allocated to train and tune
+validation_ratio = 0.1                          # percentage of the data set allocated to validation
+test_ratio = 0.1                                # percentage of the data set allocated to evaluation
 
 # Configure the Search Space
 HP = kt.HyperParameters()
@@ -102,7 +102,7 @@ def train_hypermodel(target, tuner, x_train, y_train, x_val, y_val):
     best_epoch = val_mae_per_epoch.index(min(val_mae_per_epoch)) + 1
 
     # Build the best hypermodel from the best hyperparameters
-    hypermodel = tuner.hypermodel.build(best_hp)
+    hypermodel = tuner.hypermodel.build(best_hp, input_shape=input_shape)
 
     # Retrain the model with the best found epoch
     hypermodel.fit(x_train, y_train.ravel(), epochs=best_epoch, validation_data=(x_val, y_val))
@@ -174,3 +174,5 @@ handle_model(ACL_k)
 # handle_model(['MCL_epsr'])
 # handle_model(['LCL_k'])
 # handle_model(['LCL_epsr'])
+
+# TODO : Print all evaluation results

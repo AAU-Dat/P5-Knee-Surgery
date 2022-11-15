@@ -9,9 +9,9 @@ df = pd.read_csv('../data_processing/final_final_final.csv', index_col=0)
 result_columns = [ACL_k, ACL_epsr, PCL_k, PCL_epsr, MCL_k, MCL_epsr, LCL_k, LCL_epsr]
 input_shape = (276,)                            # input is a row of entries (284 - [8 result columns])
 seed = 69                                       # to get reproducible data splits and hyperparameters
-train_ratio = 0.80                              # percentage of the data set allocated to train and tune
-validation_ratio = 0.10                         # percentage of the data set allocated to validation
-test_ratio = 0.10                               # percentage of the data set allocated to evaluation
+train_ratio = 0.8                               # percentage of the data set allocated to train and tune
+validation_ratio = 0.1                          # percentage of the data set allocated to validation
+test_ratio = 0.1                                # percentage of the data set allocated to evaluation
 
 # Set up the input
 predictors = list(set(list(df.columns)) - set(result_columns))
@@ -20,8 +20,6 @@ df[predictors] = df[predictors] / df[predictors].max()
 # Set up the data set
 x = df[predictors].values
 y = df[ACL_k].values
-
-print(x.shape)
 
 num_rows, num_cols = x.shape
 full_size = num_rows
