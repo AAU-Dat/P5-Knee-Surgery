@@ -5,11 +5,9 @@ import pandas as pd
 
 
 files = 8
-
 min_knee_measurements = 23
 results = 8
 measurements = 12
-results_plus_measurement = results + measurements
 
 
 # Loads raw data from data files 1 to 8
@@ -50,7 +48,7 @@ def transpose_data(data):
         temp_i = int(i / min_knee_measurements)
         reranged_data[temp_i][0:results] = data[i][0:results]
         for x in range(0, min_knee_measurements):
-            reranged_data[temp_i][results + measurements * x:results_plus_measurement + measurements * x] = data[i + x][results:results_plus_measurement]
+            reranged_data[temp_i][results + measurements * x:results + measurements * (x+1)] = data[i + x][results:results + measurement]
     print("Done with transpose_data()")
     return reranged_data
 
