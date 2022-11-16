@@ -143,8 +143,8 @@ def get_prefix(train, test):
 
 
 def round_result(number):
-    # If number is less than 1, greater accuracy is wanted and four decimals, else 2 decimals
-    return f"{number:.4f}" if number < 1 else f"{number:.2f}"
+    # If number is less than 1 or -1, greater accuracy is wanted and four decimals, else 2 decimals
+    return f"{number:.4f}" if number < 1 or number < -1 else f"{number:.2f}"
 
 
 def evaluate_model(x_test, y_test, x_train, y_train, hypermodel):
@@ -160,13 +160,13 @@ def evaluate_model(x_test, y_test, x_train, y_train, hypermodel):
     # Create table row with results
     intermediate_results = {'Test_R2': [f"{round_result(test_r2 * 100)}%"],
                             'Train_R2': [f"{round_result(train_r2 * 100)}%"],
-                            'Difference R2': [r2_difference],
+                            'Difference R2': [f"{r2_difference} |"],
                             'Test_MAE': [f"{round_result(test_mae)}"],
                             'Train_MAE': [f"{round_result(train_mae)}"],
-                            'Difference MAE': [mae_difference],
+                            'Difference MAE': [f"{mae_difference} |"],
                             'Test_RMSE': [f"{round_result(test_rmse)}"],
                             'Train_RMSE': [f"{round_result(train_rmse)}"],
-                            'Difference RMSE': [rmse_difference]}
+                            'Difference RMSE': [f"{rmse_difference} |"]}
 
     return intermediate_results
 
@@ -203,20 +203,20 @@ def handle_model(target):
 # </editor-fold>
 
 
-# Create and manage all eight models
-# acl_epsr = pd.DataFrame(handle_model(ACL_epsr), index=[ACL_epsr])
-# pcl_epsr = pd.DataFrame(handle_model(PCL_epsr), index=[PCL_epsr])
-# mcl_epsr = pd.DataFrame(handle_model(MCL_epsr), index=[MCL_epsr])
-# lcl_epsr = pd.DataFrame(handle_model(LCL_epsr), index=[LCL_epsr])
-acl_k = pd.DataFrame(handle_model(ACL_k), index=[ACL_k])
-# pcl_k = pd.DataFrame(handle_model(PCL_k), index=[PCL_k])
-# mcl_k = pd.DataFrame(handle_model(MCL_k), index=[MCL_k])
-# lcl_k = pd.DataFrame(handle_model(LCL_k), index=[LCL_k])
+# Create, train and evaluate all eight models
+acl_epsr = pd.DataFrame(handle_model(ACL_epsr), index=[f"{ACL_epsr} |"])
+pcl_epsr = pd.DataFrame(handle_model(PCL_epsr), index=[f"{PCL_epsr} |"])
+mcl_epsr = pd.DataFrame(handle_model(MCL_epsr), index=[f"{MCL_epsr} |"])
+lcl_epsr = pd.DataFrame(handle_model(LCL_epsr), index=[f"{LCL_epsr} |"])
+acl_k = pd.DataFrame(handle_model(ACL_k), index=[f"{ACL_k} |"])
+pcl_k = pd.DataFrame(handle_model(PCL_k), index=[f"{PCL_k} |"])
+mcl_k = pd.DataFrame(handle_model(MCL_k), index=[f"{MCL_k} |"])
+lcl_k = pd.DataFrame(handle_model(LCL_k), index=[f"{LCL_k} |"])
 
 # Concatenate intermediate results
-result = pd.concat([acl_k])
+# result = pd.concat([acl_k])
 # result = pd.concat([acl_epsr, acl_k])
-# result = pd.concat([acl_epsr, pcl_epsr, mcl_epsr, lcl_epsr, acl_k, pcl_k, mcl_k, lcl_k])
+result = pd.concat([acl_epsr, pcl_epsr, mcl_epsr, lcl_epsr, acl_k, pcl_k, mcl_k, lcl_k])
 
 # Print and save results
 print(result.to_string())
