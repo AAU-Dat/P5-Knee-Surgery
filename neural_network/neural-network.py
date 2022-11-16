@@ -1,5 +1,7 @@
 import keras.callbacks
 import math
+
+import numpy as np
 import pandas as pd
 import keras_tuner as kt
 from keras import layers
@@ -17,6 +19,7 @@ now = datetime.now().strftime("%d-%b-%Y at %H:%M")
 # Relevant path directories
 LOG_DIR = f"Test ran on {now}"
 MODEL_DIR = f"{LOG_DIR}/models/"
+RESULT_DIR = f"{LOG_DIR}/result.csv"
 
 # Data Set preparation
 ACL_k, ACL_epsr, PCL_k, PCL_epsr = 'ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr'
@@ -33,6 +36,7 @@ test_ratio = 0.1                                # percentage of the data set all
 HP = kt.HyperParameters()
 HP.Int('number_of_layers', min_value=2, max_value=8)
 HP.Choice('learning_rate', values=[1e-2, 1e-3, 1e-4])
+HP.Choice('l2', values=[0.01, 0.001, 0.1, 0.005, 0.05])
 HP.Boolean('use_dropout')
 HP.Fixed('loss', value='mean_squared_error')
 HP.Fixed('metrics', value='mean_absolute_error')
@@ -52,13 +56,13 @@ def build_model(hp):
         number = f"{j + 1}"
 
         model.add(layers.Dense(units=hp.get(f"units_layer_{number}"), name=f"hidden_layer_{number}",
-                               activation='relu', kernel_regularizer=L2(0.001)))
+                               activation='relu', kernel_regularizer=L2(hp.get('l2'))))
 
         if hp.get('use_dropout'):
             model.add(layers.Dropout(rate=hp.get(f"dropout_{number}")))
 
     # Output Layer
-    model.add(layers.Dense(1, activation='linear', kernel_initializer='normal', name='output_layer'))
+    model.add(layers.Dense(1, activation='linear', kernel_initializer='random_normal', name='output_layer'))
 
     # Set up Compiler
     model.compile(optimizer=Adam(learning_rate=hp.get('learning_rate')), loss=hp.get('loss'), metrics=[hp.get('metrics')])
@@ -102,10 +106,11 @@ def train_hypermodel(target, tuner, x_train, y_train, x_val, y_val):
     best_epoch = val_mae_per_epoch.index(min(val_mae_per_epoch)) + 1
 
     # Build the best hypermodel from the best hyperparameters
-    hypermodel = tuner.hypermodel.build(best_hp, input_shape=input_shape)
+    hypermodel = tuner.hypermodel.build(best_hp)
 
     # Retrain the model with the best found epoch
-    hypermodel.fit(x_train, y_train.ravel(), epochs=best_epoch, validation_data=(x_val, y_val))
+    x, y = np.concatenate((x_train, x_val)), np.concatenate((y_train, y_val))
+    hypermodel.fit(x, y.ravel(), epochs=best_epoch)
 
     # Save the model to the log directory for future reference
     hypermodel.save(f"{MODEL_DIR}{target}")
@@ -117,20 +122,53 @@ def train_hypermodel(target, tuner, x_train, y_train, x_val, y_val):
 
 # <editor-fold desc="Evaluating the Model">
 
-def evaluate_model(x_test, y_test, hypermodel, target):
-    expected_y = y_test
-    predicted_y = hypermodel.predict(x_test)
 
-    current_r2_score = metrics.r2_score(expected_y, predicted_y)
-    current_mse = metrics.mean_squared_error(expected_y, predicted_y)
-    current_mae = metrics.mean_absolute_error(expected_y, predicted_y)
-    current_rmse = math.sqrt(current_mse)
+def evaluate(x, y, hypermodel):
+    # Prepare the expected and predicted data set
+    expected_y = y
+    predicted_y = hypermodel.predict(x)
 
-    # TODO : Return strings or similar, so that the evaluation can be seen for all of the eight models at once
-    print(f"This is the evaluation of the {target}")
-    print(f"The coefficient of determination (R^2): {current_r2_score}")
-    print(f"Mean Absolute Error (MAE): {current_mae}")
-    print(f"Root Mean Squared Error (RMSE): {current_rmse}")
+    # Evaluate the model
+    r2 = metrics.r2_score(expected_y, predicted_y)
+    mse = metrics.mean_squared_error(expected_y, predicted_y)
+    mae = metrics.mean_absolute_error(expected_y, predicted_y)
+    rmse = math.sqrt(mse)
+
+    return [r2, mae, rmse]
+
+
+def get_prefix(train, test):
+    # If value is greater than 0 it is positive, else it is negative
+    return '+' if (train - test) > 0 else ''
+
+
+def round_result(number):
+    # If number is less than 1, greater accuracy is wanted and four decimals, else 2 decimals
+    return f"{number:.4f}" if number < 1 else f"{number:.2f}"
+
+
+def evaluate_model(x_test, y_test, x_train, y_train, hypermodel):
+    # Evaluate both the test and train data set
+    test_r2, test_mae, test_rmse = evaluate(x_test, y_test, hypermodel)
+    train_r2, train_mae, train_rmse = evaluate(x_train, y_train, hypermodel)
+
+    # Calculate differences between the three results
+    r2_difference = f"({get_prefix(train_r2, test_r2)}{round_result((train_r2 - test_r2) * 100)}%)"
+    mae_difference = f"({get_prefix(train_mae, test_mae)}{round_result(train_mae - test_mae)})"
+    rmse_difference = f"({get_prefix(train_rmse, test_rmse)}{round_result(train_rmse - test_rmse)})"
+
+    # Create table row with results
+    intermediate_results = {'Test_R2': [f"{round_result(test_r2 * 100)}%"],
+                            'Train_R2': [f"{round_result(train_r2 * 100)}%"],
+                            'Difference R2': [r2_difference],
+                            'Test_MAE': [f"{round_result(test_mae)}"],
+                            'Train_MAE': [f"{round_result(train_mae)}"],
+                            'Difference MAE': [mae_difference],
+                            'Test_RMSE': [f"{round_result(test_rmse)}"],
+                            'Train_RMSE': [f"{round_result(train_rmse)}"],
+                            'Difference RMSE': [rmse_difference]}
+
+    return intermediate_results
 
 # </editor-fold>
 
@@ -159,20 +197,27 @@ def handle_model(target):
     # Build and train the best Model on the Train data, test on the Validate data
     best_model = train_hypermodel(target, tuner, x_train, y_train, x_val, y_val)
 
-    # Evaluate the model using cross-validation on the Test data
-    evaluate_model(x_test, y_test, best_model, target)
+    # Evaluate the model using cross-validation on the Test data and return the result
+    return evaluate_model(x_test, y_test, x_train, y_train, best_model)
 
 # </editor-fold>
 
 
-handle_model(ACL_k)
-# TODO : Run for the other models too; but try to utilise the GPU
-# handle_model(['ACL_epsr'])
-# handle_model(['PCL_k'])
-# handle_model(['PCL_epsr'])
-# handle_model(['MCL_k'])
-# handle_model(['MCL_epsr'])
-# handle_model(['LCL_k'])
-# handle_model(['LCL_epsr'])
+# Create and manage all eight models
+# acl_epsr = pd.DataFrame(handle_model(ACL_epsr), index=[ACL_epsr])
+# pcl_epsr = pd.DataFrame(handle_model(PCL_epsr), index=[PCL_epsr])
+# mcl_epsr = pd.DataFrame(handle_model(MCL_epsr), index=[MCL_epsr])
+# lcl_epsr = pd.DataFrame(handle_model(LCL_epsr), index=[LCL_epsr])
+acl_k = pd.DataFrame(handle_model(ACL_k), index=[ACL_k])
+# pcl_k = pd.DataFrame(handle_model(PCL_k), index=[PCL_k])
+# mcl_k = pd.DataFrame(handle_model(MCL_k), index=[MCL_k])
+# lcl_k = pd.DataFrame(handle_model(LCL_k), index=[LCL_k])
 
-# TODO : Print all evaluation results
+# Concatenate intermediate results
+result = pd.concat([acl_k])
+# result = pd.concat([acl_epsr, acl_k])
+# result = pd.concat([acl_epsr, pcl_epsr, mcl_epsr, lcl_epsr, acl_k, pcl_k, mcl_k, lcl_k])
+
+# Print and save results
+print(result.to_string())
+result.to_csv(f"{RESULT_DIR}")
