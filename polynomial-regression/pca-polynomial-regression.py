@@ -46,7 +46,7 @@ def graph_information_k_value(title, xlable, ylable):
     plt.title(title)
     plt.xlabel(xlable)
     plt.ylabel(ylable)
-    plt.ylim(-2500, 25000)
+    plt.ylim(-2500, 27500)
 
 def graph_information_epsr_value(title, xlable, ylable):
     plt.title(title)
@@ -89,7 +89,7 @@ def train_test_model(header, make_graph=False, calculate=False):
     # fitting the model
     poly_reg_model = Pipeline([
         ('scaler', StandardScaler()),
-        ('pca', PCA(n_components=69)),
+        ('pca', PCA(n_components=100)),
         ('pca_poly_reg', PolynomialFeatures(degree=2, include_bias=False)),
         ('lin_reg', LinearRegression())
     ])
