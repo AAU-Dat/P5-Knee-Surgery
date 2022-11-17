@@ -169,7 +169,7 @@ rounds = 1
 file = open('./polynomial-regression-figures-results.csv', 'w')
 file.write('ID;Max;Min;Avg\n')
 
-for header in result_columns: 
+for header in result_columns:
     print('\n' + header + ':')
     results[header + '_train'] = []
     results[header + '_test'] = []
