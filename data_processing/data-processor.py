@@ -4,7 +4,7 @@ import math
 import pandas as pd
 
 
-files = 8
+files = 1
 min_knee_measurements = 23
 results = 8
 measurements = 12
@@ -43,14 +43,14 @@ def remove_incomplete_measurements(data):
 
 
 def transpose_data(data):
-    reranged_data = np.zeros((int(len(data)/min_knee_measurements), results + (min_knee_measurements * measurements)))
+    rearranged_data = np.zeros((math.ceil(len(data) / min_knee_measurements), results + (min_knee_measurements * measurements)))
     for i in range(0, len(data), min_knee_measurements):
         temp_i = int(i / min_knee_measurements)
-        reranged_data[temp_i][0:results] = data[i][0:results]
+        rearranged_data[temp_i][0:results] = data[i][0:results]
         for x in range(0, min_knee_measurements):
-            reranged_data[temp_i][results + measurements * x:results + measurements * (x+1)] = data[i + x][results:results + measurement]
+            rearranged_data[temp_i][results + measurements * x:results + measurements * (x + 1)] = data[i + x][results:results + measurements]
     print("Done with transpose_data()")
-    return reranged_data
+    return rearranged_data
 
 
 def headers():
