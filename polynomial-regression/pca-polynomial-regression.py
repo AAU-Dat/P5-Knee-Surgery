@@ -192,7 +192,7 @@ def find_stats(dict, header):
 # importing data and converting it to float32
 df = pd.read_csv('../data_processing/final_final_final.csv').astype(np.float32)
 
-result_columns = ['ACL_k']
+result_columns = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
 results = dict()
 # rounds = 1
 file = open('./polynomial-regression-figures-results.csv', 'w')
