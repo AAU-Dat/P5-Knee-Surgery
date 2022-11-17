@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import normalize
 
 
 def gives_header_array():
@@ -24,7 +25,7 @@ test_ratio = 0.1
 val_ratio = 0.1
 
 # data
-df = pd.read_csv('../data_processing/final_final_final.csv')
+df = pd.read_csv('../data_processing/final_final_final.csv').astype(np.float32)
 header = gives_header_array()
 
 
@@ -64,23 +65,40 @@ def main(target_index):
 
     # Both Validation and Test get 50% each of the remainder (val = 10%, test = 10% - af det fulde datasæt)
     x_val, x_test, y_val, y_test = train_test_split(x_test, y_test, test_size=test_ratio / (test_ratio + val_ratio), random_state=69)
-    x, y = np.concatenate((x_train, x_val)), np.concatenate((y_train, y_val))
+    x_all, y_all = np.concatenate((x_train, x_val)), np.concatenate((y_train, y_val))
 
     # Todo find hyper param
-    pipe = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR())])
+    pipe = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR(max_iter=10000))])
 
     list = []
-    for x in range(50, 1050, 50):
-        list.append(x)
+    for i in range(50, 150, 50):
+        list.append(i)
 
-    parameter_grid = {'svc__c': list}
+    parameter_grid = {'svc__C': list}
 
-    gridsearch = GridSearchCV(estimator=pipe, param_grid=parameter_grid, scoring="neg_root_mean_squared_error", cv=5, verbose=3, n_jobs=3)
+    gridsearch = GridSearchCV(estimator=pipe, param_grid=parameter_grid, scoring="r2", cv=5, verbose=3, n_jobs=3)
 
-    results = gridsearch.fit(x, y)
+    results = gridsearch.fit(x_all, y_all)
+
+    print(f"{results.best_params_}\t{results.best_score_}")
+
     # Todo make best model
+    print("making final model")
+    final_model = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR(max_iter=10000, C=results.best_params_["svc__C"]))])
+    final_model.fit(x_all, y_all)
+
+    prediction = final_model.predict(x_test)
+
     # Todo evaluate model
+    r2 = r2_score(y_test, prediction)
+    rmse = mean_squared_error(y_test, prediction, squared=False)
+    mae = mean_absolute_error(y_test, prediction)
+
     # Todo return evaluation
+    file = open(f'./Support_vector_regression_results_{header[target_index]}.csv', 'w')
+    file.write(f"Best C value {results.best_params_}\nR2:{r2}\nrmse:{rmse}\nmae{mae}")
+    file.close()
+
     # Todo
 
 main(1)
