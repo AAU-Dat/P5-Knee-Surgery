@@ -22,16 +22,19 @@ def make_svr_graph(target_index, test_size, max_iter, c):
     x = df[header[9:285]] #285 is max
     y = df[header[target_index]]
 
-    # split data into train and test
-    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=1-test_size, test_size=test_size, shuffle=True)
+    # Train gets the train_ratio of the data set (train = 80%, test = 20% - af det fulde datasæt)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=1 - train_ratio)
+
+    # Both Validation and Test get 50% each of the remainder (val = 10%, test = 10% - af det fulde datasæt)
+    x_val, x_test, y_val, y_test = train_test_split(x_test, y_test, test_size=test_ratio / (test_ratio + val_ratio))
 
     pipe = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR(max_iter=max_iter, C=c))])
     pipe.fit(x_train, y_train)
 
     # predictions_train = pipe.predict(x_train)
-    predictions_test = pipe.predict(x_test)
+    predictions_test = pipe.predict(x_val)
 
-    return r2_score(y_test, predictions_test)
+    return r2_score(y_val, predictions_test)
 
 
 def test(using_k, start, end, steps, header_start):
@@ -62,6 +65,9 @@ steps_k = 50
 start_espr = 5
 end_espr = 45
 steps_espr = 5
+
+train_ratio = 0.8
+test_ratio, val_ratio = 0.1
 
 k = 1
 espr = 2

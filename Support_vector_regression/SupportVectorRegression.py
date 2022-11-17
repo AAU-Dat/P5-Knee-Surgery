@@ -8,6 +8,11 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.pipeline import Pipeline
 
 
+# test train validation ratios
+train_ratio = 0.8
+test_ratio, val_ratio = 0.1
+
+
 # Change dots in graph
 MarkerSize = 0.1
 DotColor = 'Blue'
@@ -75,12 +80,24 @@ def make_svr_graph(target_index, test_size, c, max_iter, print_graph=False):
     y = df[header[target_index]]
 
     # split data into train and test
-    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=1-test_size, test_size=test_size, shuffle=True)
+    # x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=1-test_size, test_size=test_size)
+
+    # Train gets the train_ratio of the data set (train = 80%, test = 20% - af det fulde datasæt)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=1 - train_ratio, random_state=69)
+
+    # Both Validation and Test get 50% each of the remainder (val = 10%, test = 10% - af det fulde datasæt)
+    x_val, x_test, y_val, y_test = train_test_split(x_test, y_test, test_size=test_ratio / (test_ratio + val_ratio), random_state=69)
+
+    # Todo
+    # train model
 
     # making the model and fitting the model to the data
     pipe = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR(max_iter=max_iter, C=c))])
 
     pipe.fit(x_train, y_train)
+
+    # Todo
+    # evaluate model
 
     # predicting results with both test and train
     predictions_train = pipe.predict(x_train)
