@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
-import random
 from sklearn import linear_model
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
@@ -12,11 +11,15 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.model_selection import train_test_split
 matplotlib.use('Agg')
 
-ran_seed = random.seed(69)
+# Constants t ochange random seed
+ran_seed = 69
 
 # Constants to change train test split
-train_procent   = 0.80
-test_procent    = 0.20
+# train_procent   = 0.80
+# test_procent    = 0.20
+train_ratio = 0.8
+test_ratio = 0.1
+validation_ratio = 0.1
 
 # Constants to change style in graph
 MarkerSize = 0.1
@@ -32,6 +35,10 @@ xleft_epsr  = -0.10
 xright_epsr = 0.30
 ybottom_epsr= -0.10
 ytop_epsr   = 0.30
+
+# Read the data
+ACL_k, ACL_epsr, PCL_k, PCL_epsr = 'ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr'
+MCL_k, MCL_epsr, LCL_k, LCL_epsr = 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr'
 
 # This function make sure that y has all the 276 columns
 def gives_x_all_param_header():
@@ -78,37 +85,47 @@ def plt_graph_train(y_train, predictions_train, header_name):
 
     plt.savefig('./polynomial-regression-figures/prediction_train_' f'{header_name}.png')
 
-def train_test_model(header, make_graph=False, calculate=False):
+def train_test_model(target, make_graph=False, calculate=False):
 
-    x = df[gives_x_all_param_header()]
-    y = df[header]
+    # Read the data
+    predictors = list(set(list(df.columns)) - set(result_columns))
+    df[predictors] = df[predictors] / df[predictors].max()
 
-    # creating train and test sets
-    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_procent, test_size=test_procent, random_state=ran_seed)
+    # Set data up
+    x = df[predictors].values
+    y = df[target].values
 
-    # fitting the model
+    # Train gets the train_ratio of the data set (train = 80%, test = 20% - af det fulde datasæt)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=1 - train_ratio, random_state=ran_seed)
+
+    # Both Validation and Test get 50% each of the remainder (val = 10%, test = 10% - af det fulde datasæt)
+    x_val, x_test, y_val, y_test = train_test_split(x_test, y_test, test_size=test_ratio / (test_ratio + validation_ratio), random_state=ran_seed)
+
+    x_all, y_all = np.concatenate((x_train, x_val)), np.concatenate((y_train, y_val))
+
+    # creating polynomial features
     poly_reg_model = Pipeline([
         ('scaler', StandardScaler()),
-        ('pca', PCA(n_components=100)),
+        ('pca', PCA(n_components=10)),
         ('pca_poly_reg', PolynomialFeatures(degree=2, include_bias=False)),
-        ('lin_reg', LinearRegression())
+        ('lin_reg', LinearRegression(n_jobs=-1))
     ])
 
     # fitting the model
-    poly_reg_model.fit(x_train, y_train)
+    poly_reg_model.fit(x_all, y_all)
 
     # making predictions
     predictions_test = poly_reg_model.predict(x_test)
-    predictions_train = poly_reg_model.predict(x_train)
+    predictions_train = poly_reg_model.predict(x_all)
 
     if make_graph:
-        plt_graph_train(y_train, predictions_train, header)
+        plt_graph_train(y_all, predictions_train, header)
         plt_graph_test(y_test, predictions_test, header)
 
     if calculate:
-        r2_train = r2_score(y_train, predictions_train)
-        rmse_train = mean_squared_error(y_train, predictions_train, squared=False)
-        mae_train = mean_absolute_error(y_train, predictions_train)
+        r2_train = r2_score(y_all, predictions_train)
+        rmse_train = mean_squared_error(y_all, predictions_train, squared=False)
+        mae_train = mean_absolute_error(y_all, predictions_train)
 
         r2_test = r2_score(y_test, predictions_test)
         rmse_test = mean_squared_error(y_test, predictions_test, squared=False)
@@ -146,22 +163,23 @@ def find_stats(dict, header):
 # importing data and converting it to float32
 df = pd.read_csv('../data_processing/final_final_final.csv').astype(np.float32)
 
-y_head = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
+result_columns = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
 results = dict()
 rounds = 1
 file = open('./polynomial-regression-figures-results.csv', 'w')
 file.write('ID;Max;Min;Avg\n')
 
-for header in y_head:
+for header in result_columns:
     print('\n' + header + ':')
     results[header + '_train'] = []
     results[header + '_test'] = []
-    train_test_model(header, make_graph=True)
+    list_data = train_test_model(header, make_graph=True, calculate=True)
+    update_dict(results, header, list_data)
 
-    for j in range(rounds):
-        print("\r" f'{j + 1} / {rounds}', end='')
-        list_data = train_test_model(header, calculate=True)
-        update_dict(results, header, list_data)
+    #for j in range(rounds):
+    #    print("\r" f'{j + 1} / {rounds}', end='')
+    #    list_data = train_test_model(header, calculate=True)
+    #    update_dict(results, header, list_data)
 
     res = find_stats(results, header)
     file.writelines(res)
