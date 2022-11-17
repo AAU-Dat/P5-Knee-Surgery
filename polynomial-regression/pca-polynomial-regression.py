@@ -8,7 +8,7 @@ from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 matplotlib.use('Agg')
 
 # Constants t ochange random seed
@@ -106,17 +106,41 @@ def train_test_model(target, make_graph=False, calculate=False):
     # creating polynomial features
     poly_reg_model = Pipeline([
         ('scaler', StandardScaler()),
-        ('pca', PCA(n_components=10)),
+        ('pca', PCA()),
+        ('pca_poly_reg', PolynomialFeatures(degree=2, include_bias=False)),
+        ('lin_reg', LinearRegression(n_jobs=-1))
+    ])
+
+    # Making list with all the steps
+    list_param = []
+    for i in range(50, 130, 5):
+        list_param.append(i)
+
+    param_grid = {'pca__n_components': list_param}
+
+    # Grid search
+    grid_search = GridSearchCV(poly_reg_model, param_grid, cv=5, scoring='r2', n_jobs=-1, verbose=3)
+
+    # Fit the model
+    results = grid_search.fit(x_all, y_all)
+
+    print('Best score: ', results.best_score_)
+    print('Best parameters: ', results.best_params_)
+
+    # Train the model
+    best_poly_reg_model = Pipeline([
+        ('scaler', StandardScaler()),
+        ('pca', PCA(n_components=results.best_params_['pca__n_components'])),
         ('pca_poly_reg', PolynomialFeatures(degree=2, include_bias=False)),
         ('lin_reg', LinearRegression(n_jobs=-1))
     ])
 
     # fitting the model
-    poly_reg_model.fit(x_all, y_all)
+    best_poly_reg_model.fit(x_all, y_all)
 
     # making predictions
-    predictions_test = poly_reg_model.predict(x_test)
-    predictions_train = poly_reg_model.predict(x_all)
+    predictions_test = best_poly_reg_model.predict(x_test)
+    predictions_train = best_poly_reg_model.predict(x_all)
 
     if make_graph:
         plt_graph_train(y_all, predictions_train, header)
@@ -126,18 +150,21 @@ def train_test_model(target, make_graph=False, calculate=False):
         r2_train = r2_score(y_all, predictions_train)
         rmse_train = mean_squared_error(y_all, predictions_train, squared=False)
         mae_train = mean_absolute_error(y_all, predictions_train)
+        best_params_train = results.best_params_['pca__n_components']
 
         r2_test = r2_score(y_test, predictions_test)
         rmse_test = mean_squared_error(y_test, predictions_test, squared=False)
         mae_test = mean_absolute_error(y_test, predictions_test)
+        best_params_test = results.best_params_['pca__n_components']
 
-        return [r2_train, rmse_train, mae_train, r2_test, rmse_test, mae_test]
+
+        return [r2_train, rmse_train, mae_train, best_params_train, r2_test, rmse_test, mae_test, best_params_test]
 
 def update_dict(dict, header, list_data):
     l_train = dict[header + '_train']
     l_test = dict[header + '_test']
-    l_train.append({'R2': list_data[0], 'RMSE': list_data[1], 'MAE': list_data[2]})
-    l_test.append({'R2': list_data[3], 'RMSE': list_data[4], 'MAE': list_data[5]})
+    l_train.append({'R2': list_data[0], 'RMSE': list_data[1], 'MAE': list_data[2], 'PARAM': list_data[3]})
+    l_test.append({'R2': list_data[4], 'RMSE': list_data[5], 'MAE': list_data[6], 'PARAM': list_data[7]})
 
 def get_stats(header, list):
     return f'{header};{np.max(list)};{np.min(list)};{np.mean(list)}\n'
@@ -149,8 +176,10 @@ def find_stats(dict, header):
     r2_test = [x['R2'] for x in dict[header + '_test']]
     rmse_test = [x['RMSE'] for x in dict[header + '_test']]
     mae_test = [x['MAE'] for x in dict[header + '_test']]
+    param = [x['PARAM'] for x in dict[header + '_train']]
 
     res = []
+    res.append(f'{header};{str(param[0])} \n')
     res.append(get_stats(header + '_train_R2', r2_train))
     res.append(get_stats(header + '_train_RMSE', rmse_train))
     res.append(get_stats(header + '_train_MAE', mae_train))
@@ -163,9 +192,9 @@ def find_stats(dict, header):
 # importing data and converting it to float32
 df = pd.read_csv('../data_processing/final_final_final.csv').astype(np.float32)
 
-result_columns = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
+result_columns = ['ACL_k']
 results = dict()
-rounds = 1
+# rounds = 1
 file = open('./polynomial-regression-figures-results.csv', 'w')
 file.write('ID;Max;Min;Avg\n')
 
