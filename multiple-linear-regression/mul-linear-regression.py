@@ -15,11 +15,12 @@ from sklearn.model_selection import train_test_split
 matplotlib.use('Agg')
 
 # Constant to change the random seed for the train_test_split
-ran_seed = RandomState(69)
+ran_seed = 69
 
 # Constants to change train test split
-train_procent   = 0.80
-test_procent    = 0.20
+train_ratio = 0.8
+test_ratio = 0.1
+validation_ratio = 0.1
 
 # Constants to change style in graph
 MarkerSize = 0.1
@@ -36,104 +37,88 @@ xright_epsr = 0.30
 ybottom_epsr= -0.10
 ytop_epsr   = 0.30
 
-# This function make sure that y has all the 276 columns
-def gives_x_all_param_header():
-    x = []
-    for i in range(1, 24):
-        x.extend(['trans_x_' + str(i), 'trans_y_' + str(i), 'trans_z_' + str(i), 'rot_z_' + str(i),
-                  'rot_x_' + str(i), 'rot_y_' + str(i), 'F_x_' + str(i), 'F_y_' + str(i), 'F_z_' + str(i),
-                  'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
-    return x
-
-def graph_information_k_value(title, xlable, ylable, ybottom, ytop):
+def graph_information_k_value(title, xlable, ylable):
     plt.title(title)
     plt.xlabel(xlable)
     plt.ylabel(ylable)
-    #plt.xlim(xleft, xright)
-    plt.ylim(ybottom, ytop)
-    plt.plot([xleft_k, xright_k], [ybottom_k, ytop_k], color='red')
+    plt.ylim(-2500, 27500)
 
-def graph_information_epsr_value(title, xlable, ylable, ybottom, ytop):
+def graph_information_epsr_value(title, xlable, ylable):
     plt.title(title)
     plt.xlabel(xlable)
     plt.ylabel(ylable)
-    #plt.xlim(xleft, xright)
-    plt.ylim(ybottom, ytop)
-    plt.plot([xleft_epsr, xright_epsr], [ybottom_epsr, ytop_epsr], color='red')
+    plt.ylim(-0.25, 0.25)
 
 def plt_graph_test(y_test, predictions_test, header_name):
     plt.figure()  # This makes a new figure
     plt.scatter(y_test, predictions_test, color=DotColor, s=MarkerSize)
+    plt.plot(y_test, y_test, color='red')
 
     if 'k' in header_name:
-        graph_information_k_value(f'{header_name} test model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value', ybottom_k, ytop_k)
+        graph_information_k_value(f'{header_name} test model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value')
     else:
-        graph_information_epsr_value(f'{header_name} test model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value', ybottom_epsr, ytop_epsr)
+        graph_information_epsr_value(f'{header_name} test model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value')
 
     plt.savefig('./multiple-linear-regression-figures/prediction_test_' f'{header_name}.png')
 
 def plt_graph_train(y_train, predictions_train, header_name):
     plt.figure()  # This makes a new figure
     plt.scatter(y_train, predictions_train, color=DotColor, s=MarkerSize)
+    plt.plot(y_train, y_train, color='red')
 
     if 'k' in header_name:
-        graph_information_k_value(f'{header_name} train model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value', ybottom_k, ytop_k)
+        graph_information_k_value(f'{header_name} train model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value')
     else:
-        graph_information_epsr_value(f'{header_name} train model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value', ybottom_epsr, ytop_epsr)
+        graph_information_epsr_value(f'{header_name} train model', 'Actual ' f'{header_name} value', 'Predicted ' f'{header_name} value')
 
     plt.savefig('./multiple-linear-regression-figures/prediction_train_' f'{header_name}.png')
 
-def train_test_model(header):
-    x = df[gives_x_all_param_header()]
-    y = df[header]
+def train_test_model(target, make_graph=True, calculate=True):
 
-    pipe = Pipeline([('scaler', StandardScaler()), ('mul_linear_reg', linear_model.LinearRegression())])
-    pipe.fit(x, y)
+    # Read the data
+    predictors = list(set(list(df.columns)) - set(result_columns))
+    df[predictors] = df[predictors] / df[predictors].max()
 
-    # creating train and test sets
-    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_procent, test_size=test_procent, random_state=ran_seed)
+    x = df[predictors].values
+    y = df[target].values
+
+    # Train gets the train_ratio of the data set (train = 80%, test = 20% - af det fulde datasæt)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=1 - train_ratio, random_state=ran_seed)
+
+    # Both Validation and Test get 50% each of the remainder (val = 10%, test = 10% - af det fulde datasæt)
+    x_val, x_test, y_val, y_test = train_test_split(x_test, y_test, test_size=test_ratio / (test_ratio + validation_ratio), random_state=ran_seed)
+
+    x_all, y_all = np.concatenate((x_train, x_val)), np.concatenate((y_train, y_val))
+
 
     # creating a regression model
     # model = LinearRegression()
-    model = Pipeline([('scaler', StandardScaler()), ('mul_linear_reg', linear_model.LinearRegression())])
+    model = Pipeline([
+        ('scaler', StandardScaler()),
+        ('mul_linear_reg', linear_model.LinearRegression())
+    ])
 
     # fitting the model
-    model.fit(x_train, y_train)
+    model.fit(x_all, y_all)
 
     # making predictions
     predictions_test = model.predict(x_test)
-    predictions_train = model.predict(x_train)
+    predictions_train = model.predict(x_all)
 
-    plt_graph_train(y_train, predictions_train, header)
-    plt_graph_test(y_test, predictions_test, header)
+    if make_graph:
+        plt_graph_train(y_all, predictions_train, header)
+        plt_graph_test(y_test, predictions_test, header)
 
-def dynamic_train_test_model(header):
-    x = df[gives_x_all_param_header()]
-    y = df[header]
+    if calculate:
+        r2_train = r2_score(y_all, predictions_train)
+        rmse_train = mean_squared_error(y_all, predictions_train, squared=False)
+        mae_train = mean_absolute_error(y_all, predictions_train)
 
-    # creating train and test sets
-    x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=train_procent, test_size=test_procent, random_state=ran_seed)
+        r2_test = r2_score(y_test, predictions_test)
+        rmse_test = mean_squared_error(y_test, predictions_test, squared=False)
+        mae_test = mean_absolute_error(y_test, predictions_test)
 
-    # creating a regression model
-    #model = LinearRegression()
-    model = Pipeline([('scaler', StandardScaler()), ('mul_linear_reg', linear_model.LinearRegression())])
-
-    # fitting the model
-    model.fit(x_train, y_train)
-
-    # making predictions
-    predictions_test = model.predict(x_test)
-    predictions_train = model.predict(x_train)
-
-    r2_train = r2_score(y_train, predictions_train)
-    rmse_train = mean_squared_error(y_train, predictions_train, squared=False)
-    mae_train = mean_absolute_error(y_train, predictions_train)
-
-    r2_test = r2_score(y_test, predictions_test)
-    rmse_test = mean_squared_error(y_test, predictions_test, squared=False)
-    mae_test = mean_absolute_error(y_test, predictions_test)
-
-    return [r2_train, rmse_train, mae_train, r2_test, rmse_test, mae_test]
+        return [r2_train, rmse_train, mae_train, r2_test, rmse_test, mae_test]
 
 def update_dict(dict, header, list_data):
     l_train = dict[header + '_train']
@@ -164,22 +149,23 @@ def find_stats(dict, header):
 
 # importing data
 df = pd.read_csv('../data_processing/raw_data/final_final_final.csv')
-y_head = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
+result_columns = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
 results = dict()
-rounds = 50
+#rounds = 1
 file = open('./multiple-linear-regression-figures-results.csv', 'w')
 file.write('ID;Max;Min;Avg\n')
 
-for header in y_head:
+for header in result_columns:
+    print('\n' + header + ':')
     results[header + '_train'] = []
     results[header + '_test'] = []
-    train_test_model(header)
-    print('\n' + header + ':')
+    list_data = train_test_model(header, make_graph=True, calculate=True)
+    update_dict(results, header, list_data)
 
-    for j in range(rounds):
-        print("\r" f'{j + 1} / {rounds}', end='')
-        list_data = dynamic_train_test_model(header)
-        update_dict(results, header, list_data)
+    #for j in range(rounds):
+    #    print("\r" f'{j + 1} / {rounds}', end='')
+    #    list_data = dynamic_train_test_model(header)
+    #    update_dict(results, header, list_data)
 
     res = find_stats(results, header)
     file.writelines(res)
