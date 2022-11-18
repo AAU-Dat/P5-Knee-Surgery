@@ -6,11 +6,12 @@ import scipy as sp
 from numpy.random import RandomState, SeedSequence
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
+from sklearn.decomposition import PCA
 from scipy.constants._codata import val
 from sklearn import linear_model
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 
 matplotlib.use('Agg')
 
@@ -90,20 +91,41 @@ def train_test_model(target, make_graph=True, calculate=True):
 
     x_all, y_all = np.concatenate((x_train, x_val)), np.concatenate((y_train, y_val))
 
-
     # creating a regression model
-    # model = LinearRegression()
-    model = Pipeline([
+    mul_reg_model = Pipeline([
         ('scaler', StandardScaler()),
+        ('pca', PCA()),
         ('mul_linear_reg', linear_model.LinearRegression())
     ])
 
+    # Making list with all the steps
+    list_param = []
+    for i in range(50, 276, 1):
+        list_param.append(i)
+
+    param_grid = {'pca__n_components': list_param}
+
+    # Grid search
+    grid_search = GridSearchCV(mul_reg_model, param_grid, cv=5, scoring='r2', n_jobs=4, verbose=3)
+
+    # Fit the model
+    results = grid_search.fit(x_all, y_all)
+
+    print('Best score: ', results.best_score_)
+    print('Best parameters: ', results.best_params_)
+
+    best_model = Pipeline([
+        ('scaler', StandardScaler()),
+        ('pca', PCA(n_components=results.best_params_['pca__n_components'])),
+        ('mul_linear_reg', linear_model.LinearRegression(n_jobs=4))
+    ])
+
     # fitting the model
-    model.fit(x_all, y_all)
+    best_model.fit(x_all, y_all)
 
     # making predictions
-    predictions_test = model.predict(x_test)
-    predictions_train = model.predict(x_all)
+    predictions_test = best_model.predict(x_test)
+    predictions_train = best_model.predict(x_all)
 
     if make_graph:
         plt_graph_train(y_all, predictions_train, header)
@@ -113,18 +135,20 @@ def train_test_model(target, make_graph=True, calculate=True):
         r2_train = r2_score(y_all, predictions_train)
         rmse_train = mean_squared_error(y_all, predictions_train, squared=False)
         mae_train = mean_absolute_error(y_all, predictions_train)
+        best_params_train = results.best_params_['pca__n_components']
 
         r2_test = r2_score(y_test, predictions_test)
         rmse_test = mean_squared_error(y_test, predictions_test, squared=False)
         mae_test = mean_absolute_error(y_test, predictions_test)
+        best_params_test = results.best_params_['pca__n_components']
 
-        return [r2_train, rmse_train, mae_train, r2_test, rmse_test, mae_test]
+        return [r2_train, rmse_train, mae_train, best_params_train, r2_test, rmse_test, mae_test, best_params_test]
 
 def update_dict(dict, header, list_data):
     l_train = dict[header + '_train']
     l_test = dict[header + '_test']
-    l_train.append({'R2': list_data[0], 'RMSE': list_data[1], 'MAE': list_data[2]})
-    l_test.append({'R2': list_data[3], 'RMSE': list_data[4], 'MAE': list_data[5]})
+    l_train.append({'R2': list_data[0], 'RMSE': list_data[1], 'MAE': list_data[2], 'PARAM': list_data[3]})
+    l_test.append({'R2': list_data[4], 'RMSE': list_data[5], 'MAE': list_data[6], 'PARAM': list_data[7]})
 
 def get_stats(header, list):
     return f'{header};{np.max(list)};{np.min(list)};{np.mean(list)}\n'
@@ -136,8 +160,10 @@ def find_stats(dict, header):
     r2_test = [x['R2'] for x in dict[header + '_test']]
     rmse_test = [x['RMSE'] for x in dict[header + '_test']]
     mae_test = [x['MAE'] for x in dict[header + '_test']]
+    param = [x['PARAM'] for x in dict[header + '_train']]
 
     res = []
+    res.append(f'{header};{str(param[0])} \n')
     res.append(get_stats(header + '_train_R2', r2_train))
     res.append(get_stats(header + '_train_RMSE', rmse_train))
     res.append(get_stats(header + '_train_MAE', mae_train))
@@ -147,8 +173,9 @@ def find_stats(dict, header):
     return res
 
 
-# importing data
-df = pd.read_csv('../data_processing/raw_data/final_final_final.csv')
+# importing data and converting to float32
+df = pd.read_csv('../data_processing/raw_data/final_final_final.csv').astype(np.float32)
+
 result_columns = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
 results = dict()
 #rounds = 1
