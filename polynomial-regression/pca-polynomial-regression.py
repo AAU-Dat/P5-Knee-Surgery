@@ -15,8 +15,6 @@ matplotlib.use('Agg')
 ran_seed = 69
 
 # Constants to change train test split
-# train_procent   = 0.80
-# test_procent    = 0.20
 train_ratio = 0.8
 test_ratio = 0.1
 validation_ratio = 0.1
