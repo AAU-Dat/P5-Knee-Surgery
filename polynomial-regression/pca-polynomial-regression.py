@@ -38,15 +38,6 @@ ytop_epsr   = 0.30
 ACL_k, ACL_epsr, PCL_k, PCL_epsr = 'ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr'
 MCL_k, MCL_epsr, LCL_k, LCL_epsr = 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr'
 
-# This function make sure that y has all the 276 columns
-def gives_x_all_param_header():
-    x = []
-    for i in range(1, 23):
-        x.extend(['trans_x_' + str(i), 'trans_y_' + str(i), 'trans_z_' + str(i), 'rot_z_' + str(i),
-                  'rot_x_' + str(i), 'rot_y_' + str(i), 'F_x_' + str(i), 'F_y_' + str(i), 'F_z_' + str(i),
-                  'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
-    return x
-
 def graph_information_k_value(title, xlable, ylable):
     plt.title(title)
     plt.xlabel(xlable)
