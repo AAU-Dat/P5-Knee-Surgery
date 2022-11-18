@@ -63,3 +63,95 @@ Highest r_2: {'mode': 'test', 'r_2': 0.9117801753765439, 'mae': 1158.02521050756
 Highest MAE: {'mode': 'test', 'r_2': 0.9117801753765439, 'mae': 1158.0252105075635, 'mse': 2732661.730123883, 'estimators': 40, 'max_features': 0.9415900896540941, 'ligament': 'ACL_k'}
 Highest MSE: {'mode': 'test', 'r_2': 0.9117801753765439, 'mae': 1158.0252105075635, 'mse': 2732661.730123883, 'estimators': 40, 'max_features': 0.9415900896540941, 'ligament': 'ACL_k'}
 
+----
+Mode: train, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'train', 'r_2': 0.20458924467440098, 'mae': 4198.174226451469, 'rmse': 4924.982558005089, 'estimators': 6, 'max_features': 0.6640180160100657, 'min_sample_split': 0.5718535293867719, 'max_depth': 4, 'ligament': 'ACL_k'}
+Highest MAE: {'mode': 'train', 'r_2': 0.20458924467440098, 'mae': 4198.174226451469, 'rmse': 4924.982558005089, 'estimators': 6, 'max_features': 0.6640180160100657, 'min_sample_split': 0.5718535293867719, 'max_depth': 4, 'ligament': 'ACL_k'}
+Highest RMSE: {'mode': 'train', 'r_2': 0.20458924467440098, 'mae': 4198.174226451469, 'rmse': 4924.982558005089, 'estimators': 6, 'max_features': 0.6640180160100657, 'min_sample_split': 0.5718535293867719, 'max_depth': 4, 'ligament': 'ACL_k'}
+
+Mode: test, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'test', 'r_2': 0.20478980273351743, 'mae': 4204.990484861723, 'rmse': 4922.603167101197, 'estimators': 6, 'max_features': 0.6640180160100657, 'min_sample_split': 0.5718535293867719, 'max_depth': 4, 'ligament': 'ACL_k'}
+Highest MAE: {'mode': 'test', 'r_2': 0.1957616653657731, 'mae': 4202.191041389681, 'rmse': 4950.467818358136, 'estimators': 1, 'max_features': 0.547918654238402, 'min_sample_split': 0.253340545923256, 'max_depth': 2, 'ligament': 'ACL_k'}
+Highest RMSE: {'mode': 'test', 'r_2': 0.20478980273351743, 'mae': 4204.990484861723, 'rmse': 4922.603167101197, 'estimators': 6, 'max_features': 0.6640180160100657, 'min_sample_split': 0.5718535293867719, 'max_depth': 4, 'ligament': 'ACL_k'}
+----
+
+Mode: train, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'train', 'r_2': 0.20388222872898265, 'mae': 4192.79718070451, 'rmse': 4930.531058568082, 'estimators': 5, 'max_features': 0.6872837308177095, 'min_sample_split': 0.5091742869800266, 'max_depth': 4, 'ligament': 'ACL_k'}
+Highest MAE: {'mode': 'train', 'r_2': 0.20388222872898265, 'mae': 4192.79718070451, 'rmse': 4930.531058568082, 'estimators': 5, 'max_features': 0.6872837308177095, 'min_sample_split': 0.5091742869800266, 'max_depth': 4, 'ligament': 'ACL_k'}
+Highest RMSE: {'mode': 'train', 'r_2': 0.20388222872898265, 'mae': 4192.79718070451, 'rmse': 4930.531058568082, 'estimators': 5, 'max_features': 0.6872837308177095, 'min_sample_split': 0.5091742869800266, 'max_depth': 4, 'ligament': 'ACL_k'}
+
+Mode: test, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'test', 'r_2': 0.20357568704521334, 'mae': 4170.786820782653, 'rmse': 4912.728674865335, 'estimators': 5, 'max_features': 0.6872837308177095, 'min_sample_split': 0.5091742869800266, 'max_depth': 4, 'ligament': 'ACL_k'}
+Highest MAE: {'mode': 'test', 'r_2': 0.20357568704521334, 'mae': 4170.786820782653, 'rmse': 4912.728674865335, 'estimators': 5, 'max_features': 0.6872837308177095, 'min_sample_split': 0.5091742869800266, 'max_depth': 4, 'ligament': 'ACL_k'}
+Highest RMSE: {'mode': 'test', 'r_2': 0.20357568704521334, 'mae': 4170.786820782653, 'rmse': 4912.728674865335, 'estimators': 5, 'max_features': 0.6872837308177095, 'min_sample_split': 0.5091742869800266, 'max_depth': 4, 'ligament': 'ACL_k'}
+
+Mode: train, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'train', 'r_2': 0.7907863405143362, 'mae': 0.029800310530305806, 'rmse': 0.03745096880205263, 'estimators': 5, 'max_features': 0.8359644496064209, 'min_sample_split': 0.41053460175347817, 'max_depth': 4, 'ligament': 'ACL_epsr'}
+Highest MAE: {'mode': 'train', 'r_2': 0.7907863405143362, 'mae': 0.029800310530305806, 'rmse': 0.03745096880205263, 'estimators': 5, 'max_features': 0.8359644496064209, 'min_sample_split': 0.41053460175347817, 'max_depth': 4, 'ligament': 'ACL_epsr'}
+Highest RMSE: {'mode': 'train', 'r_2': 0.7907863405143362, 'mae': 0.029800310530305806, 'rmse': 0.03745096880205263, 'estimators': 5, 'max_features': 0.8359644496064209, 'min_sample_split': 0.41053460175347817, 'max_depth': 4, 'ligament': 'ACL_epsr'}
+
+Mode: test, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'test', 'r_2': 0.7939192447068337, 'mae': 0.02968588400863302, 'rmse': 0.03711816772615135, 'estimators': 5, 'max_features': 0.8359644496064209, 'min_sample_split': 0.41053460175347817, 'max_depth': 4, 'ligament': 'ACL_epsr'}
+Highest MAE: {'mode': 'test', 'r_2': 0.7939192447068337, 'mae': 0.02968588400863302, 'rmse': 0.03711816772615135, 'estimators': 5, 'max_features': 0.8359644496064209, 'min_sample_split': 0.41053460175347817, 'max_depth': 4, 'ligament': 'ACL_epsr'}
+Highest RMSE: {'mode': 'test', 'r_2': 0.7939192447068337, 'mae': 0.02968588400863302, 'rmse': 0.03711816772615135, 'estimators': 5, 'max_features': 0.8359644496064209, 'min_sample_split': 0.41053460175347817, 'max_depth': 4, 'ligament': 'ACL_epsr'}
+
+Mode: train, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'train', 'r_2': 0.02390575791389593, 'mae': 8645.341296394614, 'rmse': 10025.169805520005, 'estimators': 4, 'max_features': 0.945585637386383, 'min_sample_split': 0.6108973442240444, 'max_depth': 3, 'ligament': 'PCL_k'}
+Highest MAE: {'mode': 'train', 'r_2': 0.02390575791389593, 'mae': 8645.341296394614, 'rmse': 10025.169805520005, 'estimators': 4, 'max_features': 0.945585637386383, 'min_sample_split': 0.6108973442240444, 'max_depth': 3, 'ligament': 'PCL_k'}
+Highest RMSE: {'mode': 'train', 'r_2': 0.02390575791389593, 'mae': 8645.341296394614, 'rmse': 10025.169805520005, 'estimators': 4, 'max_features': 0.945585637386383, 'min_sample_split': 0.6108973442240444, 'max_depth': 3, 'ligament': 'PCL_k'}
+
+Mode: test, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'test', 'r_2': 0.023846075764673347, 'mae': 8668.032456446026, 'rmse': 10044.398552388502, 'estimators': 4, 'max_features': 0.945585637386383, 'min_sample_split': 0.6108973442240444, 'max_depth': 3, 'ligament': 'PCL_k'}
+Highest MAE: {'mode': 'test', 'r_2': 0.023846075764673347, 'mae': 8668.032456446026, 'rmse': 10044.398552388502, 'estimators': 4, 'max_features': 0.945585637386383, 'min_sample_split': 0.6108973442240444, 'max_depth': 3, 'ligament': 'PCL_k'}
+Highest RMSE: {'mode': 'test', 'r_2': 0.023846075764673347, 'mae': 8668.032456446026, 'rmse': 10044.398552388502, 'estimators': 4, 'max_features': 0.945585637386383, 'min_sample_split': 0.6108973442240444, 'max_depth': 3, 'ligament': 'PCL_k'}
+
+Mode: train, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'train', 'r_2': 0.7045517263013441, 'mae': 0.036190495035360884, 'rmse': 0.04448106742098824, 'estimators': 10, 'max_features': 0.5170777598606677, 'min_sample_split': 0.5384498350562158, 'max_depth': 3, 'ligament': 'PCL_epsr'}
+Highest MAE: {'mode': 'train', 'r_2': 0.7045517263013441, 'mae': 0.036190495035360884, 'rmse': 0.04448106742098824, 'estimators': 10, 'max_features': 0.5170777598606677, 'min_sample_split': 0.5384498350562158, 'max_depth': 3, 'ligament': 'PCL_epsr'}
+Highest RMSE: {'mode': 'train', 'r_2': 0.7045517263013441, 'mae': 0.036190495035360884, 'rmse': 0.04448106742098824, 'estimators': 10, 'max_features': 0.5170777598606677, 'min_sample_split': 0.5384498350562158, 'max_depth': 3, 'ligament': 'PCL_epsr'}
+
+Mode: test, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'test', 'r_2': 0.7086683247370842, 'mae': 0.03593269397093187, 'rmse': 0.04421949257261958, 'estimators': 10, 'max_features': 0.5170777598606677, 'min_sample_split': 0.5384498350562158, 'max_depth': 3, 'ligament': 'PCL_epsr'}
+Highest MAE: {'mode': 'test', 'r_2': 0.7086683247370842, 'mae': 0.03593269397093187, 'rmse': 0.04421949257261958, 'estimators': 10, 'max_features': 0.5170777598606677, 'min_sample_split': 0.5384498350562158, 'max_depth': 3, 'ligament': 'PCL_epsr'}
+Highest RMSE: {'mode': 'test', 'r_2': 0.7086683247370842, 'mae': 0.03593269397093187, 'rmse': 0.04421949257261958, 'estimators': 10, 'max_features': 0.5170777598606677, 'min_sample_split': 0.5384498350562158, 'max_depth': 3, 'ligament': 'PCL_epsr'}
+
+Mode: train, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'train', 'r_2': 0.13776372459683228, 'mae': 3568.8354704636245, 'rmse': 4199.581894620492, 'estimators': 10, 'max_features': 0.8863077640431618, 'min_sample_split': 0.3998000983746966, 'max_depth': 4, 'ligament': 'MCL_k'}
+Highest MAE: {'mode': 'train', 'r_2': 0.13776372459683228, 'mae': 3568.8354704636245, 'rmse': 4199.581894620492, 'estimators': 10, 'max_features': 0.8863077640431618, 'min_sample_split': 0.3998000983746966, 'max_depth': 4, 'ligament': 'MCL_k'}
+Highest RMSE: {'mode': 'train', 'r_2': 0.13776372459683228, 'mae': 3568.8354704636245, 'rmse': 4199.581894620492, 'estimators': 10, 'max_features': 0.8863077640431618, 'min_sample_split': 0.3998000983746966, 'max_depth': 4, 'ligament': 'MCL_k'}
+
+Mode: test, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'test', 'r_2': 0.1398071724605393, 'mae': 3553.6645218532176, 'rmse': 4184.563407187689, 'estimators': 10, 'max_features': 0.8863077640431618, 'min_sample_split': 0.3998000983746966, 'max_depth': 4, 'ligament': 'MCL_k'}
+Highest MAE: {'mode': 'test', 'r_2': 0.1398071724605393, 'mae': 3553.6645218532176, 'rmse': 4184.563407187689, 'estimators': 10, 'max_features': 0.8863077640431618, 'min_sample_split': 0.3998000983746966, 'max_depth': 4, 'ligament': 'MCL_k'}
+Highest RMSE: {'mode': 'test', 'r_2': 0.1398071724605393, 'mae': 3553.6645218532176, 'rmse': 4184.563407187689, 'estimators': 10, 'max_features': 0.8863077640431618, 'min_sample_split': 0.3998000983746966, 'max_depth': 4, 'ligament': 'MCL_k'}
+
+Mode: train, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'train', 'r_2': 0.6997187962375467, 'mae': 0.03164716600411643, 'rmse': 0.04163416651025212, 'estimators': 5, 'max_features': 0.8583770805779902, 'min_sample_split': 0.2217036220819984, 'max_depth': 2, 'ligament': 'MCL_epsr'}
+Highest MAE: {'mode': 'train', 'r_2': 0.6997187962375467, 'mae': 0.03164716600411643, 'rmse': 0.04163416651025212, 'estimators': 5, 'max_features': 0.8583770805779902, 'min_sample_split': 0.2217036220819984, 'max_depth': 2, 'ligament': 'MCL_epsr'}
+Highest RMSE: {'mode': 'train', 'r_2': 0.6997187962375467, 'mae': 0.03164716600411643, 'rmse': 0.04163416651025212, 'estimators': 5, 'max_features': 0.8583770805779902, 'min_sample_split': 0.2217036220819984, 'max_depth': 2, 'ligament': 'MCL_epsr'}
+
+Mode: test, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'test', 'r_2': 0.6992713122895147, 'mae': 0.03146458554897919, 'rmse': 0.04126931450964478, 'estimators': 5, 'max_features': 0.8583770805779902, 'min_sample_split': 0.2217036220819984, 'max_depth': 2, 'ligament': 'MCL_epsr'}
+Highest MAE: {'mode': 'test', 'r_2': 0.6992713122895147, 'mae': 0.03146458554897919, 'rmse': 0.04126931450964478, 'estimators': 5, 'max_features': 0.8583770805779902, 'min_sample_split': 0.2217036220819984, 'max_depth': 2, 'ligament': 'MCL_epsr'}
+Highest RMSE: {'mode': 'test', 'r_2': 0.6992713122895147, 'mae': 0.03146458554897919, 'rmse': 0.04126931450964478, 'estimators': 5, 'max_features': 0.8583770805779902, 'min_sample_split': 0.2217036220819984, 'max_depth': 2, 'ligament': 'MCL_epsr'}
+
+Mode: train, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'train', 'r_2': 0.21581781024049418, 'mae': 2178.3591344163056, 'rmse': 2594.174126981951, 'estimators': 9, 'max_features': 0.978641385035862, 'min_sample_split': 0.48472276744100323, 'max_depth': 4, 'ligament': 'LCL_k'}
+Highest MAE: {'mode': 'train', 'r_2': 0.21581781024049418, 'mae': 2178.3591344163056, 'rmse': 2594.174126981951, 'estimators': 9, 'max_features': 0.978641385035862, 'min_sample_split': 0.48472276744100323, 'max_depth': 4, 'ligament': 'LCL_k'}
+Highest RMSE: {'mode': 'train', 'r_2': 0.21581781024049418, 'mae': 2178.3591344163056, 'rmse': 2594.174126981951, 'estimators': 9, 'max_features': 0.978641385035862, 'min_sample_split': 0.48472276744100323, 'max_depth': 4, 'ligament': 'LCL_k'}
+
+Mode: test, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'test', 'r_2': 0.22889448808327906, 'mae': 2178.8482615559797, 'rmse': 2591.53495620141, 'estimators': 9, 'max_features': 0.978641385035862, 'min_sample_split': 0.48472276744100323, 'max_depth': 4, 'ligament': 'LCL_k'}
+Highest MAE: {'mode': 'test', 'r_2': 0.22889448808327906, 'mae': 2178.8482615559797, 'rmse': 2591.53495620141, 'estimators': 9, 'max_features': 0.978641385035862, 'min_sample_split': 0.48472276744100323, 'max_depth': 4, 'ligament': 'LCL_k'}
+Highest RMSE: {'mode': 'test', 'r_2': 0.22889448808327906, 'mae': 2178.8482615559797, 'rmse': 2591.53495620141, 'estimators': 9, 'max_features': 0.978641385035862, 'min_sample_split': 0.48472276744100323, 'max_depth': 4, 'ligament': 'LCL_k'}
+
+Mode: train, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'train', 'r_2': 0.8530496977392167, 'mae': 0.013788322540928159, 'rmse': 0.017514275414273348, 'estimators': 3, 'max_features': 0.5980731892147941, 'min_sample_split': 0.25074687687956776, 'max_depth': 3, 'ligament': 'LCL_epsr'}
+Highest MAE: {'mode': 'train', 'r_2': 0.8530496977392167, 'mae': 0.013788322540928159, 'rmse': 0.017514275414273348, 'estimators': 3, 'max_features': 0.5980731892147941, 'min_sample_split': 0.25074687687956776, 'max_depth': 3, 'ligament': 'LCL_epsr'}
+Highest RMSE: {'mode': 'train', 'r_2': 0.8530496977392167, 'mae': 0.013788322540928159, 'rmse': 0.017514275414273348, 'estimators': 3, 'max_features': 0.5980731892147941, 'min_sample_split': 0.25074687687956776, 'max_depth': 3, 'ligament': 'LCL_epsr'}
+
+Mode: test, TestSize: 0.2, Configurations: 3
+Highest r_2: {'mode': 'test', 'r_2': 0.8576895077556969, 'mae': 0.013690161808987482, 'rmse': 0.017335618497645918, 'estimators': 3, 'max_features': 0.5980731892147941, 'min_sample_split': 0.25074687687956776, 'max_depth': 3, 'ligament': 'LCL_epsr'}
+Highest MAE: {'mode': 'test', 'r_2': 0.8576895077556969, 'mae': 0.013690161808987482, 'rmse': 0.017335618497645918, 'estimators': 3, 'max_features': 0.5980731892147941, 'min_sample_split': 0.25074687687956776, 'max_depth': 3, 'ligament': 'LCL_epsr'}
+Highest RMSE: {'mode': 'test', 'r_2': 0.8576895077556969, 'mae': 0.013690161808987482, 'rmse': 0.017335618497645918, 'estimators': 3, 'max_features': 0.5980731892147941, 'min_sample_split': 0.25074687687956776, 'max_depth': 3, 'ligament': 'LCL_epsr'}
+
