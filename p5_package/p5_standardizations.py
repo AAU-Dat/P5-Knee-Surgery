@@ -3,14 +3,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
+df = pd.read_csv('../data_processing/final_final_final.csv')
+df32 = pd.read_csv('../data_processing/final_final_final.csv').astype(np.float32)
+
 
 # gives header names of the data as is read as a string array
 def gives_header_array():
     header_array = ['0', 'ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
     for i in range(1, 24):
         header_array.extend(['trans_x_' + str(i), 'trans_y_' + str(i), 'trans_z_' + str(i), 'rot_z_' + str(i),
-                  'rot_x_' + str(i), 'rot_y_' + str(i), 'F_x_' + str(i), 'F_y_' + str(i), 'F_z_' + str(i),
-                  'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
+                             'rot_x_' + str(i), 'rot_y_' + str(i), 'F_x_' + str(i), 'F_y_' + str(i), 'F_z_' + str(i),
+                             'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
     return header_array
 
 
@@ -73,13 +76,7 @@ def save_results(target_index, target_data, predicted_data, save_string):
     file.close()
 
 
-def test_save_results():
-    print('testing save_results(target_index, target_data, predicted_data, save_string)')
-
-
-
 # settings for train_val_test_split
-
 train_ratio = 0.7
 test_ratio = 0.1
 val_ratio = 0.2
@@ -116,7 +113,11 @@ def test_train_val_test_split():
         print('1 and 2 is not the same FUCK')
 
 
+def save_results_from_search(results, save_string):
+    resdf = pd.DataFrame(results.cv_results_)
+    resdf.to_csv(save_string, mode='a')
+
 
 if __name__ == '__main__':
     test_train_val_test_split()
-    test_save_results()
+    # test_save_results()
