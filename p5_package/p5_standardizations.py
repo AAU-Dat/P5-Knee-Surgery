@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 
 
 # gives header names of the data as is read as a string array
@@ -57,7 +58,6 @@ def print_a_graph(target_data, prediction_data, target_index, save_string):
     plt.close()
 
 
-# pending on how we want to write to the file
 # save the results of r2 rmse mae in a file at save_string
 def save_results(target_index, target_data, predicted_data, save_string):
     header = gives_header_array()
@@ -73,6 +73,11 @@ def save_results(target_index, target_data, predicted_data, save_string):
     file.close()
 
 
+def test_save_results():
+    print('testing save_results(target_index, target_data, predicted_data, save_string)')
+
+
+
 # settings for train_val_test_split
 
 train_ratio = 0.7
@@ -80,8 +85,9 @@ test_ratio = 0.1
 val_ratio = 0.2
 random_seed = 69
 
+
 # returns the train val test split for all methods
-def train_val_test_split(data):
+def train_val_test_split(data, target_index):
     header = gives_header_array()
     x = data[header[9:285]]
     y = data[header[target_index]]
@@ -94,4 +100,23 @@ def train_val_test_split(data):
 
     return x_train, y_train, x_val, y_val, x_test, y_test
 # example of how to use it
-# x_train, y_train, x_val, y_val, x_test, y_test = train_val_test_split(your_dataframe)
+# x_train, y_train, x_val, y_val, x_test, y_test = train_val_test_split(your_dataframe, 1)
+
+
+def test_train_val_test_split():
+    print('testing train_val_test_split(data, target_index)')
+    df = pd.read_csv('../data_processing/final_final_final.csv')
+
+    x_train1, y_train1, x_val1, y_val1, x_test1, y_test1 = train_val_test_split(df, 1)
+    x_train2, y_train2, x_val2, y_val2, x_test2, y_test2 = train_val_test_split(df, 1)
+
+    if x_train1.equals(x_train2) and y_train1.equals(y_train2) and x_val1.equals(x_val2) and y_val1.equals(y_val2) and x_test1.equals(x_test2) and y_test1.equals(y_test2):
+        print('1 and 2 is the same nice')
+    else:
+        print('1 and 2 is not the same FUCK')
+
+
+
+if __name__ == '__main__':
+    test_train_val_test_split()
+    test_save_results()
