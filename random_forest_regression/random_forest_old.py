@@ -282,7 +282,7 @@ def investigate_min_sample_split(ligament_index_range, min_sample_split_range):
             write_list_to_csv(results, path_of_results)
 
 
-train_single_forest(estimators=100, max_features=1.0, ligament_index=0, test_size=0.2, max_depth=20, bootstrap=True, min_samples_leaf=25, min_samples_split=50)
+train_single_forest(estimators=100, max_features=1.0, ligament_index=0, test_size=0.2, max_depth=None, bootstrap=True, min_samples_leaf=1, min_samples_split=100)
 #investigate_hyperparameters(n_trees_range=(10, 201, 10), max_depth_range=(1, 51, 5), min_sample_split_range=(2, 11, 1), max_features_range=(0.2, 1.2, 0.2), ligament_index_range=(0, 8))
 #investigate_sub_100_trees(n_trees_range=(10, 100, 10), ligament_index_range=(0, 1, 1), min_samples_leaf_range=(1, 101, 10))
 #investigate_max_leaf_nodes((0,1,1), max_leaf_nodes_range=(1500, 2001, 500))
