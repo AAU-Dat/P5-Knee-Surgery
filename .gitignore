@@ -13,5 +13,15 @@
 # mac osx file
 *.DS_Store
 
+<<<<<<< HEAD
 *.xml
 *.iml
+=======
+# Images
+*.png
+*.PNG
+*.jpg
+*.JPG
+
+webhook.txt
+>>>>>>> main
