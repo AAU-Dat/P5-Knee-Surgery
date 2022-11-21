@@ -12,3 +12,6 @@
 
 # mac osx file
 *.DS_Store
+
+*.xml
+*.iml
