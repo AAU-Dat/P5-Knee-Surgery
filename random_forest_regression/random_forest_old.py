@@ -283,13 +283,19 @@ def investigate_min_sample_split(ligament_index_range, min_sample_split_range):
 
 
 def make_default_forests():
+    list_param = []
+    for i in range(50, 276, 1):
+        list_param.append(i)
+
+    param_grid = {'pca__n_components': list_param}
+
     for ligament_index in range(0,8):
         x = df[gives_x_all_param_header()]
         y = df[ligament_headers[ligament_index]]
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=random.seed(69))
 
         time_before_train = time()
-        pipe = Pipeline([('scaler', StandardScaler()), ('RFR', RFR(verbose=3, n_jobs=8))])
+        pipe = Pipeline([('scaler', StandardScaler()), ('pca', PCA()), ('RFR', RFR(verbose=3, n_jobs=8))])
         pipe.fit(x_train, y_train)
 
         y_predict_test = pipe.predict(x_test)
