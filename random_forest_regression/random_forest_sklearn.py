@@ -53,7 +53,7 @@ def main(ligaments_range):
         pipe = Pipeline([('scaler', StandardScaler()), ("RFRegressor", RFRegressor)])
 
         n_estimators = [int(x) for x in np.linspace(start=20, stop=150, num=int(130 / 5))]
-        max_features = [float(x) for x in np.linspace(start=0.001, stop=1.0, num=50)]
+        max_features = [float(x) for x in np.linspace(start=0.30, stop=1.0, num=50)]
         max_depth = [int(x) for x in np.linspace(start=10, stop=120, num=int(110 / 5))]
         min_samples_split = [int(x) for x in np.linspace(start=2, stop=20, num=19)]  # keep in here
         min_samples_leaf = [int(x) for x in np.linspace(start=1, stop=20, num=20)]  # reduced to 20
@@ -64,7 +64,7 @@ def main(ligaments_range):
                        'RFRegressor__min_samples_split': min_samples_split,
                        'RFRegressor__min_samples_leaf': min_samples_leaf}
 
-        rf_randomSearch = RandomizedSearchCV(estimator=pipe, param_distributions=random_grid, scoring="neg_root_mean_squared_error", n_iter=50, cv=5, verbose=3, n_jobs=-1)
+        rf_randomSearch = RandomizedSearchCV(estimator=pipe, param_distributions=random_grid, scoring="neg_root_mean_squared_error", n_iter=50, cv=ShuffleSplit(n_splits=1, test_size=0.2), verbose=3, n_jobs=-1)
         result = rf_randomSearch.fit(x_all, y_all)
 
         final_regressor = RFR(

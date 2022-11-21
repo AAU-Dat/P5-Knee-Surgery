@@ -282,6 +282,33 @@ def investigate_min_sample_split(ligament_index_range, min_sample_split_range):
             write_list_to_csv(results, path_of_results)
 
 
+def make_default_forests():
+    for ligament_index in range(0,8):
+        x = df[gives_x_all_param_header()]
+        y = df[ligament_headers[ligament_index]]
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=random.seed(69))
+
+        time_before_train = time()
+        pipe = Pipeline([('scaler', StandardScaler()), ('RFR', RFR(verbose=3, n_jobs=8))])
+        pipe.fit(x_train, y_train)
+
+        y_predict_test = pipe.predict(x_test)
+        y_predict_train = pipe.predict(x_train)
+
+        r2_train = r2_score(y_train, y_predict_train)
+        mae_train = mean_absolute_error(y_train, y_predict_train)
+        rmse_train = mean_squared_error(y_train, y_predict_train, squared=False)
+        r2_test = r2_score(y_test, y_predict_test)
+        mae_test = mean_absolute_error(y_test, y_predict_test)
+        rmse_test = mean_squared_error(y_test, y_predict_test, squared=False)
+
+        file = open('./default_scores.csv', 'a')
+        if ligament_index == 0:
+            file.writelines("ID;r2_train;r2_test;mae_test;mae_train;rmse_test;rmse_train\n")
+        file.writelines(f"{ligament_headers[ligament_index]};{r2_train};{r2_test};{mae_test};{mae_train};{rmse_test};{rmse_train}\n\n")
+        file.close()
+
+
 train_single_forest(estimators=100, max_features=1.0, ligament_index=0, test_size=0.2, max_depth=None, bootstrap=True, min_samples_leaf=1, min_samples_split=100)
 #investigate_hyperparameters(n_trees_range=(10, 201, 10), max_depth_range=(1, 51, 5), min_sample_split_range=(2, 11, 1), max_features_range=(0.2, 1.2, 0.2), ligament_index_range=(0, 8))
 #investigate_sub_100_trees(n_trees_range=(10, 100, 10), ligament_index_range=(0, 1, 1), min_samples_leaf_range=(1, 101, 10))
