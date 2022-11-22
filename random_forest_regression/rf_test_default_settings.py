@@ -13,7 +13,7 @@ from scipy.stats import randint
 import pandas as pd
 import numpy as np
 
-df = pd.read_csv('../data_processing/final_final_final.csv').astype('float32')
+df = pd.read_csv('../data_processing/final_final_final.csv').astype(np.float32)
 ligament_headers = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
 rfr_criterion = ["squared_error", "poisson"]
 train_ratio = 0.8
