@@ -61,13 +61,13 @@ def test_dimensionality_reduction(ligament_header, calculate=False, write_to_fil
 
     # Making list with all the steps
     list_param = []
-    for i in range(100, 261, 20):
+    for i in range(60, 261, 20):
         list_param.append(i)
 
     param_grid = {"pca__n_components": list_param}
 
     # Grid search
-    rf_grid_search = GridSearchCV(pipe, param_grid, cv=3, scoring='r2', n_jobs=5, verbose=3)
+    rf_grid_search = GridSearchCV(pipe, param_grid, cv=5, scoring='r2', n_jobs=5, verbose=3)
 
     # Fit the model
     result = rf_grid_search.fit(x_all, y_all)
