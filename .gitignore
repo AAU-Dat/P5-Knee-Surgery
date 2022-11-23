@@ -2,7 +2,8 @@
 
 [Dd]ata
 *.csv
-
+*.png
+*.rar
 # Editor enviroments
 .[Pp]ython
 .[Ii]dea
@@ -11,3 +12,16 @@
 
 # mac osx file
 *.DS_Store
+
+<<<<<<< HEAD
+*.xml
+*.iml
+=======
+# Images
+*.png
+*.PNG
+*.jpg
+*.JPG
+
+webhook.txt
+>>>>>>> main
