@@ -116,8 +116,8 @@ def save_results_from_search(results, save_string):
 
 
 def print_predicted_data(target_data, prediction, save_string):
-    dataframe_target = pd.DataFrame(target_data, 'target')
-    dataframe_prediction = pd.DataFrame(prediction, 'prediction')
+    dataframe_target = pd.DataFrame(target_data)
+    dataframe_prediction = pd.DataFrame(prediction)
     print_it = pd.concat([dataframe_target, dataframe_prediction])
     print_it.to_csv(save_string, mode='a')
 
@@ -162,6 +162,5 @@ def max_min_of_each_column(data):
 
 if __name__ == '__main__':
     df = pd.read_csv('../data_processing/final_final_final.csv')
-
     # test_train_val_test_split()
     max_min_of_each_column(df)
