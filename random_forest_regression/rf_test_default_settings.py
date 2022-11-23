@@ -12,6 +12,7 @@ from sklearn.preprocessing import StandardScaler
 from scipy.stats import randint
 import pandas as pd
 import numpy as np
+from enum import Enum
 
 df = pd.read_csv('../data_processing/final_final_final.csv').astype(np.float32)
 ligament_headers = ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
@@ -30,10 +31,10 @@ def gives_x_all_param_header():
     return x
 
 
-def make_concatenated_split(df):
+def make_concatenated_split(df, target_header):
     # Read the data
     x = df[gives_x_all_param_header()]
-    y = df[ligament_headers]
+    y = df[target_header]  # FEJL. Den tager lige nu alle ligament headers. Den skal kun tage den ene
     # Train gets the train_ratio of the data set
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=1 - train_ratio, random_state=69)
     # Both Validation and Test get 50% each of the remainder
@@ -63,7 +64,7 @@ def write_scores_to_file(val_scores, test_scores, ligament, filepath, header="",
 
 
 def test_default_tree(ligament, filepath, make_header=False):
-    x_all, y_all, x_test, y_test = make_concatenated_split(df)
+    x_all, y_all, x_test, y_test = make_concatenated_split(df, ligament)
     validation_regressor = Pipeline([('scaler', StandardScaler()), ("RFRegressor", RFR(n_jobs=6, verbose=3))])
     validation_regressor.fit(x_all, y_all)
 
@@ -77,8 +78,8 @@ def test_default_tree(ligament, filepath, make_header=False):
 
 
 # Writes default hyperparameter test scores for all 8 attributes.
-ligament_being_tested = "ACL_k"#for ligament_being_tested in ligament_headers:
-test_default_tree(ligament_being_tested, filepath="./default_scores.csv", make_header=True)
+for ligament_index in ligament_headers:
+    test_default_tree(ligament_index, filepath="./default_scores.csv", make_header=True)
 
 
 
