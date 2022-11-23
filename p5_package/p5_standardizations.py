@@ -59,7 +59,7 @@ def print_a_graph(target_data, prediction_data, target_index, save_string):
     # plt.ylim(y_axis_settings[target_index][0], y_axis_settings[target_index][1])
 
     # saves/shows graph
-    plt.show()
+    # plt.show()
     plt.savefig(save_string)
     plt.close()
 
