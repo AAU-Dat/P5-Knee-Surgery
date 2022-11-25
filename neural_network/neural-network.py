@@ -17,13 +17,13 @@ from datetime import datetime
 
 # Backend and style for pyplot
 matplotlib.use('Agg')
-style.use('seaborn')
+style.use('seaborn-v0_8')
 
 # Date and Time for when running this file
-now = datetime.now().strftime("%d-%b-%Y at %H:%M")
+# now = datetime.now().strftime("%d-%b-%Y at %H:%M")
 
 # Relevant path directories
-LOG_DIR = f"Test ran on {now}"
+LOG_DIR = f"results"
 MODEL_DIR = f"{LOG_DIR}/models/"
 RESULT_DIR = f"{LOG_DIR}/"
 
@@ -177,13 +177,13 @@ def evaluate_model(target, x_test, y_test, x_train, y_train, hypermodel):
     # Create table row with results
     intermediate_results = {'Test_R2': [f"{round_result(test_r2 * 100)}%"],
                             'Train_R2': [f"{round_result(train_r2 * 100)}%"],
-                            'Difference R2': [f"{r2_difference} |"],
+                            'Difference R2': [f"{r2_difference}  |  "],
                             'Test_MAE': [f"{round_result(test_mae)}"],
                             'Train_MAE': [f"{round_result(train_mae)}"],
-                            'Difference MAE': [f"{mae_difference} |"],
+                            'Difference MAE': [f"{mae_difference}  |  "],
                             'Test_RMSE': [f"{round_result(test_rmse)}"],
                             'Train_RMSE': [f"{round_result(train_rmse)}"],
-                            'Difference RMSE': [f"{rmse_difference} |"]}
+                            'Difference RMSE': [f"{rmse_difference}  |"]}
 
     return [intermediate_results, [expected_y_test, predicted_y_test]]
 
@@ -194,16 +194,16 @@ def evaluate_model(target, x_test, y_test, x_train, y_train, hypermodel):
 
 def make_graph(target, expected_data, predicted_data):
     # Prepare regression line
-    values = linear_model.LinearRegression()
-    values.fit(expected_data.reshape(-1, 1), predicted_data)
-    regression_line = values.predict(expected_data.reshape(-1, 1))
+    regression = linear_model.LinearRegression()
+    regression.fit(expected_data, predicted_data)
+    regression_line = regression.predict(expected_data)
 
     # Set up graph
-    plt.scatter(expected_data, predicted_data, label='Data Points', c='r', alpha=0.6, s=5)
+    plt.scatter(expected_data, predicted_data, label='Data Points', c='r', alpha=0.5, s=5)
     plt.plot(expected_data, regression_line, label='Best Fit Line', c='b', linewidth=2)
-    plt.title(f"Expected and Actual {target} Values")
+    plt.title(f"Predicted and Actual {target} Values")
     plt.xlabel('Actual Values')
-    plt.ylabel('Expected Values')
+    plt.ylabel('Predicted Values')
     plt.legend()
 
     # Save and close figure
@@ -237,12 +237,12 @@ def handle_model(target):
     # Build and train the best Model on the Train data, test on the Validate data
     best_model = train_hypermodel(target, tuner, x_train, y_train, x_val, y_val)
 
-    # Evaluate the model using cross-validation on the Test data and return the result
+    # Evaluate the model using cross-validation on the Test data and get the test data
     results, test_data = evaluate_model(target, x_test, y_test, x_train, y_train, best_model)
 
     # Prints and saves the graph to the target model folder
     expected_y, predicted_y = test_data
-    make_graph(target, expected_y, predicted_y)
+    make_graph(target, expected_y.reshape(-1, 1), predicted_y.reshape(-1, 1))
 
     return results
 
@@ -250,14 +250,14 @@ def handle_model(target):
 
 
 # Create, train and evaluate all eight models
-acl_epsr = pd.DataFrame(handle_model(ACL_epsr), index=[f"{ACL_epsr} |"])
-pcl_epsr = pd.DataFrame(handle_model(PCL_epsr), index=[f"{PCL_epsr} |"])
-mcl_epsr = pd.DataFrame(handle_model(MCL_epsr), index=[f"{MCL_epsr} |"])
-lcl_epsr = pd.DataFrame(handle_model(LCL_epsr), index=[f"{LCL_epsr} |"])
-acl_k = pd.DataFrame(handle_model(ACL_k), index=[f"{ACL_k}    |"])
-pcl_k = pd.DataFrame(handle_model(PCL_k), index=[f"{PCL_k}    |"])
-mcl_k = pd.DataFrame(handle_model(MCL_k), index=[f"{MCL_k}    |"])
-lcl_k = pd.DataFrame(handle_model(LCL_k), index=[f"{LCL_k}    |"])
+acl_epsr = pd.DataFrame(handle_model(ACL_epsr), index=[f"{ACL_epsr}  |  "])
+pcl_epsr = pd.DataFrame(handle_model(PCL_epsr), index=[f"{PCL_epsr}  |  "])
+mcl_epsr = pd.DataFrame(handle_model(MCL_epsr), index=[f"{MCL_epsr}  |  "])
+lcl_epsr = pd.DataFrame(handle_model(LCL_epsr), index=[f"{LCL_epsr}  |  "])
+acl_k = pd.DataFrame(handle_model(ACL_k), index=[f"{ACL_k}     |  "])
+pcl_k = pd.DataFrame(handle_model(PCL_k), index=[f"{PCL_k}     |  "])
+mcl_k = pd.DataFrame(handle_model(MCL_k), index=[f"{MCL_k}     |  "])
+lcl_k = pd.DataFrame(handle_model(LCL_k), index=[f"{LCL_k}     |  "])
 
 # Concatenate intermediate results
 result = pd.concat([acl_epsr, pcl_epsr, mcl_epsr, lcl_epsr, acl_k, pcl_k, mcl_k, lcl_k])
