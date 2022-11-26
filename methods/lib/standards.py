@@ -7,10 +7,39 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 """
-To use any of the methods in this file, simply insert the following line in your imports:
-from p5_package.standards import *
+To use any of the methods in this file, insert ONE of the following lines in your imports or simply select the relevant
+methods to import:
 
-The star represents everything - and thus all methods.
+1) from p5_package.standards import *
+   (imports everything in standards - how to use: get_result_columns())
+   
+2) from p5_package import standards
+   (imports standards library - how to use: standards.get_result_columns())
+
+------------------------------------------------------------------------------------------------------------------------
+
+Implementation instructions (temporary):
+----------------------------------------
+1. Clean up and collect everything together in ONE script (if you haven't already), and name it "your_method_name.py".
+
+2. Move the script to the methods folder (this is a necessary evil, in order to use this library without any elaborate
+   hacks - the problem is that the library folder needs to be in the same file execution path).
+   
+3. Import the following line in your script:
+   from p5_package import standards
+
+4. import the data file like this:
+   data = pd.read_csv('./data.csv', index_col=0)
+
+5. Use the following file paths as main outputs and adapt to your use case:
+   LOG_DIR = f"results/your_method_name"           # the main path for your method output
+   MODEL_DIR = f"{LOG_DIR}/models/"                # the path for the specific models
+   RESULT_DIR = f"{LOG_DIR}/"                      # the path for the result csv file
+   
+6. If in doubt, have a look at "neural_network.py" - it is fully implemented. Alternatively just ask Jamie.
+
+NB! These instructions (below and including the dashes) will be removed, once all methods has been successfully
+    implemented.
 """
 
 matplotlib.use('Agg')                           # backend for pyplot, makes it possible to save graphs to a png format
@@ -46,7 +75,7 @@ def get_train_validation_test_split(x, y):
     # get train (approx 89% of the remainder) and validation (approx 11% of the remainder) split
     x_train, x_val, y_train, y_val = train_test_split(x_rem, y_rem, random_state=seed,
                                                       train_size=train_ratio / (train_ratio + validation_ratio))
-    return [x_train, y_train], [x_val, y_val], [x_test, y_test]
+    return x_train, y_train, x_val, y_val, x_test, y_test
 
 
 def evaluate_model(expected_y, predicted_y):

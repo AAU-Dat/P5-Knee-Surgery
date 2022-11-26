@@ -7,22 +7,23 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.regularizers import L2
 from keras_tuner import Hyperband
-from lib.standards import *
+from lib import standards
 
 # Relevant path directories
-LOG_DIR = f"results/neural_network"             # the main path for neural network output
-MODEL_DIR = f"{LOG_DIR}/models/"                # the path for the specific models
-RESULT_DIR = f"{LOG_DIR}/"                      # the path for the result csv file
+LOG_DIR = f"results/neural_network"              # the main path for neural network output
+MODEL_DIR = f"{LOG_DIR}/models/"                 # the path for the specific models
+RESULT_DIR = f"{LOG_DIR}/"                       # the path for the result csv file
 
 # Preparing the Data Set and relevant constants
-data = pd.read_csv('./data.csv', index_col=0)   # data set without the index column
-result_columns = get_result_columns()           # a list of the label column names, in string format
-input_shape = (276,)                            # input is a row of entries (284 [total cols] - 8 [result cols] = 276)
-seed = get_seed()                               # to get reproducible data splits and hyperparameters
+data = pd.read_csv('./data.csv', index_col=0)    # data set without the index column
+result_columns = standards.get_result_columns()  # a list of the label column names, in string format
+input_shape = (276,)                             # input is a row of entries (284 [total cols] - 8 [result cols] = 276)
+seed = standards.get_seed()                      # to get reproducible data splits and hyperparameters
 
 # Configure the Search Space
-max_layers = 10                                 # the maximum amount of hidden layers in any model
-max_epochs = 100                                # the maximum amount of epochs allowed in any model
+max_layers = 10                                  # the maximum amount of hidden layers in any model
+max_epochs = 10                                 # the maximum amount of epochs allowed in any model
+objective = 'val_root_mean_squared_error'        # the objective to optimise the model for
 HP = kt.HyperParameters()
 HP.Int('number_of_layers', min_value=1, max_value=max_layers)
 HP.Choice('learning_rate', values=[1e-2, 1e-3, 1e-4])
@@ -30,7 +31,7 @@ HP.Choice('l2', values=[0.01, 0.001, 0.1, 0.005, 0.05])
 HP.Choice('activation', values=['relu', 'tanh', 'sigmoid', 'softplus'])
 HP.Choice('loss', values=['mean_squared_error', 'mean_absolute_error', 'mean_squared_logarithmic_error'])
 HP.Boolean('use_dropout')
-HP.Fixed('metrics', value='mean_absolute_error')
+HP.Fixed('metrics', value='root_mean_squared_error')
 for i in range(max_layers):
     HP.Int(name=f"units_layer_{i + 1}", min_value=32, max_value=2048, step=32)
     HP.Float(name=f"dropout_{i + 1}", min_value=0.0, max_value=0.5, default=0.25, step=0.05)
@@ -69,14 +70,12 @@ def build_model(hp):
 def hyperparameter_tuning(x_train, y_train, x_val, y_val):
     # Create the Hyperband tuner with the objective to minimise the error on the validation data
     tuner = Hyperband(
-        build_model, objective='val_mean_absolute_error', max_epochs=max_epochs, hyperparameters=HP,
+        build_model, objective=objective, max_epochs=max_epochs, hyperparameters=HP,
         factor=3, hyperband_iterations=1, directory=LOG_DIR, project_name='P5-Knee-Surgery', seed=seed
     )
 
-    # TODO: change to RMSE if possible
-
     # Set up early stopping
-    stop_early = keras.callbacks.EarlyStopping(monitor='val_mean_absolute_error', patience=3)
+    stop_early = keras.callbacks.EarlyStopping(monitor=objective, patience=3)
 
     # Search for the best model and its hyperparameters
     tuner.search(x_train, y_train, epochs=max_epochs, validation_data=(x_val, y_val),
@@ -99,8 +98,8 @@ def train_hypermodel(target, tuner, x_train, y_train, x_val, y_val):
 
     # Find the best epoch from the first training
     # TODO: change to RMSE if possible
-    val_mae_per_epoch = history.history['val_mean_absolute_error']
-    best_epoch = val_mae_per_epoch.index(min(val_mae_per_epoch)) + 1
+    best_val_per_epoch = history.history[objective]
+    best_epoch = best_val_per_epoch.index(min(best_val_per_epoch)) + 1
 
     # Build the best hypermodel from the best hyperparameters
     hypermodel = tuner.hypermodel.build(best_hp)
@@ -123,7 +122,7 @@ def train_hypermodel(target, tuner, x_train, y_train, x_val, y_val):
 def save_test_data(target, expected_y, predicted_y):
     test_data = {'Expected': expected_y, 'Predicted': predicted_y}
     data_frame = pd.DataFrame(test_data)
-    save_csv(data_frame, f"{MODEL_DIR}{target}/test-data.csv")
+    standards.save_csv(data_frame, f"{MODEL_DIR}{target}/test-data.csv")
 
 
 def handle_evaluation(x_train, y_train, x_test, y_test, hypermodel):
@@ -137,8 +136,8 @@ def handle_evaluation(x_train, y_train, x_test, y_test, hypermodel):
     save_test_data(target, expected_y_test, predicted_y_test)
 
     # Run evaluation on both the Train data and Test data
-    train_evaluation = evaluate_model(expected_y_train, predicted_y_train)
-    test_evaluation = evaluate_model(expected_y_test, predicted_y_test)
+    train_evaluation = standards.evaluate_model(expected_y_train, predicted_y_train)
+    test_evaluation = standards.evaluate_model(expected_y_test, predicted_y_test)
 
     return train_evaluation, test_evaluation, [expected_y_test, predicted_y_test]
 
@@ -157,10 +156,7 @@ def handle_model(target):
     x, y = data[predictors].values, data[target].values
 
     # Train, Test and Validation data split
-    train, validation, test = get_train_validation_test_split(x, y)
-    x_train, y_train = train
-    x_validation, y_validation = validation
-    x_test, y_test = test
+    x_train, y_train, x_validation, y_validation, x_test, y_test = standards.get_train_validation_test_split(x, y)
 
     # Build a Tuner and search for Hyperparameters on the Train data, test on the Validation data
     tuner = hyperparameter_tuning(x_train, y_train, x_validation, y_validation)
@@ -169,13 +165,13 @@ def handle_model(target):
     best_model = train_hypermodel(target, tuner, x_train, y_train, x_validation, y_validation)
 
     # Handle the evaluation of the model on both train and test data
-    train_evaluation, test_evaluation, test_data = handle_evaluation(x_train, y_train, x_test, y_test, best_model)
+    train_eval, test_eval, test_data = handle_evaluation(x_train, y_train, x_test, y_test, best_model)
     actual_y, predicted_y = test_data
 
     # Make a scatter plot graph with the actual and predicted values
-    create_and_save_graph(target, actual_y, predicted_y, f"{MODEL_DIR}{target}/{target}-plot.png")
+    standards.create_and_save_graph(target, actual_y, predicted_y, f"{MODEL_DIR}{target}/{target}-plot.png")
 
-    results = get_evaluation_results(train_evaluation, test_evaluation)
+    results = standards.get_evaluation_results(train_eval, test_eval)
     return results
 
 
@@ -197,4 +193,4 @@ result = acl_k
 
 # Print and save results
 print(result.to_string())
-save_csv(result, f"{RESULT_DIR}result.csv")
+standards.save_csv(result, f"{RESULT_DIR}result.csv")
