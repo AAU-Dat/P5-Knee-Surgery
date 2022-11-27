@@ -120,25 +120,30 @@ def get_evaluation_results(train_evaluation, test_evaluation):
 # <editor-fold desc="Graph">
 
 
-def create_and_save_graph(target, expected_data, predicted_data, path):
+def create_and_save_graph(target, actual_values, predicted_values, path):
     """ Creates a scatter plot graph with the expected data and predicted data. """
-    # TODO: Change regression_line to y=x
+    fig, ax = plt.subplots()
+    ax.scatter(actual_values, predicted_values, s=5, c='b', alpha=0.25, label='Data Points')
 
-    # Prepare regression line
-    regression = linear_model.LinearRegression()
-    regression.fit(expected_data, predicted_data)
-    regression_line = regression.predict(expected_data)
+    min_lim, max_lim = min(actual_values), max(actual_values)
+    five_percent = (max_lim - min_lim) * .05
+    min_lim, max_lim = min_lim - five_percent, max_lim + five_percent
 
-    # Set up graph
-    plt.scatter(expected_data, predicted_data, label='Data Points', c='r', alpha=0.5, s=5)
-    plt.plot(expected_data, regression_line, label='Best Fit Line', c='b', linewidth=2)
+    plt.ylim(min_lim, max_lim)
+
+    lims = [
+        np.min([ax.get_xlim(), ax.get_ylim()]),  # min of both axes
+        np.max([ax.get_xlim(), ax.get_ylim()]),  # max of both axes
+    ]
+
+    ax.plot(lims, lims, linewidth=2, c='r', label='Best Fit Line')
+
     plt.title(f"Predicted and Actual {target} Values")
     plt.xlabel('Actual Values')
     plt.ylabel('Predicted Values')
     plt.legend()
 
-    # Save and close figure
-    plt.savefig(f"../{path}")
+    plt.savefig(path, dpi=300)
     plt.close()
 
 
@@ -149,7 +154,7 @@ def create_and_save_graph(target, expected_data, predicted_data, path):
 
 def save_csv(data, path):
     """ This saves a given Pandas DataFrame to a given file path in a CSV format. """
-    data.to_csv(f"../{path}")
+    data.to_csv(f"./{path}")
 
 
 # </editor-fold>

@@ -7,6 +7,7 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.regularizers import L2
 from keras_tuner import Hyperband
+from keras.metrics import RootMeanSquaredError
 from lib import standards
 
 # Relevant path directories
@@ -22,16 +23,15 @@ seed = standards.get_seed()                      # to get reproducible data spli
 
 # Configure the Search Space
 max_layers = 10                                  # the maximum amount of hidden layers in any model
-max_epochs = 10                                 # the maximum amount of epochs allowed in any model
+max_epochs = 100                                 # the maximum amount of epochs allowed in any model
 objective = 'val_root_mean_squared_error'        # the objective to optimise the model for
 HP = kt.HyperParameters()
 HP.Int('number_of_layers', min_value=1, max_value=max_layers)
 HP.Choice('learning_rate', values=[1e-2, 1e-3, 1e-4])
 HP.Choice('l2', values=[0.01, 0.001, 0.1, 0.005, 0.05])
 HP.Choice('activation', values=['relu', 'tanh', 'sigmoid', 'softplus'])
-HP.Choice('loss', values=['mean_squared_error', 'mean_absolute_error', 'mean_squared_logarithmic_error'])
+HP.Choice('loss', values=['mean_squared_error', 'mean_absolute_error'])
 HP.Boolean('use_dropout')
-HP.Fixed('metrics', value='root_mean_squared_error')
 for i in range(max_layers):
     HP.Int(name=f"units_layer_{i + 1}", min_value=32, max_value=2048, step=32)
     HP.Float(name=f"dropout_{i + 1}", min_value=0.0, max_value=0.5, default=0.25, step=0.05)
@@ -58,7 +58,7 @@ def build_model(hp):
 
     # Set up Compiler
     model.compile(optimizer=Adam(learning_rate=hp.get('learning_rate')),
-                  loss=hp.get('loss'), metrics=[hp.get('metrics')])
+                  loss=hp.get('loss'), metrics=[RootMeanSquaredError()])
     return model
 
 
@@ -70,8 +70,8 @@ def build_model(hp):
 def hyperparameter_tuning(x_train, y_train, x_val, y_val):
     # Create the Hyperband tuner with the objective to minimise the error on the validation data
     tuner = Hyperband(
-        build_model, objective=objective, max_epochs=max_epochs, hyperparameters=HP,
-        factor=3, hyperband_iterations=1, directory=LOG_DIR, project_name='P5-Knee-Surgery', seed=seed
+        build_model, objective=kt.Objective(objective, direction='min'), max_epochs=max_epochs, hyperparameters=HP,
+        factor=3, hyperband_iterations=3, directory=LOG_DIR, project_name='P5-Knee-Surgery', seed=seed
     )
 
     # Set up early stopping
@@ -120,12 +120,12 @@ def train_hypermodel(target, tuner, x_train, y_train, x_val, y_val):
 
 
 def save_test_data(target, expected_y, predicted_y):
-    test_data = {'Expected': expected_y, 'Predicted': predicted_y}
+    test_data = {'Expected': expected_y.tolist(), 'Predicted': predicted_y.tolist()}
     data_frame = pd.DataFrame(test_data)
     standards.save_csv(data_frame, f"{MODEL_DIR}{target}/test-data.csv")
 
 
-def handle_evaluation(x_train, y_train, x_test, y_test, hypermodel):
+def handle_evaluation(target, x_train, y_train, x_test, y_test, hypermodel):
     # Prepare the expected and predicted data set
     expected_y_train, predicted_y_train = y_train, hypermodel.predict(x_train)
     expected_y_test, predicted_y_test = y_test, hypermodel.predict(x_test)
@@ -158,14 +158,14 @@ def handle_model(target):
     # Train, Test and Validation data split
     x_train, y_train, x_validation, y_validation, x_test, y_test = standards.get_train_validation_test_split(x, y)
 
-    # Build a Tuner and search for Hyperparameters on the Train data, test on the Validation data
+    # Build a Tuner and search for hyperparameters on the Train data, test on the Validation data
     tuner = hyperparameter_tuning(x_train, y_train, x_validation, y_validation)
 
     # Build and train the best Model on the Train data, test on the Validation data
     best_model = train_hypermodel(target, tuner, x_train, y_train, x_validation, y_validation)
 
     # Handle the evaluation of the model on both train and test data
-    train_eval, test_eval, test_data = handle_evaluation(x_train, y_train, x_test, y_test, best_model)
+    train_eval, test_eval, test_data = handle_evaluation(target, x_train, y_train, x_test, y_test, best_model)
     actual_y, predicted_y = test_data
 
     # Make a scatter plot graph with the actual and predicted values
