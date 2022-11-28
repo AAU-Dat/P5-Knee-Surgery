@@ -10,10 +10,10 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 To use any of the methods in this file, insert ONE of the following lines in your imports or simply select the relevant
 methods to import:
 
-1) from p5_package.standards import *
+1) from lib.standards import *
    (imports everything in standards - how to use: get_result_columns())
    
-2) from p5_package import standards
+2) from lib import standards
    (imports standards library - how to use: standards.get_result_columns())
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ Implementation instructions (temporary):
    hacks - the problem is that the library folder needs to be in the same file execution path).
    
 3. Import the following line in your script:
-   from p5_package import standards
+   from lib import standards
 
 4. import the data file like this:
    data = pd.read_csv('./data.csv', index_col=0)
