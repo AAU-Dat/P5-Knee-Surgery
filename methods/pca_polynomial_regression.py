@@ -1,43 +1,16 @@
 import numpy as np
 import pandas as pd
-import matplotlib
-import matplotlib.pyplot as plt
 from sklearn import linear_model
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import mean_squared_error
 from lib.standards import *
-matplotlib.use('Agg')
 
-# Constants t ochange random seed
+# Gets int from
 ran_seed = get_seed()
-
-# Constants to change train test split
-train_ratio = 0.8
-test_ratio = 0.1
-validation_ratio = 0.1
-
-# Constants to change style in graph
-MarkerSize = 0.1
-DotColor = 'Blue'
-
-# Constants to change x & y axises in the saved graphs
-xleft_k     = -2500
-xright_k    = 30000
-ybottom_k   = -2500
-ytop_k      = 30000
-
-xleft_epsr  = -0.10
-xright_epsr = 0.30
-ybottom_epsr= -0.10
-ytop_epsr   = 0.30
-
-# Read the data
-ACL_k, ACL_epsr, PCL_k, PCL_epsr = 'ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr'
-MCL_k, MCL_epsr, LCL_k, LCL_epsr = 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr'
 
 # Path constants
 LOG_DIR = f"results/your_method_name"  # the main path for your method output
@@ -73,7 +46,7 @@ def handle_model(target):
     param_grid = {'pca__n_components': list_param}
 
     # Grid search
-    grid_search = GridSearchCV(poly_reg_model, param_grid, cv=5, scoring='r2', n_jobs=1, verbose=3)
+    grid_search = GridSearchCV(poly_reg_model, param_grid, cv=5, scoring='neg_root_mean_squared_error', n_jobs=1, verbose=3)
 
     # Fit the model
     results = grid_search.fit(x_train, y_train)
@@ -100,7 +73,8 @@ def handle_model(target):
     test_evaluation = evaluate_model(y_test, predictions_test)
 
     create_and_save_graph(target, y_test, predictions_test, f'{MODEL_DIR}{target}/{target}-plot.png')
-    get_evaluation_results(train_evaluation, test_evaluation)
+
+    return get_evaluation_results(train_evaluation, test_evaluation)
 
 
 # importing data and converting it to float32
