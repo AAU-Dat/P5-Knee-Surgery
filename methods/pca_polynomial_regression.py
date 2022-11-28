@@ -9,7 +9,7 @@ from sklearn.decomposition import PCA
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.model_selection import train_test_split, GridSearchCV
-from p5_package.standards import *
+from lib.standards import *
 matplotlib.use('Agg')
 
 # Constants t ochange random seed
@@ -62,7 +62,7 @@ def handle_model(target):
         ('scaler', StandardScaler()),
         ('pca', PCA()),
         ('pca_poly_reg', PolynomialFeatures(degree=2, include_bias=False)),
-        ('lin_reg', LinearRegression(n_jobs=-1))
+        ('lin_reg', LinearRegression(n_jobs=1))
     ])
 
     # Making list with all the steps
@@ -73,7 +73,7 @@ def handle_model(target):
     param_grid = {'pca__n_components': list_param}
 
     # Grid search
-    grid_search = GridSearchCV(poly_reg_model, param_grid, cv=5, scoring='r2', n_jobs=-1, verbose=3)
+    grid_search = GridSearchCV(poly_reg_model, param_grid, cv=5, scoring='r2', n_jobs=1, verbose=3)
 
     # Fit the model
     results = grid_search.fit(x_train, y_train)
@@ -86,7 +86,7 @@ def handle_model(target):
         ('scaler', StandardScaler()),
         ('pca', PCA(n_components=results.best_params_['pca__n_components'])),
         ('pca_poly_reg', PolynomialFeatures(degree=2, include_bias=False)),
-        ('lin_reg', LinearRegression(n_jobs=-1))
+        ('lin_reg', LinearRegression(n_jobs=1))
     ])
 
     # fitting the model
