@@ -126,20 +126,20 @@ def save_test_data(target, expected_y, predicted_y):
 
 
 def handle_evaluation(target, x_train, y_train, x_test, y_test, hypermodel):
-    # Prepare the expected and predicted data set
-    expected_y_train, predicted_y_train = y_train, hypermodel.predict(x_train)
-    expected_y_test, predicted_y_test = y_test, hypermodel.predict(x_test)
+    # Prepare the actual and predicted data set
+    actual_y_train, predicted_y_train = y_train, hypermodel.predict(x_train)
+    actual_y_test, predicted_y_test = y_test, hypermodel.predict(x_test)
 
     # Reshape all sets to make sure that they are saved in a one dimensional list and save the test data
-    expected_y_train, predicted_y_train = expected_y_train.reshape(-1, 1), predicted_y_train.reshape(-1, 1)
-    expected_y_test, predicted_y_test = expected_y_test.reshape(-1, 1), predicted_y_test.reshape(-1, 1)
-    save_test_data(target, expected_y_test, predicted_y_test)
+    actual_y_train, predicted_y_train = actual_y_train.reshape(-1, 1), predicted_y_train.reshape(-1, 1)
+    actual_y_test, predicted_y_test = actual_y_test.reshape(-1, 1), predicted_y_test.reshape(-1, 1)
+    save_test_data(target, actual_y_test, predicted_y_test)
 
     # Run evaluation on both the Train data and Test data
-    train_evaluation = standards.evaluate_model(expected_y_train, predicted_y_train)
-    test_evaluation = standards.evaluate_model(expected_y_test, predicted_y_test)
+    train_evaluation = standards.evaluate_model(actual_y_train, predicted_y_train)
+    test_evaluation = standards.evaluate_model(actual_y_test, predicted_y_test)
 
-    return train_evaluation, test_evaluation, [expected_y_test, predicted_y_test]
+    return train_evaluation, test_evaluation, [actual_y_test, predicted_y_test]
 
 
 # </editor-fold>
@@ -171,25 +171,23 @@ def handle_model(target):
     # Make a scatter plot graph with the actual and predicted values
     standards.create_and_save_graph(target, actual_y, predicted_y, f"{MODEL_DIR}{target}/{target}-plot.png")
 
-    results = standards.get_evaluation_results(train_eval, test_eval)
-    return results
+    return standards.get_evaluation_results(train_eval, test_eval)
 
 
 # </editor-fold>
 
 # Create, train and evaluate all eight models
-# acl_epsr = pd.DataFrame(handle_model(ACL_epsr), index=["ACL_epsr"])
-# lcl_epsr = pd.DataFrame(handle_model(LCL_epsr), index=["LCL_epsr"])
-# mcl_epsr = pd.DataFrame(handle_model(MCL_epsr), index=["MCL_epsr"])
-# pcl_epsr = pd.DataFrame(handle_model(PCL_epsr), index=["PCL_epsr"])
+acl_epsr = pd.DataFrame(handle_model("ACL_epsr"), index=["ACL_epsr"])
+lcl_epsr = pd.DataFrame(handle_model("LCL_epsr"), index=["LCL_epsr"])
+mcl_epsr = pd.DataFrame(handle_model("MCL_epsr"), index=["MCL_epsr"])
+pcl_epsr = pd.DataFrame(handle_model("PCL_epsr"), index=["PCL_epsr"])
 acl_k = pd.DataFrame(handle_model("ACL_k"), index=["ACL_k"])
-# lcl_k = pd.DataFrame(handle_model("LCL_k"), index=["LCL_k"])
-# mcl_k = pd.DataFrame(handle_model("MCL_k"), index=["MCL_k}])
-# pcl_k = pd.DataFrame(handle_model("PCL_k"), index=["PCL_k"])
+lcl_k = pd.DataFrame(handle_model("LCL_k"), index=["LCL_k"])
+mcl_k = pd.DataFrame(handle_model("MCL_k"), index=["MCL_k"])
+pcl_k = pd.DataFrame(handle_model("PCL_k"), index=["PCL_k"])
 
 # Concatenate intermediate results
-# result = pd.concat([acl_epsr, lcl_epsr, mcl_epsr, pcl_epsr, acl_k, lcl_k, mcl_k, pcl_k])
-result = acl_k
+result = pd.concat([acl_epsr, lcl_epsr, mcl_epsr, pcl_epsr, acl_k, lcl_k, mcl_k, pcl_k])
 
 # Print and save results
 print(result.to_string())
