@@ -11,19 +11,14 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from scipy.stats import randint
 import pandas as pd
-import numpy as np
 from lib.standards import *
+
 
 LOG_DIR = f"results/random_forest"           # the main path for your method output
 MODEL_DIR = f"{LOG_DIR}/models/"                # the path for the specific models
 RESULT_DIR = f"{LOG_DIR}/"                      # the path for the result csv file
 
-#import tensorflow as tf
-#from fast_ml.utilities import display_all
-#from fast_ml.feature_selection import get_constant_features
-
-data = pd.read_csv('./data.csv', index_col=0).astype(np.float32)
-result_columns = get_result_columns()
+rand_seed = get_seed()
 
 def gives_x_all_param_header():
     x = []
@@ -34,19 +29,15 @@ def gives_x_all_param_header():
     return x
 
 
-#x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, shuffle=rand)
-
-rand = np.random.RandomState(69)
-
 def handle_model(target):
     # Set up and normalise the input
-    predictors = list(set(list(data.columns)) - set(result_columns))
-    data[predictors] = data[predictors] / data[predictors].max()  #Not used in RF yet. May remove.
+    #predictors = list(set(list(data.columns)) - set(result_columns))
+    #data[predictors] = data[predictors] / data[predictors].max()  #Not used in RF yet. May remove.
 
     # Set up the domain and label of the data set
-    x, y = data[predictors].values, data[target].values
+    x, y = data[gives_x_all_param_header()].values, data[target].values
 
-    x_train, y_train, x_test, y_test = get_train_test_split(x, y)
+    x_train, x_test, y_train, y_test = get_train_test_split(x, y)
     # all code below can be abstracted away in multiple functions.
 
     RFRegressor = RFR()
@@ -65,11 +56,9 @@ def handle_model(target):
                    'RFRegressor__min_samples_leaf': min_samples_leaf}
 
     rf_randomSearch = RandomizedSearchCV(estimator=pipe, param_distributions=random_grid,
-                                         scoring="neg_root_mean_squared_error", n_iter=1,
-                                         cv=ShuffleSplit(n_splits=1, test_size=0.2), verbose=3, n_jobs=-3)
+                                         scoring="neg_root_mean_squared_error", n_iter=50,
+                                         cv=ShuffleSplit(n_splits=1, test_size=0.2), verbose=3, n_jobs=-1)
 
-    print(x_train)
-    print(y_train)
 
     result = rf_randomSearch.fit(x_train, y_train)
 
@@ -85,20 +74,22 @@ def handle_model(target):
     final_pipe = Pipeline([('scaler', StandardScaler()), ("final_regressor", final_regressor)])
     final_pipe.fit(x_train, y_train)
 
-    y_predict_test = final_pipe.predict(x_test)
-    y_predict_train = final_pipe.predict(x_train)
+    predict_test = final_pipe.predict(x_test)
+    predict_train = final_pipe.predict(x_train)
 
-    train_evaluation = evaluate_model(y_train, y_predict_train)
-    test_evaluation = evalutate_model(y_test, y_predict_test)
+    train_evaluation = evaluate_model(y_train, predict_train)
+    test_evaluation = evaluate_model(y_test, predict_test)
 
-    create_and_save_graph(target, y_test, y_predict_test, f"{MODEL_DIR}{target}/{target}-plot.png")
+    create_and_save_graph(target, y_test, predict_test, f"{MODEL_DIR}{target}/{target}-plot.png")
 
-    return get_evalutation_results(train_evaluation, test_evaluation)
+    return get_evaluation_results(train_evaluation, test_evaluation)
 
+
+data = pd.read_csv('./data.csv', index_col=0).astype(np.float32)
+result_columns = get_result_columns()
 
 # Create, train and evaluate all eight models
 acl_epsr = pd.DataFrame(handle_model("ACL_epsr"), index=["ACL_epsr"])
-'''
 lcl_epsr = pd.DataFrame(handle_model("LCL_epsr"), index=["LCL_epsr"])
 mcl_epsr = pd.DataFrame(handle_model("MCL_epsr"), index=["MCL_epsr"])
 pcl_epsr = pd.DataFrame(handle_model("PCL_epsr"), index=["PCL_epsr"])
@@ -106,10 +97,10 @@ acl_k = pd.DataFrame(handle_model("ACL_k"), index=["ACL_k"])
 lcl_k = pd.DataFrame(handle_model("LCL_k"), index=["LCL_k"])
 mcl_k = pd.DataFrame(handle_model("MCL_k"), index=["MCL_k"])
 pcl_k = pd.DataFrame(handle_model("PCL_k"), index=["PCL_k"])
-'''
+
 # Concatenate intermediate results
-#result = pd.concat([acl_epsr, lcl_epsr, mcl_epsr, pcl_epsr, acl_k, lcl_k, mcl_k, pcl_k])
-result = acl_epsr
+result = pd.concat([acl_epsr, lcl_epsr, mcl_epsr, pcl_epsr, acl_k, lcl_k, mcl_k, pcl_k])
+
 # Print and save results
 print(result.to_string())
 save_csv(result, f"{RESULT_DIR}result.csv")
