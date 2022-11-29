@@ -149,7 +149,7 @@ def create_and_save_graph(target, actual_values, predicted_values, path):
     plt.legend()
 
     # Save and close out the graph, to avoid them cumulating
-    plt.savefig(path, dpi=300)
+    plt.savefig(f"./{path}", dpi=300)
     plt.close()
 
 
