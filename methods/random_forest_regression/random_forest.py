@@ -12,6 +12,8 @@ from sklearn.preprocessing import StandardScaler
 from scipy.stats import randint
 import pandas as pd
 import numpy as np
+from lib.standards import *
+
 #import tensorflow as tf
 #from fast_ml.utilities import display_all
 #from fast_ml.feature_selection import get_constant_features
