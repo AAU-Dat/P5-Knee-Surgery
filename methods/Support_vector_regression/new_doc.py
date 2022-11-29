@@ -5,24 +5,25 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
 import sys
-sys.path.append('C:\\Users\\houga\\Desktop\\Git_Projects\\P5-Knee-Surgery\\p5_package')
+project_path = 'C:\\Users\\houga\\Desktop\\uni\\P5-Knee-Surgery\\'
+sys.path.append(f'{project_path}p5_package')
 import p5_standardizations as p5
 
 
 # data
 df = pd.read_csv('../data_processing/final_final_final.csv').astype(np.float32)
 header = p5.gives_header_array()
-path = 'C:\\Users\\houga\\Desktop\\Git_Projects\\P5-Knee-Surgery\\Support_vector_regression\\'
+path = f'{project_path}Support_vector_regression\\'
 
 
-def main(target_index):
+def run_svr(target_index):
     x_all, y_all, x_test, y_test = p5.train_test_split(df, target_index)
 
     # Setup for grid search
     pipe = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR(max_iter=10000))])
 
     list = []
-    for i in range(50, 100, 50):
+    for i in range(100, 200, 100):
         list.append(i)
     parameter_grid = {'svc__C': list}
 
@@ -45,4 +46,9 @@ def main(target_index):
     p5.save_results(target_index, y_test, prediction, f'{path}svr_results.csv')
 
 
-main(1)
+def main():
+    for x in range(1, 9):
+        run_svr(x)
+
+
+main()

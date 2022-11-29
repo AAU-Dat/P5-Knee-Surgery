@@ -65,10 +65,10 @@ def handle_model(target):
         ('lin_reg', LinearRegression(n_jobs=4))
     ])
 
-    # fitting the model
+    # Fitting the model
     best_poly_reg_model.fit(x_train, y_train)
 
-    # making predictions
+    # Making predictions
     predictions_train = best_poly_reg_model.predict(x_train)
     predictions_test = best_poly_reg_model.predict(x_test)
 

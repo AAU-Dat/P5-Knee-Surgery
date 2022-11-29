@@ -116,8 +116,14 @@ def save_results_from_search(results, save_string):
 
 
 def print_predicted_data(target_data, prediction, save_string):
+    print('print_predicted_data DOSENT WORK\n'
+          'print_predicted_data DOSENT WORK\n'
+          'print_predicted_data DOSENT WORK\n'
+          'print_predicted_data DOSENT WORK\n'
+          'print_predicted_data DOSENT WORK\n'
+          'print_predicted_data DOSENT WORK\n')
     dataframe_target = pd.DataFrame(target_data)
-    dataframe_prediction = pd.DataFrame(prediction)
+    dataframe_prediction = pd.DataFrame(prediction, columns=['prediction'])
     print_it = pd.concat([dataframe_target, dataframe_prediction])
     print_it.to_csv(save_string, mode='a')
 
