@@ -85,16 +85,16 @@ result_columns = get_result_columns()
 
 # Create, train and evaluate all eight models
 acl_epsr = pd.DataFrame(handle_model("ACL_epsr"), index=["ACL_epsr"])
-'''lcl_epsr = pd.DataFrame(handle_model("LCL_epsr"), index=["LCL_epsr"])
+lcl_epsr = pd.DataFrame(handle_model("LCL_epsr"), index=["LCL_epsr"])
 mcl_epsr = pd.DataFrame(handle_model("MCL_epsr"), index=["MCL_epsr"])
 pcl_epsr = pd.DataFrame(handle_model("PCL_epsr"), index=["PCL_epsr"])
 acl_k = pd.DataFrame(handle_model("ACL_k"), index=["ACL_k"])
 lcl_k = pd.DataFrame(handle_model("LCL_k"), index=["LCL_k"])
 mcl_k = pd.DataFrame(handle_model("MCL_k"), index=["MCL_k"])
-pcl_k = pd.DataFrame(handle_model("PCL_k"), index=["PCL_k"])'''
+pcl_k = pd.DataFrame(handle_model("PCL_k"), index=["PCL_k"])
 
 # Concatenate intermediate results
-result = pd.concat([acl_epsr])
+result = pd.concat([acl_epsr, lcl_epsr, mcl_epsr, pcl_epsr, acl_k, lcl_k, mcl_k, pcl_k])
 # , lcl_epsr, mcl_epsr, pcl_epsr, acl_k, lcl_k, mcl_k, pcl_k
 # Print and save results
 print(result.to_string())

@@ -37,13 +37,13 @@ def handle_model(target):
     poly_reg_model = Pipeline([
         ('scaler', StandardScaler()),
         ('pca', PCA()),
-        ('pca_poly_reg', PolynomialFeatures(degree=2, include_bias=False)),
+        ('pca_poly_reg', PolynomialFeatures(degree=2, include_bias=False, interaction_only=True)),
         ('lin_reg', LinearRegression(n_jobs=4))
     ])
 
     # Making list with all the steps
     list_param = []
-    for i in range(50, 51, 1):
+    for i in range(70, 100, 1):
         list_param.append(i)
 
     param_grid = {'pca__n_components': list_param}
@@ -61,7 +61,7 @@ def handle_model(target):
     best_poly_reg_model = Pipeline([
         ('scaler', StandardScaler()),
         ('pca', PCA(n_components=results.best_params_['pca__n_components'])),
-        ('pca_poly_reg', PolynomialFeatures(degree=2, include_bias=False)),
+        ('pca_poly_reg', PolynomialFeatures(degree=2, include_bias=False, interaction_only=True)),
         ('lin_reg', LinearRegression(n_jobs=4))
     ])
 
@@ -86,16 +86,16 @@ result_columns = get_result_columns()
 
 # Create, train and evaluate all eight models
 acl_epsr = pd.DataFrame(handle_model("ACL_epsr"), index=["ACL_epsr"])
-'''lcl_epsr = pd.DataFrame(handle_model("LCL_epsr"), index=["LCL_epsr"])
+lcl_epsr = pd.DataFrame(handle_model("LCL_epsr"), index=["LCL_epsr"])
 mcl_epsr = pd.DataFrame(handle_model("MCL_epsr"), index=["MCL_epsr"])
 pcl_epsr = pd.DataFrame(handle_model("PCL_epsr"), index=["PCL_epsr"])
 acl_k = pd.DataFrame(handle_model("ACL_k"), index=["ACL_k"])
 lcl_k = pd.DataFrame(handle_model("LCL_k"), index=["LCL_k"])
 mcl_k = pd.DataFrame(handle_model("MCL_k"), index=["MCL_k"])
-pcl_k = pd.DataFrame(handle_model("PCL_k"), index=["PCL_k"])'''
+pcl_k = pd.DataFrame(handle_model("PCL_k"), index=["PCL_k"])
 
 # Concatenate intermediate results
-result = pd.concat([acl_epsr])
+result = pd.concat([acl_epsr, lcl_epsr, mcl_epsr, pcl_epsr, acl_k, lcl_k, mcl_k, pcl_k])
 # , lcl_epsr, mcl_epsr, pcl_epsr, acl_k, lcl_k, mcl_k, pcl_k
 # Print and save results
 print(result.to_string())
