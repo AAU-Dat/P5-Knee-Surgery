@@ -36,7 +36,7 @@ def handle_model(target):
     x_train, x_test, y_train, y_test = get_train_test_split(x, y)
 
     # creating a regression model
-    mul_reg_model = Pipeline([
+    '''mul_reg_model = Pipeline([
         ('scaler', StandardScaler()),
         ('pca', PCA()),
         ('mul_linear_reg', linear_model.LinearRegression())
@@ -56,11 +56,11 @@ def handle_model(target):
     results = grid_search.fit(x_train, y_train)
 
     print('Best score: ', results.best_score_)
-    print('Best parameters: ', results.best_params_)
+    print('Best parameters: ', results.best_params_)'''
 
     best_model = Pipeline([
         ('scaler', StandardScaler()),
-        ('pca', PCA(n_components=results.best_params_['pca__n_components'])),
+        #('pca', PCA(n_components=results.best_params_['pca__n_components'])),
         ('mul_linear_reg', linear_model.LinearRegression(n_jobs=4))
     ])
 

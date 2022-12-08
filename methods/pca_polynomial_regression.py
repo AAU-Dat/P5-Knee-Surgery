@@ -37,13 +37,13 @@ def handle_model(target):
     poly_reg_model = Pipeline([
         ('scaler', StandardScaler()),
         ('pca', PCA()),
-        ('pca_poly_reg', PolynomialFeatures(degree=2, include_bias=False, interaction_only=True)),
+        ('pca_poly_reg', PolynomialFeatures(degree=2, include_bias=False)),
         ('lin_reg', LinearRegression(n_jobs=4))
     ])
 
     # Making list with all the steps
     list_param = []
-    for i in range(70, 100, 1):
+    for i in range(60, 101, 1):
         list_param.append(i)
 
     param_grid = {'pca__n_components': list_param}
