@@ -59,7 +59,15 @@ def handle_model(target):
     train_evaluation = evaluate_model(y_train, predictions_train)
     test_evaluation = evaluate_model(y_test, predictions_test)
 
-    create_and_save_graph(target, y_test, predictions_test, f'{MODEL_DIR}{target}/{target}-plot.png')
+    # saves graphs
+    create_and_save_graph(target, y_test, predictions_test, f'{MODEL_DIR}{target}/SVR_{target}-plot.png')
+
+    # saves best hyper parameters
+    save_hyperparameters(target, results.best_params_, -results.best_score_, f"{RESULT_DIR}hyperparams.csv")
+
+    # saves the results of the gridsearch
+    results_of_gridsearch_df = pd.DataFrame(results.cv_results_)
+    results_of_gridsearch_df.to_csv(f'{MODEL_DIR}{target}/{target}_GridsearchCV_Results.csv', mode='a', header=True)
 
     return get_evaluation_results(train_evaluation, test_evaluation)
 
