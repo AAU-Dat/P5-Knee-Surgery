@@ -12,6 +12,7 @@ from sklearn.preprocessing import StandardScaler
 from scipy.stats import randint
 import pandas as pd
 from lib.standards import *
+import pickle
 
 
 LOG_DIR = f"results/random_forest"           # the main path for your method output
@@ -44,7 +45,7 @@ def handle_model(target):
     RFRegressor = RFR()
     pipe = Pipeline([('scaler', StandardScaler()), ("RFRegressor", RFRegressor)])
 
-    n_estimators = [int(x) for x in np.linspace(start=20, stop=150, num=int(130 / 5))]
+    n_estimators = [int(x) for x in np.linspace(start=30, stop=150, num=int(130 / 5))] #changed to 30
     max_features = [float(x) for x in np.linspace(start=0.40, stop=1.0, num=50)] #min changed to 0.40
     max_depth = [int(x) for x in np.linspace(start=10, stop=120, num=int(110 / 5))]
     min_samples_split = [int(x) for x in np.linspace(start=2, stop=20, num=19)]  # keep in here
@@ -57,8 +58,8 @@ def handle_model(target):
                    'RFRegressor__min_samples_leaf': min_samples_leaf}
 
     rf_randomSearch = RandomizedSearchCV(estimator=pipe, param_distributions=random_grid,
-                                         scoring="neg_root_mean_squared_error", n_iter=60,
-                                         cv=5, verbose=3, n_jobs=-1)
+                                         scoring="neg_root_mean_squared_error", n_iter=60, #60
+                                         cv=5, verbose=3, n_jobs=-1) #-1 #cv=5
 
     #cv=ShuffleSplit(n_splits=1, test_size=0.2)
 
@@ -85,6 +86,13 @@ def handle_model(target):
     create_and_save_graph(target, y_test, predict_test, f"{MODEL_DIR}{target}/{target}-plot.png")
 
     save_hyperparameters(target, result.best_params_, -result.best_score_, f"{RESULT_DIR}hyperparams.csv")
+
+    results_of_randomsearch_df = pd.DataFrame(result.cv_results_)
+    results_of_randomsearch_df.to_csv(f'{MODEL_DIR}{target}/{target}_GridsearchCV_Results.csv', mode='a', header=True)
+
+    # save gridsearch result object for further use!
+    filehandle = open(f'{MODEL_DIR}{target}/{target}_cvRes.p', 'wb')
+    pickle.dump(result.cv_results_, filehandle)
 
     return get_evaluation_results(train_evaluation, test_evaluation)
 
