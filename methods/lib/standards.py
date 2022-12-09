@@ -164,3 +164,9 @@ def save_csv(data, path):
 
 
 # </editor-fold>
+
+def save_hyperparameters(target, resultparams, resultbestscore, filepath):
+    file = open(filepath, 'a')
+    file.writelines(f"Ligament attribute: {target}\n")
+    file.writelines(f"Best hypermodel: {resultparams}\n")
+    file.writelines(f"Best Score: {resultbestscore}\n")

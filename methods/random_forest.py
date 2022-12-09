@@ -20,6 +20,7 @@ RESULT_DIR = f"{LOG_DIR}/"                      # the path for the result csv fi
 
 rand_seed = get_seed()
 
+
 def gives_x_all_param_header():
     x = []
     for i in range(1, 24):
@@ -44,7 +45,7 @@ def handle_model(target):
     pipe = Pipeline([('scaler', StandardScaler()), ("RFRegressor", RFRegressor)])
 
     n_estimators = [int(x) for x in np.linspace(start=20, stop=150, num=int(130 / 5))]
-    max_features = [float(x) for x in np.linspace(start=0.30, stop=1.0, num=50)]
+    max_features = [float(x) for x in np.linspace(start=0.40, stop=1.0, num=50)] #min changed to 0.40
     max_depth = [int(x) for x in np.linspace(start=10, stop=120, num=int(110 / 5))]
     min_samples_split = [int(x) for x in np.linspace(start=2, stop=20, num=19)]  # keep in here
     min_samples_leaf = [int(x) for x in np.linspace(start=1, stop=20, num=20)]  # reduced to 20
@@ -56,9 +57,10 @@ def handle_model(target):
                    'RFRegressor__min_samples_leaf': min_samples_leaf}
 
     rf_randomSearch = RandomizedSearchCV(estimator=pipe, param_distributions=random_grid,
-                                         scoring="neg_root_mean_squared_error", n_iter=50,
-                                         cv=ShuffleSplit(n_splits=1, test_size=0.2), verbose=3, n_jobs=-1)
+                                         scoring="neg_root_mean_squared_error", n_iter=60,
+                                         cv=5, verbose=3, n_jobs=-1)
 
+    #cv=ShuffleSplit(n_splits=1, test_size=0.2)
 
     result = rf_randomSearch.fit(x_train, y_train)
 
@@ -68,7 +70,7 @@ def handle_model(target):
         max_depth=result.best_params_['RFRegressor__max_depth'],
         min_samples_split=result.best_params_['RFRegressor__min_samples_split'],
         bootstrap=result.best_params_['RFRegressor__min_samples_leaf'],
-        verbose=3, n_jobs=7
+        verbose=3, n_jobs=8
     )  # params in here
 
     final_pipe = Pipeline([('scaler', StandardScaler()), ("final_regressor", final_regressor)])
@@ -82,8 +84,9 @@ def handle_model(target):
 
     create_and_save_graph(target, y_test, predict_test, f"{MODEL_DIR}{target}/{target}-plot.png")
 
-    return get_evaluation_results(train_evaluation, test_evaluation)
+    save_hyperparameters(target, result.best_params_, -result.best_score_, f"{RESULT_DIR}hyperparams.csv")
 
+    return get_evaluation_results(train_evaluation, test_evaluation)
 
 data = pd.read_csv('./data.csv', index_col=0).astype(np.float32)
 result_columns = get_result_columns()

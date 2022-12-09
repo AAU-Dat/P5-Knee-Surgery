@@ -8,6 +8,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_squared_error
 from lib.standards import *
+import pickle
 
 # Gets int from
 ran_seed = get_seed()
@@ -43,7 +44,7 @@ def handle_model(target):
 
     # Making list with all the steps
     list_param = []
-    for i in range(50, 51, 1):
+    for i in range(60, 101, 1): #range(60, 101, 1)
         list_param.append(i)
 
     param_grid = {'pca__n_components': list_param}
@@ -61,7 +62,7 @@ def handle_model(target):
     best_poly_reg_model = Pipeline([
         ('scaler', StandardScaler()),
         ('pca', PCA(n_components=results.best_params_['pca__n_components'])),
-        ('pca_poly_reg', PolynomialFeatures(degree=2, include_bias=False)),
+        ('pca_poly_reg', PolynomialFeatures(degree=2, include_bias=False, interaction_only=True)),
         ('lin_reg', LinearRegression(n_jobs=4))
     ])
 
@@ -77,6 +78,16 @@ def handle_model(target):
 
     create_and_save_graph(target, y_test, predictions_test, f'{MODEL_DIR}{target}/{target}-plot.png')
 
+    save_hyperparameters(target, results.best_params_, -results.best_score_, f"{RESULT_DIR}hyperparams.csv")
+    
+    # saves the results of the gridsearch
+    results_of_gridsearch_df = pd.DataFrame(results.cv_results_)
+    results_of_gridsearch_df.to_csv(f'{MODEL_DIR}{target}/{target}_GridsearchCV_Results.csv', mode='a', header=True)
+
+    #save gridsearch result object for further use!
+    filehandle = open(f'{MODEL_DIR}{target}/{target}_cvRes.p', 'wb')
+    pickle.dump(results.cv_results_, filehandle)
+
     return get_evaluation_results(train_evaluation, test_evaluation)
 
 
@@ -86,16 +97,16 @@ result_columns = get_result_columns()
 
 # Create, train and evaluate all eight models
 acl_epsr = pd.DataFrame(handle_model("ACL_epsr"), index=["ACL_epsr"])
-'''lcl_epsr = pd.DataFrame(handle_model("LCL_epsr"), index=["LCL_epsr"])
+lcl_epsr = pd.DataFrame(handle_model("LCL_epsr"), index=["LCL_epsr"])
 mcl_epsr = pd.DataFrame(handle_model("MCL_epsr"), index=["MCL_epsr"])
 pcl_epsr = pd.DataFrame(handle_model("PCL_epsr"), index=["PCL_epsr"])
 acl_k = pd.DataFrame(handle_model("ACL_k"), index=["ACL_k"])
 lcl_k = pd.DataFrame(handle_model("LCL_k"), index=["LCL_k"])
 mcl_k = pd.DataFrame(handle_model("MCL_k"), index=["MCL_k"])
-pcl_k = pd.DataFrame(handle_model("PCL_k"), index=["PCL_k"])'''
+pcl_k = pd.DataFrame(handle_model("PCL_k"), index=["PCL_k"])
 
 # Concatenate intermediate results
-result = pd.concat([acl_epsr])
+result = pd.concat([acl_epsr, lcl_epsr, mcl_epsr, pcl_epsr, acl_k, lcl_k, mcl_k, pcl_k])
 # , lcl_epsr, mcl_epsr, pcl_epsr, acl_k, lcl_k, mcl_k, pcl_k
 # Print and save results
 print(result.to_string())

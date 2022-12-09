@@ -36,7 +36,7 @@ def handle_model(target):
     x_train, x_test, y_train, y_test = get_train_test_split(x, y)
 
     # creating a regression model
-    mul_reg_model = Pipeline([
+    '''mul_reg_model = Pipeline([
         ('scaler', StandardScaler()),
         ('pca', PCA()),
         ('mul_linear_reg', linear_model.LinearRegression())
@@ -56,11 +56,11 @@ def handle_model(target):
     results = grid_search.fit(x_train, y_train)
 
     print('Best score: ', results.best_score_)
-    print('Best parameters: ', results.best_params_)
+    print('Best parameters: ', results.best_params_)'''
 
     best_model = Pipeline([
         ('scaler', StandardScaler()),
-        ('pca', PCA(n_components=results.best_params_['pca__n_components'])),
+        #('pca', PCA(n_components=results.best_params_['pca__n_components'])),
         ('mul_linear_reg', linear_model.LinearRegression(n_jobs=4))
     ])
 
@@ -85,16 +85,16 @@ result_columns = get_result_columns()
 
 # Create, train and evaluate all eight models
 acl_epsr = pd.DataFrame(handle_model("ACL_epsr"), index=["ACL_epsr"])
-'''lcl_epsr = pd.DataFrame(handle_model("LCL_epsr"), index=["LCL_epsr"])
+lcl_epsr = pd.DataFrame(handle_model("LCL_epsr"), index=["LCL_epsr"])
 mcl_epsr = pd.DataFrame(handle_model("MCL_epsr"), index=["MCL_epsr"])
 pcl_epsr = pd.DataFrame(handle_model("PCL_epsr"), index=["PCL_epsr"])
 acl_k = pd.DataFrame(handle_model("ACL_k"), index=["ACL_k"])
 lcl_k = pd.DataFrame(handle_model("LCL_k"), index=["LCL_k"])
 mcl_k = pd.DataFrame(handle_model("MCL_k"), index=["MCL_k"])
-pcl_k = pd.DataFrame(handle_model("PCL_k"), index=["PCL_k"])'''
+pcl_k = pd.DataFrame(handle_model("PCL_k"), index=["PCL_k"])
 
 # Concatenate intermediate results
-result = pd.concat([acl_epsr])
+result = pd.concat([acl_epsr, lcl_epsr, mcl_epsr, pcl_epsr, acl_k, lcl_k, mcl_k, pcl_k])
 # , lcl_epsr, mcl_epsr, pcl_epsr, acl_k, lcl_k, mcl_k, pcl_k
 # Print and save results
 print(result.to_string())
