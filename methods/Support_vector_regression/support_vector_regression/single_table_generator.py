@@ -6,10 +6,6 @@ def gives_header_array():
     return ['ACL_k', 'ACL_epsr', 'PCL_k', 'PCL_epsr', 'MCL_k', 'MCL_epsr', 'LCL_k', 'LCL_epsr']
 
 
-def gives_caption_header_array():
-    return ['ACL\_k', 'ACL\_epsr', 'PCL\_k', 'PCL\_epsr', 'MCL\_k', 'MCL\_epsr', 'LCL\_k', 'LCL\_epsr']
-
-
 def left_side_columns():
     columns = 'l'
     for i in range(len(hyperparameters_renaming)):
