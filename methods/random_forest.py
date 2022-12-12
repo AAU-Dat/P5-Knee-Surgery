@@ -45,11 +45,11 @@ def handle_model(target):
     RFRegressor = RFR()
     pipe = Pipeline([('scaler', StandardScaler()), ("RFRegressor", RFRegressor)])
 
-    n_estimators = [int(x) for x in np.linspace(start=1, stop=151, num=int(150 / 5))] #changed to 30 (start=30, stop=150, num=int(130 / 5)) | granu 5
-    max_features = [float(x) for x in np.linspace(start=0.10, stop=1.0, num=75)] #min changed to 0.40 | granu ?
-    max_depth = [int(x) for x in np.linspace(start=1, stop=121, num=int(120 / 5))] # | granu 5
-    min_samples_split = [int(x) for x in np.linspace(start=2, stop=50, num=49)]  # keep in here | granu 1
-    min_samples_leaf = [int(x) for x in np.linspace(start=1, stop=50, num=50)]  # reduced to 20 | granu 1
+    n_estimators = [int(x) for x in np.linspace(start=30, stop=150, num=int(120 / 5))]
+    max_features = [float(x) for x in np.linspace(start=0.40, stop=1.0, num=50)]
+    max_depth = [int(x) for x in np.linspace(start=10, stop=120, num=int(110 / 5))]
+    min_samples_split = [int(x) for x in np.linspace(start=2, stop=20, num=19)]
+    min_samples_leaf = [int(x) for x in np.linspace(start=1, stop=20, num=20)]
 
     random_grid = {'RFRegressor__n_estimators': n_estimators,
                    'RFRegressor__max_features': max_features,
