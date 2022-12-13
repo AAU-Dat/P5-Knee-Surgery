@@ -16,6 +16,7 @@ LOG_DIR = f"results/support_vector_regression"  # the main path for your method 
 MODEL_DIR = f"{LOG_DIR}/models/"  # the path for the specific models
 RESULT_DIR = f"{LOG_DIR}/"  # the path for the result csv file
 
+
 def gives_x_param_header():
     x = []
     for i in range(1, 24):
@@ -23,6 +24,7 @@ def gives_x_param_header():
                   'rot_x_' + str(i), 'rot_y_' + str(i), 'F_x_' + str(i), 'F_y_' + str(i), 'F_z_' + str(i),
                   'M_x_' + str(i), 'M_y_' + str(i), 'M_z_' + str(i)])
     return x
+
 
 def handle_model(target):
     # Set data up
@@ -35,7 +37,7 @@ def handle_model(target):
     # Setup for grid search
     pipe = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR(max_iter=35000))])
 
-    parameter_grid = {'svc__C': index[target]}
+    parameter_grid = {'svc__C': paramgrid}
 
     # Gridsearch
     gridsearch = GridSearchCV(estimator=pipe, param_grid=parameter_grid, scoring="neg_root_mean_squared_error", cv=5, verbose=3, n_jobs=4)
@@ -72,8 +74,9 @@ def handle_model(target):
     return get_evaluation_results(train_evaluation, test_evaluation)
 
 
-paramgrid = [[50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000], [0.005, 0.001, 0.0005, 0.0001]]
+paramgrid = [0.1, 1, 5, 10, 25, 50, 75, 100, 125, 250, 375, 500, 625, 750, 875, 1000]
 
+'''
 index = {'ACL_k': paramgrid[0],
          'ACL_epsr': paramgrid[1],
          'PCL_k': paramgrid[0],
@@ -81,7 +84,7 @@ index = {'ACL_k': paramgrid[0],
          'MCL_k': paramgrid[0],
          'MCL_epsr': paramgrid[1],
          'LCL_k': paramgrid[0],
-         'LCL_epsr': paramgrid[1]}
+         'LCL_epsr': paramgrid[1]}'''
 
 # importing data and converting it to float32
 df = pd.read_csv('./data.csv', index_col=0).astype(np.float32)
