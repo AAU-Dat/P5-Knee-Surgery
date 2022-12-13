@@ -2,6 +2,7 @@ import csv
 import random
 import scipy as sp
 import numpy as np
+import scipy.stats
 from sklearn.ensemble import RandomForestRegressor as RFR
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 from sklearn.model_selection import train_test_split
@@ -51,11 +52,11 @@ def handle_model(target):
     min_samples_split = [int(x) for x in np.linspace(start=2, stop=20, num=19)]
     min_samples_leaf = [int(x) for x in np.linspace(start=1, stop=20, num=20)]
 
-    random_grid = {'RFRegressor__n_estimators': n_estimators,
-                   'RFRegressor__max_features': max_features,
-                   'RFRegressor__max_depth': max_depth,
-                   'RFRegressor__min_samples_split': min_samples_split,
-                   'RFRegressor__min_samples_leaf': min_samples_leaf}
+    random_grid = {'RFRegressor__n_estimators': scipy.stats.randint(low=1, high=150),
+                   'RFRegressor__max_features': scipy.stats.uniform(0.01, 1.0),
+                   'RFRegressor__max_depth': scipy.stats.randint(1, 100),
+                   'RFRegressor__min_samples_split': scipy.stats.randint(1, 50),
+                   'RFRegressor__min_samples_leaf': scipy.stats.randint(1, 50)}
 
     rf_randomSearch = RandomizedSearchCV(estimator=pipe, param_distributions=random_grid,
                                          scoring="neg_root_mean_squared_error", n_iter=60, #60
