@@ -15,31 +15,6 @@ methods to import:
    
 2) from lib import standards
    (imports standards library - how to use: standards.get_result_columns())
-
-------------------------------------------------------------------------------------------------------------------------
-
-Implementation instructions (temporary):
-----------------------------------------
-1. Clean up and collect everything together in ONE script (if you haven't already), and name it "your_method_name.py".
-
-2. Move the script to the methods folder (this is a necessary evil, in order to use this library without any elaborate
-   hacks - the problem is that the library folder needs to be in the same file execution path).
-   
-3. Import the following line in your script:
-   from lib import standards
-
-4. import the data file like this:
-   data = pd.read_csv('./data.csv', index_col=0)
-
-5. Use the following file paths as main outputs and adapt to your use case:
-   LOG_DIR = f"results/your_method_name"           # the main path for your method output
-   MODEL_DIR = f"{LOG_DIR}/models/"                # the path for the specific models
-   RESULT_DIR = f"{LOG_DIR}/"                      # the path for the result csv file
-   
-6. If in doubt, have a look at "neural_network.py" - it is fully implemented. Alternatively just ask Jamie.
-
-NB! These instructions (below and including the dashes) will be removed, once all methods has been successfully
-    implemented.
 """
 
 matplotlib.use('Agg')                           # backend for pyplot, makes it possible to save graphs to a png format
@@ -153,6 +128,27 @@ def create_and_save_graph(target, actual_values, predicted_values, path):
     plt.close()
 
 
+def create_fit_eval_graph(hypermodel, max_epochs, target, path):
+    # Prepare the RMSE data for both train and validation, and the epochs range
+    rmse_train = hypermodel.history['root_mean_squared_error']
+    rmse_val = hypermodel.history['val_root_mean_squared_error']
+    epochs = range(1, max_epochs + 1)
+
+    # Plot a train and validation graph
+    plt.plot(epochs, rmse_train, 'g', label='Training RMSE')
+    plt.plot(epochs, rmse_val, 'b', label='Validation RMSE')
+
+    # Add title, axes labels and a legend to the plot
+    plt.title(f"Training and Validation RMSE for {target}")
+    plt.xlabel('Epochs')
+    plt.ylabel('RMSE')
+    plt.legend()
+
+    # Save and close out the graph, to avoid them cumulating
+    plt.savefig(f"./{path}", dpi=300)
+    plt.close()
+
+
 # </editor-fold>
 
 # <editor-fold desc="Saving Data">
@@ -163,10 +159,11 @@ def save_csv(data, path):
     data.to_csv(f"./{path}")
 
 
-# </editor-fold>
-
-def save_hyperparameters(target, resultparams, resultbestscore, filepath):
+def save_hyperparameters(target, result_params, result_best_score, filepath):
     file = open(filepath, 'a')
     file.writelines(f"Ligament attribute: {target}\n")
-    file.writelines(f"Best hypermodel: {resultparams}\n")
-    file.writelines(f"Best Score: {resultbestscore}\n")
+    file.writelines(f"Best hypermodel: {result_params}\n")
+    file.writelines(f"Best Score: {result_best_score}\n")
+
+
+# </editor-fold>

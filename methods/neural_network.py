@@ -1,4 +1,3 @@
-import keras.callbacks
 import numpy as np
 import pandas as pd
 import keras_tuner as kt
@@ -8,6 +7,8 @@ from keras.optimizers import Adam
 from keras.regularizers import L2
 from keras_tuner import Hyperband
 from keras.metrics import RootMeanSquaredError
+from keras.losses import Huber
+from keras.callbacks import EarlyStopping
 from lib import standards
 
 # Relevant path directories
@@ -28,9 +29,8 @@ objective = 'val_root_mean_squared_error'        # the objective to optimise the
 HP = kt.HyperParameters()
 HP.Int('number_of_layers', min_value=1, max_value=max_layers)
 HP.Choice('learning_rate', values=[1e-2, 1e-3, 1e-4])
-HP.Choice('l2', values=[0.01, 0.001, 0.1, 0.005, 0.05])
+HP.Choice('l2', values=[1e-2, 1e-3, 1e-1, 5e-2, 5e-3])
 HP.Choice('activation', values=['relu', 'tanh', 'sigmoid', 'softplus'])
-HP.Choice('loss', values=['mean_squared_error', 'mean_absolute_error'])
 HP.Boolean('use_dropout')
 for i in range(max_layers):
     HP.Int(name=f"units_layer_{i + 1}", min_value=32, max_value=2048, step=32)
@@ -48,17 +48,18 @@ def build_model(hp):
         number = f"{j + 1}"
 
         model.add(Dense(units=hp.get(f"units_layer_{number}"), name=f"hidden_layer_{number}",
-                        activation=hp.get('activation'), kernel_regularizer=L2(hp.get('l2'))))
+                        activation=hp.get('activation'), kernel_regularizer=L2(hp.get('l2')),
+                        kernel_initializer='he_normal'))
 
         if hp.get('use_dropout'):
             model.add(Dropout(rate=hp.get(f"dropout_{number}")))
 
     # Output Layer
-    model.add(Dense(1, activation='linear', kernel_initializer='random_normal', name='output_layer'))
+    model.add(Dense(1, activation='linear', kernel_initializer='he_normal', name='output_layer'))
 
     # Set up Compiler
     model.compile(optimizer=Adam(learning_rate=hp.get('learning_rate')),
-                  loss=hp.get('loss'), metrics=[RootMeanSquaredError()])
+                  loss=[Huber()], metrics=[RootMeanSquaredError()])
     return model
 
 
@@ -67,15 +68,15 @@ def build_model(hp):
 # <editor-fold desc="Hyperparameter tuning">
 
 
-def hyperparameter_tuning(x_train, y_train, x_val, y_val):
+def hyperparameter_tuning(x_train, y_train, x_val, y_val, model_dir):
     # Create the Hyperband tuner with the objective to minimise the error on the validation data
     tuner = Hyperband(
         build_model, objective=kt.Objective(objective, direction='min'), max_epochs=max_epochs, hyperparameters=HP,
-        factor=3, hyperband_iterations=3, directory=LOG_DIR, project_name='P5-Knee-Surgery', seed=seed
+        factor=3, hyperband_iterations=3, directory=model_dir, project_name='P5-Knee-Surgery', seed=seed
     )
 
     # Set up early stopping
-    stop_early = keras.callbacks.EarlyStopping(monitor=objective, patience=3)
+    stop_early = EarlyStopping(monitor=objective, patience=3)
 
     # Search for the best model and its hyperparameters
     tuner.search(x_train, y_train, epochs=max_epochs, validation_data=(x_val, y_val),
@@ -88,16 +89,39 @@ def hyperparameter_tuning(x_train, y_train, x_val, y_val):
 
 # <editor-fold desc="Training the best Model">
 
+def save_hyperparameters(hp, epoch, path):
+    number_of_layers = hp.get('number_of_layers')
+    use_dropout = hp.get('use_dropout')
+
+    hyperparameters = [['number_of_layers', number_of_layers],
+                       ['learning_rate', hp.get('learning_rate')],
+                       ['l2', hp.get('l2')],
+                       ['activation', hp.get('activation')],
+                       ['use_dropout', use_dropout]]
+
+    for j in range(number_of_layers):
+        number = j + 1
+        hyperparameters.append([f"units_layer_{number}", hp.get(f"units_layer_{number}")])
+        if use_dropout:
+            hyperparameters.append([f"dropout_{number}", hp.get(f"dropout_{number}")])
+
+    hyperparameters.append(['best_epoch', epoch])
+
+    data_frame = pd.DataFrame(hyperparameters, columns=['Name', 'Value'])
+    standards.save_csv(data_frame, f"{path}hyperparameters.csv")
+
 
 def train_hypermodel(target, tuner, x_train, y_train, x_val, y_val):
-    best_hp = tuner.get_best_hyperparameters()[0]
+    best_hp = tuner.get_best_hyperparameters(1)[0]
 
     # Build model with the best hyperparameters and train it for 100 epochs
     best_model = tuner.hypermodel.build(best_hp)
     history = best_model.fit(x_train, y_train.ravel(), epochs=max_epochs, validation_data=(x_val, y_val))
 
+    # Create graph to evaluate under- and overfitting
+    standards.create_fit_eval_graph(history, max_epochs, target, f"{MODEL_DIR}{target}/{target}-fit_eval.png")
+
     # Find the best epoch from the first training
-    # TODO: change to RMSE if possible
     best_val_per_epoch = history.history[objective]
     best_epoch = best_val_per_epoch.index(min(best_val_per_epoch)) + 1
 
@@ -108,8 +132,9 @@ def train_hypermodel(target, tuner, x_train, y_train, x_val, y_val):
     x, y = np.concatenate((x_train, x_val)), np.concatenate((y_train, y_val))
     hypermodel.fit(x, y.ravel(), epochs=best_epoch)
 
-    # Save the model to the log directory for future reference
+    # Save the model and hyperparameters to the log directory
     hypermodel.save(f"{MODEL_DIR}{target}")
+    save_hyperparameters(best_hp, best_epoch, f"{MODEL_DIR}{target}/")
 
     return hypermodel
 
@@ -159,7 +184,7 @@ def handle_model(target):
     x_train, y_train, x_validation, y_validation, x_test, y_test = standards.get_train_validation_test_split(x, y)
 
     # Build a Tuner and search for hyperparameters on the Train data, test on the Validation data
-    tuner = hyperparameter_tuning(x_train, y_train, x_validation, y_validation)
+    tuner = hyperparameter_tuning(x_train, y_train, x_validation, y_validation, f"{MODEL_DIR}/{target}")
 
     # Build and train the best Model on the Train data, test on the Validation data
     best_model = train_hypermodel(target, tuner, x_train, y_train, x_validation, y_validation)
