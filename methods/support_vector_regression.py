@@ -37,10 +37,10 @@ def handle_model(target):
     # Setup for grid search
     pipe = Pipeline([('scaler', StandardScaler()), ('svc', sk.LinearSVR(max_iter=35000))])
 
-    parameter_grid = {'svc__C': paramgrid}
+    # parameter_grid = {'svc__C': index[target]}
 
     # Gridsearch
-    gridsearch = GridSearchCV(estimator=pipe, param_grid=parameter_grid, scoring="neg_root_mean_squared_error", cv=5, verbose=3, n_jobs=4)
+    gridsearch = GridSearchCV(estimator=pipe, param_grid=parameter_grid, scoring="neg_root_mean_squared_error", cv=5, verbose=3, n_jobs=7)
 
     # Fit the model
     results = gridsearch.fit(x_train, y_train)
@@ -73,10 +73,12 @@ def handle_model(target):
 
     return get_evaluation_results(train_evaluation, test_evaluation)
 
-
-paramgrid = [0.1, 1, 5, 10, 25, 50, 75, 100, 125, 250, 375, 500, 625, 750, 875, 1000]
+parameter_grid = {'svc__C': [0.1, 1, 5, 10, 25, 50, 75, 100, 125, 250, 375, 500, 625, 750, 875, 1000]}
 
 '''
+paramgrid = [0.1, 1, 5, 10, 25, 50, 75, 100, 125, 250, 375, 500, 625, 750, 875, 1000]
+
+
 index = {'ACL_k': paramgrid[0],
          'ACL_epsr': paramgrid[1],
          'PCL_k': paramgrid[0],
@@ -84,16 +86,17 @@ index = {'ACL_k': paramgrid[0],
          'MCL_k': paramgrid[0],
          'MCL_epsr': paramgrid[1],
          'LCL_k': paramgrid[0],
-         'LCL_epsr': paramgrid[1]}'''
+         'LCL_epsr': paramgrid[1]}
+'''
 
 # importing data and converting it to float32
 df = pd.read_csv('./data.csv', index_col=0).astype(np.float32)
 result_columns = get_result_columns()
 
 # Create, train and evaluate all eight models
-acl_epsr = pd.DataFrame(handle_model("ACL_epsr"), index=["ACL_epsr"])
-lcl_epsr = pd.DataFrame(handle_model("LCL_epsr"), index=["LCL_epsr"])
-mcl_epsr = pd.DataFrame(handle_model("MCL_epsr"), index=["MCL_epsr"])
+# acl_epsr = pd.DataFrame(handle_model("ACL_epsr"), index=["ACL_epsr"])
+# lcl_epsr = pd.DataFrame(handle_model("LCL_epsr"), index=["LCL_epsr"])
+# mcl_epsr = pd.DataFrame(handle_model("MCL_epsr"), index=["MCL_epsr"])
 pcl_epsr = pd.DataFrame(handle_model("PCL_epsr"), index=["PCL_epsr"])
 acl_k = pd.DataFrame(handle_model("ACL_k"), index=["ACL_k"])
 lcl_k = pd.DataFrame(handle_model("LCL_k"), index=["LCL_k"])
@@ -101,8 +104,8 @@ mcl_k = pd.DataFrame(handle_model("MCL_k"), index=["MCL_k"])
 pcl_k = pd.DataFrame(handle_model("PCL_k"), index=["PCL_k"])
 
 # Concatenate intermediate results
-result = pd.concat([acl_epsr, lcl_epsr, mcl_epsr, pcl_epsr, acl_k, lcl_k, mcl_k, pcl_k])
-
+result = pd.concat([pcl_epsr, acl_k, lcl_k, mcl_k, pcl_k])
+'''acl_epsr, lcl_epsr, mcl_epsr,'''
 # Print and save results
 print(result.to_string())
 save_csv(result, f"{RESULT_DIR}result.csv")
