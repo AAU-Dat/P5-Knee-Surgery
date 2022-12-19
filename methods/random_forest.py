@@ -2,6 +2,7 @@ import csv
 import random
 import scipy as sp
 import numpy as np
+import scipy.stats
 from sklearn.ensemble import RandomForestRegressor as RFR
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 from sklearn.model_selection import train_test_split
@@ -12,6 +13,7 @@ from sklearn.preprocessing import StandardScaler
 from scipy.stats import randint
 import pandas as pd
 from lib.standards import *
+import pickle
 
 
 LOG_DIR = f"results/random_forest"           # the main path for your method output
@@ -44,21 +46,21 @@ def handle_model(target):
     RFRegressor = RFR()
     pipe = Pipeline([('scaler', StandardScaler()), ("RFRegressor", RFRegressor)])
 
-    n_estimators = [int(x) for x in np.linspace(start=20, stop=150, num=int(130 / 5))]
-    max_features = [float(x) for x in np.linspace(start=0.40, stop=1.0, num=50)] #min changed to 0.40
+    n_estimators = [int(x) for x in np.linspace(start=30, stop=150, num=int(120 / 5))]
+    max_features = [float(x) for x in np.linspace(start=0.40, stop=1.0, num=50)]
     max_depth = [int(x) for x in np.linspace(start=10, stop=120, num=int(110 / 5))]
-    min_samples_split = [int(x) for x in np.linspace(start=2, stop=20, num=19)]  # keep in here
-    min_samples_leaf = [int(x) for x in np.linspace(start=1, stop=20, num=20)]  # reduced to 20
+    min_samples_split = [int(x) for x in np.linspace(start=2, stop=20, num=19)]
+    min_samples_leaf = [int(x) for x in np.linspace(start=1, stop=20, num=20)]
 
-    random_grid = {'RFRegressor__n_estimators': n_estimators,
-                   'RFRegressor__max_features': max_features,
-                   'RFRegressor__max_depth': max_depth,
-                   'RFRegressor__min_samples_split': min_samples_split,
-                   'RFRegressor__min_samples_leaf': min_samples_leaf}
+    random_grid = {'RFRegressor__n_estimators': scipy.stats.randint(low=1, high=150),
+                   'RFRegressor__max_features': scipy.stats.uniform(0.01, 1.0),
+                   'RFRegressor__max_depth': scipy.stats.randint(1, 100),
+                   'RFRegressor__min_samples_split': scipy.stats.randint(1, 50),
+                   'RFRegressor__min_samples_leaf': scipy.stats.randint(1, 50)}
 
     rf_randomSearch = RandomizedSearchCV(estimator=pipe, param_distributions=random_grid,
-                                         scoring="neg_root_mean_squared_error", n_iter=60,
-                                         cv=5, verbose=3, n_jobs=-1)
+                                         scoring="neg_root_mean_squared_error", n_iter=60, #60
+                                         cv=5, verbose=3, n_jobs=-1) #-1 #cv=5
 
     #cv=ShuffleSplit(n_splits=1, test_size=0.2)
 
@@ -85,6 +87,13 @@ def handle_model(target):
     create_and_save_graph(target, y_test, predict_test, f"{MODEL_DIR}{target}/{target}-plot.png")
 
     save_hyperparameters(target, result.best_params_, -result.best_score_, f"{RESULT_DIR}hyperparams.csv")
+
+    results_of_randomsearch_df = pd.DataFrame(result.cv_results_)
+    results_of_randomsearch_df.to_csv(f'{MODEL_DIR}{target}/{target}_GridsearchCV_Results.csv', mode='a', header=True)
+
+    # save gridsearch result object for further use!
+    filehandle = open(f'{MODEL_DIR}{target}/{target}_cvRes.p', 'wb')
+    pickle.dump(result.cv_results_, filehandle)
 
     return get_evaluation_results(train_evaluation, test_evaluation)
 
