@@ -1,6 +1,0 @@
-
-    random_grid = {'RFRegressor__n_estimators': scipy.stats.randint(low=1, high=150),
-                   'RFRegressor__max_features': scipy.stats.uniform(0.01, 1.0),
-                   'RFRegressor__max_depth': scipy.stats.randint(1, 80),
-                   'RFRegressor__min_samples_split': scipy.stats.randint(1, 50),
-                   'RFRegressor__min_samples_leaf': scipy.stats.randint(1, 50)}
