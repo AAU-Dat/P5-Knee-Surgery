@@ -167,3 +167,9 @@ def save_hyperparameters(target, result_params, result_best_score, filepath):
 
 
 # </editor-fold>
+
+def save_hyperparameters(target, resultparams, resultbestscore, filepath):
+    file = open(filepath, 'a')
+    file.writelines(f"Ligament attribute: {target}\n")
+    file.writelines(f"Best hypermodel: {resultparams}\n")
+    file.writelines(f"Best Score: {resultbestscore}\n")
